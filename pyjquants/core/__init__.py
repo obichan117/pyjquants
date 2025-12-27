@@ -25,7 +25,10 @@ __all__ = [
 
 # Optional async support
 try:
-    from pyjquants.core.async_session import AsyncSession, AsyncTokenManager
+    from pyjquants.core.async_session import (  # noqa: F401
+        AsyncSession,
+        AsyncTokenManager,
+    )
 
     __all__.extend(["AsyncSession", "AsyncTokenManager"])
 except ImportError:
