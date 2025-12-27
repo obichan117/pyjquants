@@ -33,7 +33,7 @@ def sample_stock_info() -> StockInfo:
         "Sector17CodeName": "自動車・輸送機",
         "Sector33Code": "3050",
         "Sector33CodeName": "輸送用機器",
-        "MarketCode": "0101",
+        "MarketCode": "0111",
         "MarketCodeName": "プライム",
         "Date": "1949-05-16",
     })

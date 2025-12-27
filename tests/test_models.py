@@ -137,9 +137,11 @@ class TestMarketSegment:
 
     def test_from_code(self) -> None:
         """Test converting market codes."""
-        assert MarketSegment.from_code("0101") == MarketSegment.TSE_PRIME
-        assert MarketSegment.from_code("0102") == MarketSegment.TSE_STANDARD
-        assert MarketSegment.from_code("0103") == MarketSegment.TSE_GROWTH
+        assert MarketSegment.from_code("0111") == MarketSegment.TSE_PRIME
+        assert MarketSegment.from_code("0112") == MarketSegment.TSE_STANDARD
+        assert MarketSegment.from_code("0113") == MarketSegment.TSE_GROWTH
+        assert MarketSegment.from_code("0105") == MarketSegment.TOKYO_PRO
+        assert MarketSegment.from_code("0109") == MarketSegment.OTHER
         assert MarketSegment.from_code("9999") == MarketSegment.OTHER
 
 

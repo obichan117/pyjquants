@@ -73,7 +73,7 @@ def sample_stock_info_data() -> dict[str, Any]:
         "Sector17CodeName": "自動車・輸送機",
         "Sector33Code": "3050",
         "Sector33CodeName": "輸送用機器",
-        "MarketCode": "0101",
+        "MarketCode": "0111",
         "MarketCodeName": "プライム",
         "ScaleCategory": "TOPIX Large70",
         "Date": "2024-01-15",
