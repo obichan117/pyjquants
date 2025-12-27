@@ -22,3 +22,11 @@ __all__ = [
     "Session",
     "TokenManager",
 ]
+
+# Optional async support
+try:
+    from pyjquants.core.async_session import AsyncSession, AsyncTokenManager
+
+    __all__.extend(["AsyncSession", "AsyncTokenManager"])
+except ImportError:
+    pass  # aiohttp not installed
