@@ -83,3 +83,6 @@ dmypy.json
 # Project specific
 .jquants/
 *.toml.local
+
+# Claude Code
+.claude/
