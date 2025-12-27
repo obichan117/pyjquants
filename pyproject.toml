@@ -44,6 +44,8 @@ dev = [
     "ruff>=0.1",
     "types-requests",
     "pandas-stubs",
+    "aiohttp>=3.9",
+    "tomli>=2.0",
 ]
 all = [
     "aiohttp>=3.9",

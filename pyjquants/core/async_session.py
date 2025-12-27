@@ -8,10 +8,7 @@ from collections.abc import AsyncIterator
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-try:
-    import aiohttp
-except ImportError:
-    aiohttp = None  # type: ignore[assignment]
+import aiohttp
 
 from pyjquants.core.cache import Cache, NullCache, TTLCache
 from pyjquants.core.config import JQuantsConfig

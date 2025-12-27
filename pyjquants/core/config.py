@@ -20,7 +20,7 @@ if sys.version_info >= (3, 11):
     _tomllib = tomllib
 else:
     try:
-        import tomli as _tomli_module  # type: ignore[import-not-found]
+        import tomli as _tomli_module
         _tomllib = _tomli_module
     except ImportError:
         pass
