@@ -269,7 +269,7 @@ class Session:
             cache_key = self._cache.make_key(endpoint, params)
             cached = self._cache.get(cache_key)
             if cached is not None:
-                return cached
+                return dict(cached)
 
         # Get auth token
         token = self._token_manager.id_token()
@@ -306,7 +306,7 @@ class Session:
         if response.status_code >= 400:
             raise APIError(response.status_code, response.text)
 
-        data = response.json()
+        data: dict[str, Any] = response.json()
 
         # Cache successful GET responses
         if method == "GET" and use_cache:

@@ -11,13 +11,20 @@ if TYPE_CHECKING:
     pass
 
 # Try to import tomllib (Python 3.11+) or tomli
-try:
+import sys
+from types import ModuleType
+from typing import Any
+
+_tomllib: ModuleType | None = None
+if sys.version_info >= (3, 11):
     import tomllib
-except ImportError:
+    _tomllib = tomllib
+else:
     try:
-        import tomli as tomllib  # type: ignore[import-not-found,no-redef]
+        import tomli as _tomli_module  # type: ignore[import-not-found]
+        _tomllib = _tomli_module
     except ImportError:
-        tomllib = None  # type: ignore[assignment]
+        pass
 
 
 @dataclass
@@ -53,7 +60,7 @@ class JQuantsConfig:
     @classmethod
     def from_toml(cls, path: Path | None = None) -> JQuantsConfig:
         """Load configuration from TOML file."""
-        if tomllib is None:
+        if _tomllib is None:
             raise ImportError(
                 "tomllib/tomli is required for TOML config. "
                 "Install with: pip install tomli (Python < 3.11)"
@@ -75,7 +82,7 @@ class JQuantsConfig:
             return cls()
 
         with open(path, "rb") as f:
-            data = tomllib.load(f)
+            data = _tomllib.load(f)
 
         credentials = data.get("credentials", {})
         cache = data.get("cache", {})

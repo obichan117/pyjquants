@@ -103,7 +103,7 @@ class Portfolio:
     @property
     def unrealized_pnl(self) -> Decimal:
         """Total unrealized P&L."""
-        return sum(p.unrealized_pnl for p in self.positions)
+        return sum((p.unrealized_pnl for p in self.positions), Decimal("0"))
 
     def position(self, stock: Stock) -> Position | None:
         """Get position for a stock."""
