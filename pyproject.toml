@@ -51,9 +51,9 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/soshimizutani/pyjquants"
-Documentation = "https://github.com/soshimizutani/pyjquants#readme"
-Repository = "https://github.com/soshimizutani/pyjquants.git"
+Homepage = "https://github.com/obichan117/pyjquants"
+Documentation = "https://github.com/obichan117/pyjquants#readme"
+Repository = "https://github.com/obichan117/pyjquants.git"
 
 [tool.hatch.build.targets.wheel]
 packages = ["pyjquants"]
