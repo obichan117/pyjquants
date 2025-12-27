@@ -5,8 +5,9 @@ from __future__ import annotations
 import threading
 import time
 from collections import deque
+from collections.abc import Iterator
 from datetime import datetime, timedelta, timezone
-from typing import Any, Iterator
+from typing import Any
 
 import requests
 

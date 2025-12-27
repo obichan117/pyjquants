@@ -14,41 +14,40 @@ Usage:
     trader.buy(stock, 100)
 """
 
-from pyjquants.core.session import Session, set_global_session
-from pyjquants.core.exceptions import (
-    PyJQuantsError,
-    AuthenticationError,
-    TokenExpiredError,
-    APIError,
-    RateLimitError,
-    NotFoundError,
-    ValidationError,
-    ConfigurationError,
-)
-
-# Entities
-from pyjquants.entities.stock import Stock
-from pyjquants.entities.index import Index
-
 # Collections
 from pyjquants.collections.market import Market
 from pyjquants.collections.universe import Universe
+from pyjquants.core.exceptions import (
+    APIError,
+    AuthenticationError,
+    ConfigurationError,
+    NotFoundError,
+    PyJQuantsError,
+    RateLimitError,
+    TokenExpiredError,
+    ValidationError,
+)
+from pyjquants.core.session import Session, set_global_session
+from pyjquants.entities.index import Index
 
-# Trading
-from pyjquants.trading.order import Order, Execution
-from pyjquants.trading.portfolio import Portfolio, Position
-from pyjquants.trading.trader import Trader
+# Entities
+from pyjquants.entities.stock import Stock
+from pyjquants.models.company import Sector
 
 # Models
 from pyjquants.models.enums import (
     MarketSegment,
+    OptionType,
     OrderSide,
     OrderStatus,
     OrderType,
-    OptionType,
 )
-from pyjquants.models.company import Sector
 from pyjquants.models.price import PriceBar
+
+# Trading
+from pyjquants.trading.order import Execution, Order
+from pyjquants.trading.portfolio import Portfolio, Position
+from pyjquants.trading.trader import Trader
 
 __version__ = "0.1.0"
 

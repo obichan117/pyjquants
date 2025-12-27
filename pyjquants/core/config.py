@@ -13,7 +13,6 @@ if TYPE_CHECKING:
 # Try to import tomllib (Python 3.11+) or tomli
 import sys
 from types import ModuleType
-from typing import Any
 
 _tomllib: ModuleType | None = None
 if sys.version_info >= (3, 11):
