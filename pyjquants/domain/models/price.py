@@ -113,10 +113,11 @@ class IndexPrice(BaseModel):
     """Index price data.
 
     V2 API uses abbreviated field names.
+    Note: Code field is optional (not present in TOPIX-specific endpoint).
     """
 
     date: datetime.date = Field(alias="Date")
-    code: str = Field(alias="Code")
+    code: str | None = Field(alias="Code", default=None)
     open: Decimal | None = Field(alias="O", default=None)
     high: Decimal | None = Field(alias="H", default=None)
     low: Decimal | None = Field(alias="L", default=None)

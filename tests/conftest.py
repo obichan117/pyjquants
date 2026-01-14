@@ -63,18 +63,18 @@ def sample_price_data() -> list[dict[str, Any]]:
 
 @pytest.fixture
 def sample_stock_info_data() -> dict[str, Any]:
-    """Sample stock info as returned by API."""
+    """Sample stock info as returned by V2 API (abbreviated field names)."""
     return {
         "Code": "7203",
-        "CompanyName": "トヨタ自動車",
-        "CompanyNameEnglish": "Toyota Motor Corporation",
-        "Sector17Code": "6",
-        "Sector17CodeName": "自動車・輸送機",
-        "Sector33Code": "3050",
-        "Sector33CodeName": "輸送用機器",
-        "MarketCode": "0111",
-        "MarketCodeName": "プライム",
-        "ScaleCategory": "TOPIX Large70",
+        "CoName": "トヨタ自動車",
+        "CoNameEn": "Toyota Motor Corporation",
+        "S17": "6",
+        "S17Nm": "自動車・輸送機",
+        "S33": "3050",
+        "S33Nm": "輸送用機器",
+        "Mkt": "0111",
+        "MktNm": "プライム",
+        "ScaleCat": "TOPIX Large70",
         "Date": "2024-01-15",
     }
 

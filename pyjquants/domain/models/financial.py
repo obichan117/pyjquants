@@ -12,24 +12,47 @@ from pyjquants.domain.models.base import BaseModel
 
 
 class FinancialStatement(BaseModel):
-    """Financial statement data."""
+    """Financial statement data (V2 API abbreviated field names)."""
 
-    code: str = Field(alias="LocalCode")
-    disclosure_date: datetime.date = Field(alias="DisclosedDate")
+    code: str = Field(alias="Code")
+    disclosure_date: datetime.date = Field(alias="DiscDate")
+    disclosure_time: str | None = Field(alias="DiscTime", default=None)
 
-    type_of_document: str | None = Field(alias="TypeOfDocument", default=None)
-    net_sales: Decimal | None = Field(alias="NetSales", default=None)
-    operating_profit: Decimal | None = Field(alias="OperatingProfit", default=None)
-    ordinary_profit: Decimal | None = Field(alias="OrdinaryProfit", default=None)
-    profit: Decimal | None = Field(alias="Profit", default=None)
+    type_of_document: str | None = Field(alias="DocType", default=None)
+    current_period_type: str | None = Field(alias="CurPerType", default=None)
+    current_period_start: str | None = Field(alias="CurPerSt", default=None)
+    current_period_end: str | None = Field(alias="CurPerEn", default=None)
+    current_fy_start: str | None = Field(alias="CurFYSt", default=None)
+    current_fy_end: str | None = Field(alias="CurFYEn", default=None)
 
-    earnings_per_share: Decimal | None = Field(alias="EarningsPerShare", default=None)
-    book_value_per_share: Decimal | None = Field(alias="BookValuePerShare", default=None)
-    total_assets: Decimal | None = Field(alias="TotalAssets", default=None)
-    equity: Decimal | None = Field(alias="Equity", default=None)
+    # Income Statement (abbreviated names)
+    net_sales: Decimal | None = Field(alias="Sales", default=None)
+    operating_profit: Decimal | None = Field(alias="OP", default=None)
+    ordinary_profit: Decimal | None = Field(alias="OdP", default=None)
+    profit: Decimal | None = Field(alias="NP", default=None)
 
-    roe: float | None = Field(alias="ROE", default=None)
-    roa: float | None = Field(alias="ROA", default=None)
+    # Per Share Data
+    earnings_per_share: Decimal | None = Field(alias="EPS", default=None)
+    diluted_eps: Decimal | None = Field(alias="DEPS", default=None)
+    book_value_per_share: Decimal | None = Field(alias="BPS", default=None)
+
+    # Balance Sheet
+    total_assets: Decimal | None = Field(alias="TA", default=None)
+    equity: Decimal | None = Field(alias="Eq", default=None)
+    equity_ratio: Decimal | None = Field(alias="EqAR", default=None)
+
+    # Cash Flow
+    cf_operating: Decimal | None = Field(alias="CFO", default=None)
+    cf_investing: Decimal | None = Field(alias="CFI", default=None)
+    cf_financing: Decimal | None = Field(alias="CFF", default=None)
+    cash_equivalents: Decimal | None = Field(alias="CashEq", default=None)
+
+    # Dividends
+    dividend_q1: Decimal | None = Field(alias="Div1Q", default=None)
+    dividend_q2: Decimal | None = Field(alias="Div2Q", default=None)
+    dividend_q3: Decimal | None = Field(alias="Div3Q", default=None)
+    dividend_fy: Decimal | None = Field(alias="DivFY", default=None)
+    dividend_annual: Decimal | None = Field(alias="DivAnn", default=None)
 
     @field_validator("disclosure_date", mode="before")
     @classmethod
@@ -48,9 +71,20 @@ class FinancialStatement(BaseModel):
         "ordinary_profit",
         "profit",
         "earnings_per_share",
+        "diluted_eps",
         "book_value_per_share",
         "total_assets",
         "equity",
+        "equity_ratio",
+        "cf_operating",
+        "cf_investing",
+        "cf_financing",
+        "cash_equivalents",
+        "dividend_q1",
+        "dividend_q2",
+        "dividend_q3",
+        "dividend_fy",
+        "dividend_annual",
         mode="before",
     )
     @classmethod
@@ -91,11 +125,15 @@ class Dividend(BaseModel):
 
 
 class EarningsAnnouncement(BaseModel):
-    """Earnings announcement calendar entry."""
+    """Earnings announcement calendar entry (V2 API abbreviated field names)."""
 
     code: str = Field(alias="Code")
-    company_name: str = Field(alias="CompanyName")
+    company_name: str = Field(alias="CoName")
     announcement_date: datetime.date = Field(alias="Date")
+    fiscal_year: str | None = Field(alias="FY", default=None)
+    fiscal_quarter: str | None = Field(alias="FQ", default=None)
+    sector_name: str | None = Field(alias="SectorNm", default=None)
+    section: str | None = Field(alias="Section", default=None)
 
     @field_validator("announcement_date", mode="before")
     @classmethod

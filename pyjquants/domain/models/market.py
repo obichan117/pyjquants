@@ -12,10 +12,10 @@ from pyjquants.domain.models.base import BaseModel
 
 
 class TradingCalendarDay(BaseModel):
-    """Single trading calendar day."""
+    """Single trading calendar day (V2 API abbreviated field names)."""
 
     date: datetime.date = Field(alias="Date")
-    holiday_division: str = Field(alias="HolidayDivision")
+    holiday_division: str = Field(alias="HolDiv")
 
     @field_validator("date", mode="before")
     @classmethod

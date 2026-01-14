@@ -35,22 +35,26 @@ class Sector(BaseModel):
 
 
 class StockInfo(BaseModel):
-    """Listed company basic information."""
+    """Listed company basic information (V2 API abbreviated field names)."""
 
     code: str = Field(alias="Code")
-    company_name: str = Field(alias="CompanyName")
-    company_name_english: str | None = Field(alias="CompanyNameEnglish", default=None)
+    company_name: str = Field(alias="CoName")
+    company_name_english: str | None = Field(alias="CoNameEn", default=None)
 
-    sector_17_code: str = Field(alias="Sector17Code")
-    sector_17_name: str = Field(alias="Sector17CodeName")
-    sector_33_code: str = Field(alias="Sector33Code")
-    sector_33_name: str = Field(alias="Sector33CodeName")
+    sector_17_code: str = Field(alias="S17")
+    sector_17_name: str = Field(alias="S17Nm")
+    sector_33_code: str = Field(alias="S33")
+    sector_33_name: str = Field(alias="S33Nm")
 
-    market_code: str = Field(alias="MarketCode")
-    market_name: str = Field(alias="MarketCodeName")
+    market_code: str = Field(alias="Mkt")
+    market_name: str = Field(alias="MktNm")
 
-    scale_category: str | None = Field(alias="ScaleCategory", default=None)
+    scale_category: str | None = Field(alias="ScaleCat", default=None)
     listing_date: datetime.date | None = Field(alias="Date", default=None)
+
+    # V2 new fields
+    margin_code: str | None = Field(alias="Mrgn", default=None)
+    margin_name: str | None = Field(alias="MrgnNm", default=None)
 
     @field_validator("listing_date", mode="before")
     @classmethod

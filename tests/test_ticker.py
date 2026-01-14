@@ -25,20 +25,20 @@ class TestTicker:
 
     @pytest.fixture
     def sample_stock_info_response(self) -> dict[str, Any]:
-        """Sample stock info API response (V2 uses 'data' key)."""
+        """Sample stock info API response (V2 abbreviated field names)."""
         return {
             "data": [
                 {
                     "Code": "7203",
-                    "CompanyName": "トヨタ自動車",
-                    "CompanyNameEnglish": "Toyota Motor Corporation",
-                    "Sector17Code": "6",
-                    "Sector17CodeName": "自動車・輸送機",
-                    "Sector33Code": "3050",
-                    "Sector33CodeName": "輸送用機器",
-                    "MarketCode": "0111",
-                    "MarketCodeName": "プライム",
-                    "ScaleCategory": "TOPIX Large70",
+                    "CoName": "トヨタ自動車",
+                    "CoNameEn": "Toyota Motor Corporation",
+                    "S17": "6",
+                    "S17Nm": "自動車・輸送機",
+                    "S33": "3050",
+                    "S33Nm": "輸送用機器",
+                    "Mkt": "0111",
+                    "MktNm": "プライム",
+                    "ScaleCat": "TOPIX Large70",
                     "Date": "2024-01-15",
                 }
             ]
@@ -250,40 +250,40 @@ class TestSearch:
 
     @pytest.fixture
     def sample_listed_info(self) -> list[dict[str, Any]]:
-        """Sample listed info API response."""
+        """Sample listed info API response (V2 abbreviated field names)."""
         return [
             {
                 "Code": "7203",
-                "CompanyName": "トヨタ自動車",
-                "CompanyNameEnglish": "Toyota Motor Corporation",
-                "Sector17Code": "6",
-                "Sector17CodeName": "自動車・輸送機",
-                "Sector33Code": "3050",
-                "Sector33CodeName": "輸送用機器",
-                "MarketCode": "0111",
-                "MarketCodeName": "プライム",
+                "CoName": "トヨタ自動車",
+                "CoNameEn": "Toyota Motor Corporation",
+                "S17": "6",
+                "S17Nm": "自動車・輸送機",
+                "S33": "3050",
+                "S33Nm": "輸送用機器",
+                "Mkt": "0111",
+                "MktNm": "プライム",
             },
             {
                 "Code": "7201",
-                "CompanyName": "日産自動車",
-                "CompanyNameEnglish": "Nissan Motor Co., Ltd.",
-                "Sector17Code": "6",
-                "Sector17CodeName": "自動車・輸送機",
-                "Sector33Code": "3050",
-                "Sector33CodeName": "輸送用機器",
-                "MarketCode": "0111",
-                "MarketCodeName": "プライム",
+                "CoName": "日産自動車",
+                "CoNameEn": "Nissan Motor Co., Ltd.",
+                "S17": "6",
+                "S17Nm": "自動車・輸送機",
+                "S33": "3050",
+                "S33Nm": "輸送用機器",
+                "Mkt": "0111",
+                "MktNm": "プライム",
             },
             {
                 "Code": "6758",
-                "CompanyName": "ソニーグループ",
-                "CompanyNameEnglish": "Sony Group Corporation",
-                "Sector17Code": "5",
-                "Sector17CodeName": "電機・精密",
-                "Sector33Code": "3650",
-                "Sector33CodeName": "電気機器",
-                "MarketCode": "0111",
-                "MarketCodeName": "プライム",
+                "CoName": "ソニーグループ",
+                "CoNameEn": "Sony Group Corporation",
+                "S17": "5",
+                "S17Nm": "電機・精密",
+                "S33": "3650",
+                "S33Nm": "電気機器",
+                "Mkt": "0111",
+                "MktNm": "プライム",
             },
         ]
 
