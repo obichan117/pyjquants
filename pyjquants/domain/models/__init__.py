@@ -12,8 +12,11 @@ from pyjquants.domain.models.financial import (
     FinancialStatement,
 )
 from pyjquants.domain.models.market import (
+    BreakdownTrade,
     InvestorTrades,
+    MarginAlert,
     MarginInterest,
+    ShortSaleReport,
     ShortSelling,
     TradingCalendarDay,
 )
@@ -39,4 +42,7 @@ __all__ = [
     "MarginInterest",
     "ShortSelling",
     "InvestorTrades",
+    "BreakdownTrade",
+    "ShortSaleReport",
+    "MarginAlert",
 ]

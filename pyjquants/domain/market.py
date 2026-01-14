@@ -6,7 +6,16 @@ from datetime import date, timedelta
 from functools import cached_property
 from typing import TYPE_CHECKING
 
-from pyjquants.adapters.endpoints import SECTORS_17, SECTORS_33, TRADING_CALENDAR
+import pandas as pd
+
+from pyjquants.adapters.endpoints import (
+    BREAKDOWN,
+    MARGIN_ALERT,
+    SECTORS_17,
+    SECTORS_33,
+    SHORT_SALE_REPORT,
+    TRADING_CALENDAR,
+)
 from pyjquants.infra.client import JQuantsClient
 from pyjquants.infra.session import _get_global_session
 
@@ -90,3 +99,71 @@ class Market:
     def sectors_17(self) -> list[Sector]:
         """Get 17-sector classification list."""
         return self._client.fetch_list(SECTORS_17)
+
+    # === MARKET DATA ===
+
+    def breakdown(
+        self,
+        code: str,
+        start: date | None = None,
+        end: date | None = None,
+    ) -> pd.DataFrame:
+        """Get breakdown trading data by trade type.
+
+        Contains trading values and volumes categorized by:
+        - Long selling/buying
+        - Short selling (excluding margin)
+        - Margin selling/buying (new and closing)
+
+        Args:
+            code: Stock code (e.g., "7203")
+            start: Start date (optional)
+            end: End date (optional)
+
+        Returns:
+            DataFrame with breakdown trading data
+        """
+        params = self._client.date_params(code=code, start=start, end=end)
+        return self._client.fetch_dataframe(BREAKDOWN, params)
+
+    def short_positions(
+        self,
+        code: str | None = None,
+        start: date | None = None,
+        end: date | None = None,
+    ) -> pd.DataFrame:
+        """Get outstanding short selling positions reported.
+
+        Contains reported short positions where ratio >= 0.5%.
+
+        Args:
+            code: Stock code (optional, returns all if not specified)
+            start: Start date (optional)
+            end: End date (optional)
+
+        Returns:
+            DataFrame with short position reports
+        """
+        params = self._client.date_params(code=code, start=start, end=end)
+        return self._client.fetch_dataframe(SHORT_SALE_REPORT, params)
+
+    def margin_alerts(
+        self,
+        code: str | None = None,
+        start: date | None = None,
+        end: date | None = None,
+    ) -> pd.DataFrame:
+        """Get margin trading daily publication (alert) data.
+
+        Contains margin trading outstanding for issues subject to daily publication.
+
+        Args:
+            code: Stock code (optional, returns all if not specified)
+            start: Start date (optional)
+            end: End date (optional)
+
+        Returns:
+            DataFrame with margin alert data
+        """
+        params = self._client.date_params(code=code, start=start, end=end)
+        return self._client.fetch_dataframe(MARGIN_ALERT, params)

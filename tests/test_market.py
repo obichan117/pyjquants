@@ -187,3 +187,126 @@ class TestMarket:
         sectors = market.sectors
 
         assert len(sectors) == 3
+
+    # === MARKET DATA METHODS ===
+
+    @pytest.fixture
+    def sample_breakdown_response(self) -> list[dict[str, Any]]:
+        """Sample breakdown trading data."""
+        return [
+            {
+                "Date": "2024-01-15",
+                "Code": "7203",
+                "LongSellVa": "1000000.0",
+                "ShrtNoMrgnVa": "500000.0",
+                "MrgnSellNewVa": "200000.0",
+                "LongBuyVa": "1200000.0",
+                "LongSellVo": 10000,
+                "ShrtNoMrgnVo": 5000,
+            }
+        ]
+
+    @pytest.fixture
+    def sample_short_report_response(self) -> list[dict[str, Any]]:
+        """Sample short sale report data."""
+        return [
+            {
+                "DisclosedDate": "2024-01-15",
+                "CalculatedDate": "2024-01-12",
+                "Code": "7203",
+                "StockName": "トヨタ自動車",
+                "ShortSellerName": "Goldman Sachs",
+                "ShortPositionsToSharesOutstandingRatio": "0.52",
+                "ShortPositionsInSharesNumber": 1000000,
+            }
+        ]
+
+    @pytest.fixture
+    def sample_margin_alert_response(self) -> list[dict[str, Any]]:
+        """Sample margin alert data."""
+        return [
+            {
+                "PubDate": "2024-01-15",
+                "Code": "7203",
+                "AppDate": "2024-01-14",
+                "ShrtOut": 500000,
+                "ShrtOutChg": 10000,
+                "ShrtOutRatio": "1.5",
+                "LongOut": 800000,
+                "LongOutChg": -5000,
+                "SLRatio": "0.625",
+            }
+        ]
+
+    def test_breakdown(
+        self, mock_session: MagicMock, sample_breakdown_response: list[dict[str, Any]]
+    ) -> None:
+        """Test Market.breakdown returns DataFrame."""
+        mock_session.get_paginated.return_value = iter(sample_breakdown_response)
+
+        market = Market(session=mock_session)
+        df = market.breakdown(
+            code="7203",
+            start=datetime.date(2024, 1, 15),
+            end=datetime.date(2024, 1, 15),
+        )
+
+        assert len(df) == 1
+        assert "code" in df.columns
+        assert "long_sell_value" in df.columns
+        assert df.iloc[0]["code"] == "7203"
+
+    def test_breakdown_empty(self, mock_session: MagicMock) -> None:
+        """Test Market.breakdown returns empty DataFrame when no data."""
+        mock_session.get_paginated.return_value = iter([])
+
+        market = Market(session=mock_session)
+        df = market.breakdown(code="9999")
+
+        assert df.empty
+
+    def test_short_positions(
+        self, mock_session: MagicMock, sample_short_report_response: list[dict[str, Any]]
+    ) -> None:
+        """Test Market.short_positions returns DataFrame."""
+        mock_session.get_paginated.return_value = iter(sample_short_report_response)
+
+        market = Market(session=mock_session)
+        df = market.short_positions(code="7203")
+
+        assert len(df) == 1
+        assert "code" in df.columns
+        assert "short_position_ratio" in df.columns
+        assert df.iloc[0]["code"] == "7203"
+
+    def test_short_positions_empty(self, mock_session: MagicMock) -> None:
+        """Test Market.short_positions returns empty DataFrame when no data."""
+        mock_session.get_paginated.return_value = iter([])
+
+        market = Market(session=mock_session)
+        df = market.short_positions(code="9999")
+
+        assert df.empty
+
+    def test_margin_alerts(
+        self, mock_session: MagicMock, sample_margin_alert_response: list[dict[str, Any]]
+    ) -> None:
+        """Test Market.margin_alerts returns DataFrame."""
+        mock_session.get_paginated.return_value = iter(sample_margin_alert_response)
+
+        market = Market(session=mock_session)
+        df = market.margin_alerts(code="7203")
+
+        assert len(df) == 1
+        assert "code" in df.columns
+        assert "short_outstanding" in df.columns
+        assert df.iloc[0]["code"] == "7203"
+
+    def test_margin_alerts_empty(self, mock_session: MagicMock) -> None:
+        """Test Market.margin_alerts returns empty DataFrame when no data."""
+        mock_session.get_paginated.return_value = iter([])
+
+        market = Market(session=mock_session)
+        df = market.margin_alerts(code="9999")
+
+        assert df.empty

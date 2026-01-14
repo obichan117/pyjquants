@@ -11,15 +11,18 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 
 if TYPE_CHECKING:
     from pyjquants.domain.models import (
+        BreakdownTrade,
         Dividend,
         EarningsAnnouncement,
         FinancialDetails,
         FinancialStatement,
         IndexPrice,
         InvestorTrades,
+        MarginAlert,
         MarginInterest,
         PriceBar,
         Sector,
+        ShortSaleReport,
         ShortSelling,
         StockInfo,
         TradingCalendarDay,
@@ -138,6 +141,27 @@ MARGIN_INTEREST: Endpoint[MarginInterest] = Endpoint(
     path="/markets/margin-interest",
     response_key="data",
     model="MarginInterest",  # type: ignore[arg-type]
+    paginated=True,
+)
+
+BREAKDOWN: Endpoint[BreakdownTrade] = Endpoint(
+    path="/markets/breakdown",
+    response_key="data",
+    model="BreakdownTrade",  # type: ignore[arg-type]
+    paginated=True,
+)
+
+SHORT_SALE_REPORT: Endpoint[ShortSaleReport] = Endpoint(
+    path="/markets/short-sale-report",
+    response_key="data",
+    model="ShortSaleReport",  # type: ignore[arg-type]
+    paginated=True,
+)
+
+MARGIN_ALERT: Endpoint[MarginAlert] = Endpoint(
+    path="/markets/margin-alert",
+    response_key="data",
+    model="MarginAlert",  # type: ignore[arg-type]
     paginated=True,
 )
 

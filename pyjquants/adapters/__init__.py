@@ -1,6 +1,7 @@
 """J-Quants API adapters."""
 
 from pyjquants.adapters.endpoints import (
+    BREAKDOWN,
     DAILY_QUOTES,
     DAILY_QUOTES_AM,
     DIVIDENDS,
@@ -9,9 +10,11 @@ from pyjquants.adapters.endpoints import (
     INDEX_PRICES,
     INVESTOR_TYPES,
     LISTED_INFO,
+    MARGIN_ALERT,
     MARGIN_INTEREST,
     SECTORS_17,
     SECTORS_33,
+    SHORT_SALE_REPORT,
     SHORT_SELLING,
     STATEMENTS,
     TRADING_CALENDAR,
@@ -33,5 +36,8 @@ __all__ = [
     "SECTORS_33",
     "SHORT_SELLING",
     "MARGIN_INTEREST",
+    "BREAKDOWN",
+    "SHORT_SALE_REPORT",
+    "MARGIN_ALERT",
     "INDEX_PRICES",
 ]

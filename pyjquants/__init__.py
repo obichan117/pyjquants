@@ -26,6 +26,7 @@ Usage:
 
 # Domain entities
 from pyjquants.domain import (
+    BreakdownTrade,
     Dividend,
     EarningsAnnouncement,
     FinancialDetails,
@@ -33,11 +34,13 @@ from pyjquants.domain import (
     Index,
     IndexPrice,
     InvestorTrades,
+    MarginAlert,
     MarginInterest,
     Market,
     MarketSegment,
     PriceBar,
     Sector,
+    ShortSaleReport,
     ShortSelling,
     StockInfo,
     Ticker,
@@ -93,6 +96,9 @@ __all__ = [
     "MarginInterest",
     "ShortSelling",
     "InvestorTrades",
+    "BreakdownTrade",
+    "ShortSaleReport",
+    "MarginAlert",
     # Enums
     "MarketSegment",
 ]

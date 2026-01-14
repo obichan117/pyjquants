@@ -6,11 +6,14 @@ import datetime
 from decimal import Decimal
 
 from pyjquants.domain.models import (
+    BreakdownTrade,
     FinancialDetails,
     InvestorTrades,
+    MarginAlert,
     MarketSegment,
     PriceBar,
     Sector,
+    ShortSaleReport,
     StockInfo,
     TradingCalendarDay,
 )
@@ -255,3 +258,148 @@ class TestFinancialDetails:
         assert details.total_assets is None
         assert details.cf_operating is None
         assert details.gross_profit is None
+
+
+class TestBreakdownTrade:
+    """Tests for BreakdownTrade model."""
+
+    def test_create_from_api_data(self) -> None:
+        """Test creating BreakdownTrade from API response."""
+        data = {
+            "Date": "2024-01-15",
+            "Code": "7203",
+            "LongSellVa": "1000000.5",
+            "ShrtNoMrgnVa": "500000.0",
+            "MrgnSellNewVa": "200000.0",
+            "MrgnSellCloseVa": "150000.0",
+            "LongBuyVa": "1200000.0",
+            "MrgnBuyNewVa": "100000.0",
+            "MrgnBuyCloseVa": "50000.0",
+            "LongSellVo": 10000,
+            "ShrtNoMrgnVo": 5000,
+            "MrgnSellNewVo": 2000,
+            "MrgnSellCloseVo": 1500,
+            "LongBuyVo": 12000,
+            "MrgnBuyNewVo": 1000,
+            "MrgnBuyCloseVo": 500,
+        }
+        trade = BreakdownTrade.model_validate(data)
+
+        assert trade.date == datetime.date(2024, 1, 15)
+        assert trade.code == "7203"
+        assert trade.long_sell_value == Decimal("1000000.5")
+        assert trade.short_no_margin_value == Decimal("500000.0")
+        assert trade.margin_sell_new_value == Decimal("200000.0")
+        assert trade.long_buy_value == Decimal("1200000.0")
+        assert trade.long_sell_volume == 10000
+        assert trade.short_no_margin_volume == 5000
+
+    def test_optional_fields(self) -> None:
+        """Test that optional fields default to None."""
+        data = {
+            "Date": "20240115",
+            "Code": "7203",
+        }
+        trade = BreakdownTrade.model_validate(data)
+
+        assert trade.date == datetime.date(2024, 1, 15)
+        assert trade.code == "7203"
+        assert trade.long_sell_value is None
+        assert trade.long_sell_volume is None
+
+
+class TestShortSaleReport:
+    """Tests for ShortSaleReport model."""
+
+    def test_create_from_api_data(self) -> None:
+        """Test creating ShortSaleReport from API response."""
+        data = {
+            "DisclosedDate": "2024-01-15",
+            "CalculatedDate": "2024-01-12",
+            "Code": "7203",
+            "StockName": "トヨタ自動車",
+            "StockNameEnglish": "Toyota Motor Corporation",
+            "ShortSellerName": "Goldman Sachs",
+            "ShortSellerAddress": "New York, USA",
+            "ShortPositionsToSharesOutstandingRatio": "0.52",
+            "ShortPositionsInSharesNumber": 1000000,
+            "ShortPositionsInTradingUnitsNumber": 10000,
+            "CalculationInPreviousReportingDate": "2024-01-05",
+            "ShortPositionsInPreviousReportingRatio": "0.48",
+        }
+        report = ShortSaleReport.model_validate(data)
+
+        assert report.disclosed_date == datetime.date(2024, 1, 15)
+        assert report.calculated_date == datetime.date(2024, 1, 12)
+        assert report.code == "7203"
+        assert report.stock_name == "トヨタ自動車"
+        assert report.short_seller_name == "Goldman Sachs"
+        assert report.short_position_ratio == Decimal("0.52")
+        assert report.short_position_shares == 1000000
+        assert report.prev_report_date == datetime.date(2024, 1, 5)
+        assert report.prev_position_ratio == Decimal("0.48")
+
+    def test_optional_fields(self) -> None:
+        """Test that optional fields default to None."""
+        data = {
+            "DisclosedDate": "20240115",
+            "CalculatedDate": "20240112",
+            "Code": "7203",
+        }
+        report = ShortSaleReport.model_validate(data)
+
+        assert report.disclosed_date == datetime.date(2024, 1, 15)
+        assert report.code == "7203"
+        assert report.stock_name is None
+        assert report.short_position_ratio is None
+        assert report.prev_report_date is None
+
+
+class TestMarginAlert:
+    """Tests for MarginAlert model."""
+
+    def test_create_from_api_data(self) -> None:
+        """Test creating MarginAlert from API response."""
+        data = {
+            "PubDate": "2024-01-15",
+            "Code": "7203",
+            "AppDate": "2024-01-14",
+            "ShrtOut": 500000,
+            "ShrtOutChg": 10000,
+            "ShrtOutRatio": "1.5",
+            "LongOut": 800000,
+            "LongOutChg": -5000,
+            "LongOutRatio": "2.4",
+            "SLRatio": "0.625",
+            "ShrtNegOut": 100000,
+            "ShrtStdOut": 400000,
+            "LongNegOut": 200000,
+            "LongStdOut": 600000,
+        }
+        alert = MarginAlert.model_validate(data)
+
+        assert alert.pub_date == datetime.date(2024, 1, 15)
+        assert alert.code == "7203"
+        assert alert.apply_date == datetime.date(2024, 1, 14)
+        assert alert.short_outstanding == 500000
+        assert alert.short_outstanding_change == 10000
+        assert alert.short_outstanding_ratio == Decimal("1.5")
+        assert alert.long_outstanding == 800000
+        assert alert.long_outstanding_change == -5000
+        assert alert.sl_ratio == Decimal("0.625")
+        assert alert.short_neg_outstanding == 100000
+        assert alert.short_std_outstanding == 400000
+
+    def test_optional_fields(self) -> None:
+        """Test that optional fields default to None."""
+        data = {
+            "PubDate": "20240115",
+            "Code": "7203",
+        }
+        alert = MarginAlert.model_validate(data)
+
+        assert alert.pub_date == datetime.date(2024, 1, 15)
+        assert alert.code == "7203"
+        assert alert.apply_date is None
+        assert alert.short_outstanding is None
+        assert alert.sl_ratio is None
