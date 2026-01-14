@@ -65,7 +65,7 @@ The **infrastructure layer** handles HTTP, authentication, caching, and configur
 
 | Module | Purpose |
 |--------|---------|
-| `session.py` | `Session` with auth, rate limiting; `TokenManager` for token lifecycle |
+| `session.py` | `Session` with API key auth and rate limiting |
 | `client.py` | `JQuantsClient` - generic fetch/parse with typed endpoints |
 | `config.py` | `JQuantsConfig` - environment and configuration loading |
 | `cache.py` | `TTLCache`, `NullCache` - response caching |
@@ -83,8 +83,8 @@ The **adapters layer** contains declarative API endpoint definitions.
 
 ```python
 DAILY_QUOTES: Endpoint[PriceBar] = Endpoint(
-    path="/prices/daily_quotes",
-    response_key="daily_quotes",
+    path="/equities/bars/daily",
+    response_key="data",
     model="PriceBar",
     paginated=True,
 )
@@ -107,7 +107,7 @@ sequenceDiagram
     alt Not cached
         Ticker->>Client: fetch_list(LISTED_INFO)
         Client->>Endpoints: Get endpoint definition
-        Client->>Session: GET /listed/info
+        Client->>Session: GET /equities/master
         Session->>Cache: Check cache
         alt Cache hit
             Cache-->>Session: Cached response

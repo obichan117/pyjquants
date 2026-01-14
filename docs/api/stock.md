@@ -126,13 +126,3 @@ tickers = pjq.search("Toyota")
 # Search by code prefix
 tickers = pjq.search("72")  # All codes starting with 72
 ```
-
-## Backward Compatibility
-
-`Stock` is available as an alias for `Ticker`:
-
-```python
-# Both work the same
-ticker = pjq.Ticker("7203")
-stock = pjq.Stock("7203")  # Alias
-```

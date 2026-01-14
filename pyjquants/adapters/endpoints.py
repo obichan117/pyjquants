@@ -52,12 +52,6 @@ DAILY_QUOTES: Endpoint[PriceBar] = Endpoint(
     paginated=True,
 )
 
-PRICES_AM: Endpoint[PriceBar] = Endpoint(
-    path="/equities/bars/daily/am",
-    response_key="data",
-    model="PriceBar",  # type: ignore[arg-type]
-)
-
 LISTED_INFO: Endpoint[StockInfo] = Endpoint(
     path="/equities/master",
     response_key="data",
@@ -141,22 +135,3 @@ TOPIX: Endpoint[IndexPrice] = Endpoint(
     model="IndexPrice",  # type: ignore[arg-type]
     paginated=True,
 )
-
-
-# === ENDPOINT REGISTRY ===
-
-ALL_ENDPOINTS = {
-    "daily_quotes": DAILY_QUOTES,
-    "prices_am": PRICES_AM,
-    "listed_info": LISTED_INFO,
-    "statements": STATEMENTS,
-    "dividends": DIVIDENDS,
-    "earnings_calendar": EARNINGS_CALENDAR,
-    "trading_calendar": TRADING_CALENDAR,
-    "sectors_17": SECTORS_17,
-    "sectors_33": SECTORS_33,
-    "short_selling": SHORT_SELLING,
-    "margin_interest": MARGIN_INTEREST,
-    "index_prices": INDEX_PRICES,
-    "topix": TOPIX,
-}

@@ -56,9 +56,6 @@ from pyjquants.infra import (
     ValidationError,
 )
 
-# Backward compatibility aliases
-Stock = Ticker  # Alias for migration
-
 __version__ = "0.2.0"
 
 __all__ = [
@@ -94,6 +91,4 @@ __all__ = [
     "ShortSelling",
     # Enums
     "MarketSegment",
-    # Backward compatibility
-    "Stock",
 ]

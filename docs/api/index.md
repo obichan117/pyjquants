@@ -59,12 +59,9 @@ The following are available from `pyjquants`:
 - `Session` - HTTP session with authentication
 - `PyJQuantsError` - Base exception
 - `AuthenticationError` - Auth failures
-- `TokenExpiredError` - Token expiration
 - `APIError` - API errors
 - `RateLimitError` - Rate limit exceeded
 - `NotFoundError` - Resource not found
 - `ValidationError` - Validation errors
 - `ConfigurationError` - Configuration errors
 
-### Backward Compatibility
-- `Stock` - Alias for `Ticker`

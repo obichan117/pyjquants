@@ -6,16 +6,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart.ipynb)
 
-Investor-friendly OOP Python library for [J-Quants API](https://jpx.gitbook.io/j-quants-en).
+yfinance-style Python library for [J-Quants API](https://jpx.gitbook.io/j-quants-en) (Japanese stock market data).
 
 **[Documentation](https://obichan117.github.io/pyjquants)** | **[Quickstart Notebook](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart.ipynb)**
 
 ## Features
 
-- **Intuitive OOP design**: `Stock("7203")` just works
-- **Lazy-loaded attributes**: `stock.name`, `stock.prices`, `stock.financials`
-- **Auto-authentication**: Reads credentials from environment variables
-- **Paper trading simulation**: `Trader`, `Order`, `Portfolio`, `Position`
+- **yfinance-style API**: Familiar interface for quantitative analysts
+- **Lazy-loaded attributes**: Data fetched on first access, then cached
+- **V2 API support**: Simple API key authentication
 - **Type hints**: Full type annotations with Pydantic models
 - **DataFrame integration**: Price data returned as pandas DataFrames
 
@@ -34,11 +33,10 @@ pip install pyjquants[dev]
 
 ### Setup
 
-Set your J-Quants credentials as environment variables:
+Get your API key from the [J-Quants dashboard](https://application.jpx-jquants.com/) and set it:
 
 ```bash
-export JQUANTS_MAIL_ADDRESS="your_email@example.com"
-export JQUANTS_PASSWORD="your_password"
+export JQUANTS_API_KEY="your_api_key_here"
 ```
 
 ### Basic Usage
@@ -46,109 +44,74 @@ export JQUANTS_PASSWORD="your_password"
 ```python
 import pyjquants as pjq
 
-# Create a stock - data is lazy-loaded from API
-stock = pjq.Stock("7203")  # Toyota
+# Create a ticker - data is lazy-loaded from API
+ticker = pjq.Ticker("7203")  # Toyota
 
-# Access attributes (fetched on first access, then cached)
-stock.code              # "7203"
-stock.name              # "トヨタ自動車"
-stock.name_english      # "Toyota Motor Corporation"
-stock.sector_33.name    # "輸送用機器"
-stock.market_segment    # MarketSegment.TSE_PRIME
+# Access info (fetched on first access, then cached)
+ticker.info.name            # "トヨタ自動車"
+ticker.info.name_english    # "Toyota Motor Corporation"
+ticker.info.sector          # "輸送用機器"
+ticker.info.market          # "Prime"
 
-# Get price data as DataFrame
-stock.prices            # Recent 30 trading days
-stock.adjusted_prices   # Adjusted for splits/dividends
-
-# Custom date range
-from datetime import date
-stock.prices_between(date(2024, 1, 1), date(2024, 6, 30))
+# Get price history (yfinance-style)
+df = ticker.history("30d")        # Recent 30 days
+df = ticker.history("1y")         # Last year
+df = ticker.history(start="2024-01-01", end="2024-06-30")  # Custom range
 
 # Financial data
-stock.financials        # Latest financial statements
-stock.dividends         # Dividend history
+ticker.financials           # Financial statements
+ticker.dividends            # Dividend history
 ```
 
-### Paper Trading
+### Multi-Ticker Download
 
 ```python
 import pyjquants as pjq
-from datetime import date
-from decimal import Decimal
 
-# Initialize trader with starting cash
-trader = pjq.Trader(initial_cash=10_000_000)
-
-# Get stock
-toyota = pjq.Stock("7203")
-
-# Place orders
-order = trader.buy(toyota, 100)                    # Market buy 100 shares
-order = trader.buy(toyota, 100, price=2500)        # Limit buy at 2500
-order = trader.sell(toyota, 50)                    # Market sell
-
-# Simulate fills using historical prices
-executions = trader.simulate_fills(date(2024, 6, 15))
-
-# Check portfolio
-trader.cash                     # Current cash balance
-trader.portfolio.total_value    # Total portfolio value
-trader.portfolio.positions      # List of positions
-trader.portfolio.realized_pnl   # Realized P&L
-trader.portfolio.unrealized_pnl # Unrealized P&L
-
-# Get position for a specific stock
-position = trader.position(toyota)
-if position:
-    print(f"Holding {position.quantity} shares")
-    print(f"Average cost: {position.average_cost}")
-    print(f"Unrealized P&L: {position.unrealized_pnl}")
+# Download multiple tickers at once
+df = pjq.download(["7203", "6758", "9984"], period="30d")
 ```
 
-### Market Data
+### Search
 
 ```python
 import pyjquants as pjq
-from datetime import date
 
-# Market utilities
-market = pjq.Market()
-market.is_trading_day(date(2024, 12, 25))  # False
-market.trading_days(date(2024, 1, 1), date(2024, 1, 31))
-market.next_trading_day(date(2024, 1, 1))
-
-# Sector information
-market.sectors_17  # 17-sector classification
-market.sectors_33  # 33-sector classification
+# Search by name or code
+tickers = pjq.search("トヨタ")
+for t in tickers:
+    print(f"{t.code}: {t.info.name}")
 ```
 
-### Index Data
+### Market Indices
 
 ```python
 import pyjquants as pjq
 
 # Get TOPIX index
 topix = pjq.Index.topix()
-topix.name      # "TOPIX"
-topix.prices    # Recent 30 days
+df = topix.history("1y")
 
-# All available indices
-indices = pjq.Index.all()
+# Get Nikkei 225
+nikkei = pjq.Index.nikkei225()
+df = nikkei.history("30d")
 ```
 
-### Universe Filtering
+### Market Information
 
 ```python
 import pyjquants as pjq
+from datetime import date
 
-# Get all stocks and filter
-universe = pjq.Universe.all()
-prime_stocks = (universe
-    .filter_by_market(pjq.MarketSegment.TSE_PRIME)
-    .head(50))
+market = pjq.Market()
 
-# Get prices for filtered universe
-prime_stocks.prices  # Multi-stock DataFrame
+# Check trading days
+market.is_trading_day(date(2024, 12, 25))  # False (holiday)
+market.next_trading_day(date(2024, 1, 1))  # Next open day
+
+# Sector information
+market.sectors_17  # 17-sector classification
+market.sectors_33  # 33-sector classification
 ```
 
 ## Configuration
@@ -157,21 +120,20 @@ prime_stocks.prices  # Multi-stock DataFrame
 
 | Variable | Description |
 |----------|-------------|
-| `JQUANTS_MAIL_ADDRESS` | Your J-Quants email |
-| `JQUANTS_PASSWORD` | Your J-Quants password |
-| `JQUANTS_REFRESH_TOKEN` | (Optional) Refresh token |
+| `JQUANTS_API_KEY` | Your J-Quants API key (required) |
 | `JQUANTS_CACHE_ENABLED` | Enable caching (default: `true`) |
 | `JQUANTS_CACHE_TTL` | Cache TTL in seconds (default: `3600`) |
 | `JQUANTS_RATE_LIMIT` | Requests per minute (default: `60`) |
+
+**Rate limit tiers:** Free=5, Light=60, Standard=120, Premium=500
 
 ### TOML Configuration
 
 Create `~/.jquants/config.toml`:
 
 ```toml
-[credentials]
-mail_address = "your_email@example.com"
-password = "your_password"
+[auth]
+api_key = "your_api_key_here"
 
 [cache]
 enabled = true
@@ -188,72 +150,46 @@ requests_per_minute = 60
 ```python
 from pyjquants import PriceBar
 
-bar = stock.latest_price
+bar = ticker.history("1d").iloc[0]
 bar.date            # datetime.date
 bar.open            # Decimal
 bar.high            # Decimal
 bar.low             # Decimal
 bar.close           # Decimal
 bar.volume          # int
-bar.adjustment_factor  # Decimal
-bar.adjusted_close  # Decimal (adjusted for splits)
-```
-
-### Order
-
-```python
-from pyjquants import Order, OrderSide, OrderType, OrderStatus
-
-order = Order.market_buy(stock, 100)
-order = Order.limit_sell(stock, 100, Decimal("2600"))
-
-order.id            # Unique order ID
-order.side          # OrderSide.BUY or OrderSide.SELL
-order.order_type    # OrderType.MARKET or OrderType.LIMIT
-order.status        # OrderStatus.PENDING, FILLED, CANCELLED, etc.
-order.is_active     # True if pending/partially filled
-order.is_filled     # True if fully filled
 ```
 
 ## API Reference
 
-### Entities
+### Main API
 
-| Class | Description |
-|-------|-------------|
-| `Stock(code)` | Japanese stock with lazy-loaded data |
-| `Index` | Market index (TOPIX, etc.) |
+| Class/Function | Description |
+|----------------|-------------|
+| `Ticker(code)` | Stock ticker with `.history()`, `.info`, `.financials` |
+| `download(codes, period)` | Download price data for multiple tickers |
+| `search(query)` | Search tickers by name or code |
+| `Index` | Market index (TOPIX, Nikkei 225) |
 | `Market` | Market utilities (calendar, sectors) |
-| `Universe` | Filterable collection of stocks |
 
-### Trading
+### Models & Enums
 
 | Class | Description |
 |-------|-------------|
-| `Trader` | Paper trading interface |
-| `Order` | Buy/sell order |
-| `Portfolio` | Holdings and cash |
-| `Position` | Single stock holding |
-| `Execution` | Filled order record |
-
-### Enums
-
-| Enum | Values |
-|------|--------|
+| `PriceBar` | OHLCV price data |
+| `StockInfo` | Stock information |
+| `Sector` | Industry sector |
 | `MarketSegment` | `TSE_PRIME`, `TSE_STANDARD`, `TSE_GROWTH`, `OTHER` |
-| `OrderSide` | `BUY`, `SELL` |
-| `OrderType` | `MARKET`, `LIMIT` |
-| `OrderStatus` | `PENDING`, `FILLED`, `PARTIALLY_FILLED`, `CANCELLED`, `REJECTED` |
 
 ## Architecture
 
-![Architecture](docs/assets/architecture.png)
+PyJQuants follows a Clean Domain-Driven Design:
 
-PyJQuants follows a layered architecture:
-
-- **Entities Layer**: User-facing OOP interface (`Stock`, `Index`, `Market`, `Universe`)
-- **Repository Layer**: API data access (`StockRepository`, `CompanyRepository`, etc.)
-- **Core Layer**: Infrastructure (`Session`, `Cache`, `Config`)
+```
+pyjquants/
+├── domain/       # Business logic (Ticker, Index, Market, models)
+├── infra/        # Infrastructure (Session, Cache, Config)
+└── adapters/     # API layer (endpoint definitions)
+```
 
 See the [Architecture documentation](https://obichan117.github.io/pyjquants/architecture/) for details.
 
@@ -264,26 +200,23 @@ See the [Architecture documentation](https://obichan117.github.io/pyjquants/arch
 git clone https://github.com/obichan117/pyjquants.git
 cd pyjquants
 
-# Install with dev dependencies
-pip install -e ".[dev]"
+# Install with uv
+uv sync --all-extras
 
 # Run tests
-pytest tests/ -v
-
-# Run tests with coverage
-pytest tests/ --cov=pyjquants --cov-report=term-missing
+uv run pytest tests/ -v
 
 # Type checking
-mypy pyjquants/
+uv run mypy pyjquants/
 
 # Linting
-ruff check pyjquants/
+uv run ruff check pyjquants/
 
 # Build documentation
-mkdocs build --strict
+uv run mkdocs build --strict
 
 # Serve documentation locally
-mkdocs serve
+uv run mkdocs serve
 ```
 
 ## License
