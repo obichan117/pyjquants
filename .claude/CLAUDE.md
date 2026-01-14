@@ -209,29 +209,30 @@ uv run twine upload dist/* -u __token__ -p $PYPI_TOKEN
 
 ## Documentation
 
-The docs support English and Japanese with `mkdocs-static-i18n` plugin.
+The docs support Japanese (default) and English with `mkdocs-static-i18n` plugin.
 
-**English (default):** Technical documentation for developers
+**Japanese (default):** Simplified docs for non-technical Japanese investors
 ```
 docs/
-├── index.md              # Landing page with tier table
-├── getting-started.md    # Setup and basic usage
-├── architecture.md       # DDD architecture overview
-├── api-spec.md           # J-Quants API mapping
-├── api/                  # API reference (mkdocstrings)
-└── examples/
-    └── quickstart.ipynb  # English Colab notebook
-```
-
-**Japanese:** Simplified docs for non-technical Japanese investors
-```
-docs/ja/
 ├── index.md              # ホーム（投資家向け紹介）
 ├── setup.md              # セットアップ（APIキー取得方法）
 ├── basic-usage.md        # 基本的な使い方（コピペサンプル）
 ├── tier-guide.md         # プラン別ガイド（料金・機能比較）
 └── examples/
     └── quickstart_ja.ipynb  # 日本語クイックスタート
+```
+
+**English:** Technical documentation for developers
+```
+docs/en/
+├── index.md              # Landing page with tier table
+├── getting-started.md    # Setup and basic usage
+├── architecture.md       # DDD architecture overview
+├── api-spec.md           # J-Quants API mapping
+├── api/                  # API reference (mkdocstrings)
+├── openapi/              # OpenAPI 3.0 spec
+└── examples/
+    └── quickstart.ipynb  # English Colab notebook
 ```
 
 **Key differences in Japanese docs:**
@@ -248,8 +249,43 @@ uv run mkdocs serve            # Preview at localhost:8000
 ```
 
 **URLs:**
-- English: https://obichan117.github.io/pyjquants/
-- Japanese: https://obichan117.github.io/pyjquants/ja/
+- Japanese (default): https://obichan117.github.io/pyjquants/
+- English: https://obichan117.github.io/pyjquants/en/
+
+## CI/CD
+
+**GitHub Actions Workflows:**
+
+| Workflow | Trigger | Jobs |
+|----------|---------|------|
+| **CI** (`.github/workflows/ci.yml`) | Push to `main`, PRs to `main` | `test` (Python 3.10/3.11/3.12), `docs` |
+| **Docs** (`.github/workflows/docs.yml`) | Push to `main`, manual | Build & deploy to GitHub Pages |
+| **Publish** (`.github/workflows/publish.yml`) | GitHub Release published | Build → TestPyPI → PyPI (OIDC) |
+
+**CI validates:**
+- Linting: `ruff check pyjquants/`
+- Type checking: `mypy pyjquants/`
+- Tests: `pytest tests/ --cov=pyjquants`
+- Docs: `mkdocs build --strict`
+
+**Branch Protection on `main`:**
+- Required status checks: `test (3.10)`, `test (3.11)`, `test (3.12)`, `docs`
+- Strict mode: branches must be up-to-date before merge
+- Force pushes: disabled
+- Branch deletion: disabled
+- Admins can bypass (for hotfixes)
+
+**Recommended workflow:**
+```
+main (protected)
+  ↑
+  └── PR ← feature/xxx or fix/xxx
+```
+
+**Publishing to PyPI:**
+1. Update version in `pyjquants/__init__.py`
+2. Create GitHub Release with tag `vX.Y.Z`
+3. Workflow auto-publishes to TestPyPI then PyPI
 
 ## Tier-Aware Client
 
