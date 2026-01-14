@@ -20,8 +20,8 @@ from pyjquants.adapters.endpoints import (
     SHORT_SELLING,
     TRADING_CALENDAR,
 )
-from pyjquants.infra.exceptions import AuthenticationError
 from pyjquants.infra.client import JQuantsClient
+from pyjquants.infra.exceptions import AuthenticationError
 from pyjquants.infra.session import _get_global_session
 
 if TYPE_CHECKING:
