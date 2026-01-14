@@ -7,7 +7,15 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 
-from pyjquants.adapters.endpoints import DAILY_QUOTES, DIVIDENDS, LISTED_INFO, STATEMENTS
+from pyjquants.adapters.endpoints import (
+    DAILY_QUOTES,
+    DAILY_QUOTES_AM,
+    DIVIDENDS,
+    FINANCIAL_DETAILS,
+    INVESTOR_TYPES,
+    LISTED_INFO,
+    STATEMENTS,
+)
 from pyjquants.domain.info import TickerInfo
 from pyjquants.domain.utils import parse_date, parse_period
 from pyjquants.infra.client import JQuantsClient
@@ -107,6 +115,45 @@ class Ticker:
 
         return df.reset_index(drop=True)
 
+    def history_am(
+        self,
+        period: str | None = "30d",
+        start: str | date | None = None,
+        end: str | date | None = None,
+    ) -> pd.DataFrame:
+        """Get morning session (AM) price history.
+
+        Returns prices from the morning trading session only (9:00-11:30 JST).
+        Useful for intraday analysis or when you need morning-only prices.
+
+        Args:
+            period: Time period (e.g., "30d", "1y"). Ignored if start/end provided.
+            start: Start date (YYYY-MM-DD string or date object)
+            end: End date (YYYY-MM-DD string or date object)
+
+        Returns:
+            DataFrame with columns: date, open, high, low, close, volume, adjusted_close
+        """
+        start_date = parse_date(start) if start is not None else None
+        end_date = parse_date(end) if end is not None else None
+
+        if start_date is None and end_date is None:
+            days = parse_period(period or "30d")
+            end_date = date.today()
+            start_date = end_date - timedelta(days=days + 15)
+
+        params = self._client.date_params(code=self.code, start=start_date, end=end_date)
+        df = self._client.fetch_dataframe(DAILY_QUOTES_AM, params)
+
+        if df.empty:
+            return df
+
+        if period and start is None and end is None:
+            days = parse_period(period)
+            df = df.tail(days)
+
+        return df.reset_index(drop=True)
+
     # === FINANCIALS ===
 
     @property
@@ -118,6 +165,29 @@ class Ticker:
     def dividends(self) -> pd.DataFrame:
         """Dividend history."""
         return self._client.fetch_dataframe(DIVIDENDS, {"code": self.code})
+
+    @property
+    def financial_details(self) -> pd.DataFrame:
+        """Full financial statement data (BS/PL/CF).
+
+        Provides detailed balance sheet, income statement, and cash flow data.
+        More comprehensive than the `financials` property.
+        """
+        return self._client.fetch_dataframe(FINANCIAL_DETAILS, {"code": self.code})
+
+    @property
+    def investor_trades(self) -> pd.DataFrame:
+        """Trading by type of investors.
+
+        Returns trading volumes broken down by investor category:
+        - Proprietary (prop_*)
+        - Individual (ind_*)
+        - Foreign (frgn_*)
+        - Investment trusts (inv_tr_*)
+        - Trust banks (trst_bnk_*)
+        - Total (total_*)
+        """
+        return self._client.fetch_dataframe(INVESTOR_TYPES, {"code": self.code})
 
     # === CACHE CONTROL ===
 

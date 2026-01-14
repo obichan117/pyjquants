@@ -5,8 +5,18 @@ Re-exports all models for backward compatibility.
 
 from pyjquants.domain.models.base import BaseModel, MarketSegment
 from pyjquants.domain.models.company import Sector, StockInfo
-from pyjquants.domain.models.financial import Dividend, EarningsAnnouncement, FinancialStatement
-from pyjquants.domain.models.market import MarginInterest, ShortSelling, TradingCalendarDay
+from pyjquants.domain.models.financial import (
+    Dividend,
+    EarningsAnnouncement,
+    FinancialDetails,
+    FinancialStatement,
+)
+from pyjquants.domain.models.market import (
+    InvestorTrades,
+    MarginInterest,
+    ShortSelling,
+    TradingCalendarDay,
+)
 from pyjquants.domain.models.price import IndexPrice, PriceBar
 
 __all__ = [
@@ -21,10 +31,12 @@ __all__ = [
     "StockInfo",
     # Financial
     "FinancialStatement",
+    "FinancialDetails",
     "Dividend",
     "EarningsAnnouncement",
     # Market
     "TradingCalendarDay",
     "MarginInterest",
     "ShortSelling",
+    "InvestorTrades",
 ]

@@ -5,8 +5,10 @@ from pyjquants.domain.market import Market
 from pyjquants.domain.models import (
     Dividend,
     EarningsAnnouncement,
+    FinancialDetails,
     FinancialStatement,
     IndexPrice,
+    InvestorTrades,
     MarginInterest,
     MarketSegment,
     PriceBar,
@@ -30,12 +32,14 @@ __all__ = [
     "StockInfo",
     "Sector",
     "FinancialStatement",
+    "FinancialDetails",
     "Dividend",
     "EarningsAnnouncement",
     "TradingCalendarDay",
     "MarginInterest",
     "ShortSelling",
     "IndexPrice",
+    "InvestorTrades",
     # Enums
     "MarketSegment",
 ]

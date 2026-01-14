@@ -28,9 +28,11 @@ Usage:
 from pyjquants.domain import (
     Dividend,
     EarningsAnnouncement,
+    FinancialDetails,
     FinancialStatement,
     Index,
     IndexPrice,
+    InvestorTrades,
     MarginInterest,
     Market,
     MarketSegment,
@@ -83,12 +85,14 @@ __all__ = [
     "StockInfo",
     "Sector",
     "FinancialStatement",
+    "FinancialDetails",
     "Dividend",
     "EarningsAnnouncement",
     "TradingCalendarDay",
     "IndexPrice",
     "MarginInterest",
     "ShortSelling",
+    "InvestorTrades",
     # Enums
     "MarketSegment",
 ]

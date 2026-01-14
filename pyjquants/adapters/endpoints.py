@@ -13,8 +13,10 @@ if TYPE_CHECKING:
     from pyjquants.domain.models import (
         Dividend,
         EarningsAnnouncement,
+        FinancialDetails,
         FinancialStatement,
         IndexPrice,
+        InvestorTrades,
         MarginInterest,
         PriceBar,
         Sector,
@@ -66,6 +68,19 @@ EARNINGS_CALENDAR: Endpoint[EarningsAnnouncement] = Endpoint(
     paginated=True,
 )
 
+DAILY_QUOTES_AM: Endpoint[PriceBar] = Endpoint(
+    path="/equities/bars/daily/am",
+    response_key="data",
+    model="PriceBar",  # type: ignore[arg-type]
+)
+
+INVESTOR_TYPES: Endpoint[InvestorTrades] = Endpoint(
+    path="/equities/investor-types",
+    response_key="data",
+    model="InvestorTrades",  # type: ignore[arg-type]
+    paginated=True,
+)
+
 
 # === FINANCIALS ===
 
@@ -80,6 +95,13 @@ DIVIDENDS: Endpoint[Dividend] = Endpoint(
     path="/fins/dividend",
     response_key="data",
     model="Dividend",  # type: ignore[arg-type]
+    paginated=True,
+)
+
+FINANCIAL_DETAILS: Endpoint[FinancialDetails] = Endpoint(
+    path="/fins/details",
+    response_key="data",
+    model="FinancialDetails",  # type: ignore[arg-type]
     paginated=True,
 )
 

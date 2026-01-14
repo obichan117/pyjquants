@@ -345,3 +345,137 @@ class TestSearch:
 
         assert len(results) == 1
         assert results[0].code == "7203"
+
+
+class TestTickerNewMethods:
+    """Tests for new Ticker methods (history_am, investor_trades, financial_details)."""
+
+    @pytest.fixture
+    def mock_session(self) -> MagicMock:
+        """Create a mock session."""
+        session = MagicMock()
+        session.get.return_value = {}
+        session.get_paginated.return_value = iter([])
+        return session
+
+    @pytest.fixture
+    def sample_price_response(self) -> list[dict[str, Any]]:
+        """Sample AM price data (same structure as daily)."""
+        return [
+            {
+                "Date": "2024-01-15",
+                "O": "2500.0",
+                "H": "2530.0",
+                "L": "2495.0",
+                "C": "2520.0",
+                "Vo": 500000,
+                "AdjFactor": "1.0",
+            },
+        ]
+
+    @pytest.fixture
+    def sample_investor_trades_response(self) -> list[dict[str, Any]]:
+        """Sample investor trades data."""
+        return [
+            {
+                "PubDate": "2024-01-15",
+                "StDate": "2024-01-08",
+                "EnDate": "2024-01-12",
+                "Section": "TSE1",
+                "PropSell": 1000000,
+                "PropBuy": 1200000,
+                "IndSell": 500000,
+                "IndBuy": 600000,
+                "FrgnSell": 2000000,
+                "FrgnBuy": 2500000,
+            },
+        ]
+
+    @pytest.fixture
+    def sample_financial_details_response(self) -> list[dict[str, Any]]:
+        """Sample financial details data."""
+        return [
+            {
+                "LocalCode": "7203",
+                "DisclosedDate": "2024-01-15",
+                "TypeOfDocument": "Annual",
+                "TotalAssets": "1000000000",
+                "NetAssets": "500000000",
+                "NetSales": "200000000",
+                "OperatingProfit": "50000000",
+                "Profit": "30000000",
+            },
+        ]
+
+    def test_history_am(
+        self, mock_session: MagicMock, sample_price_response: list[dict[str, Any]]
+    ) -> None:
+        """Test Ticker.history_am returns AM session prices."""
+        # AM endpoint is not paginated, so mock get() instead of get_paginated()
+        mock_session.get.return_value = {"data": sample_price_response}
+
+        ticker = Ticker("7203", session=mock_session)
+        df = ticker.history_am(period="30d")
+
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 1
+        assert "date" in df.columns
+        assert "close" in df.columns
+
+    def test_history_am_empty(self, mock_session: MagicMock) -> None:
+        """Test Ticker.history_am returns empty DataFrame when no data."""
+        mock_session.get.return_value = {"data": []}
+
+        ticker = Ticker("7203", session=mock_session)
+        df = ticker.history_am(period="30d")
+
+        assert isinstance(df, pd.DataFrame)
+        assert df.empty
+
+    def test_investor_trades(
+        self, mock_session: MagicMock, sample_investor_trades_response: list[dict[str, Any]]
+    ) -> None:
+        """Test Ticker.investor_trades property."""
+        mock_session.get_paginated.return_value = iter(sample_investor_trades_response)
+
+        ticker = Ticker("7203", session=mock_session)
+        df = ticker.investor_trades
+
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 1
+        assert "prop_sell" in df.columns
+        assert "frgn_buy" in df.columns
+
+    def test_investor_trades_empty(self, mock_session: MagicMock) -> None:
+        """Test Ticker.investor_trades returns empty DataFrame when no data."""
+        mock_session.get_paginated.return_value = iter([])
+
+        ticker = Ticker("7203", session=mock_session)
+        df = ticker.investor_trades
+
+        assert isinstance(df, pd.DataFrame)
+        assert df.empty
+
+    def test_financial_details(
+        self, mock_session: MagicMock, sample_financial_details_response: list[dict[str, Any]]
+    ) -> None:
+        """Test Ticker.financial_details property."""
+        mock_session.get_paginated.return_value = iter(sample_financial_details_response)
+
+        ticker = Ticker("7203", session=mock_session)
+        df = ticker.financial_details
+
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 1
+        assert "code" in df.columns
+        assert "total_assets" in df.columns
+
+    def test_financial_details_empty(self, mock_session: MagicMock) -> None:
+        """Test Ticker.financial_details returns empty DataFrame when no data."""
+        mock_session.get_paginated.return_value = iter([])
+
+        ticker = Ticker("7203", session=mock_session)
+        df = ticker.financial_details
+
+        assert isinstance(df, pd.DataFrame)
+        assert df.empty

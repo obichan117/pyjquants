@@ -2,9 +2,12 @@
 
 from pyjquants.adapters.endpoints import (
     DAILY_QUOTES,
+    DAILY_QUOTES_AM,
     DIVIDENDS,
     EARNINGS_CALENDAR,
+    FINANCIAL_DETAILS,
     INDEX_PRICES,
+    INVESTOR_TYPES,
     LISTED_INFO,
     MARGIN_INTEREST,
     SECTORS_17,
@@ -18,9 +21,12 @@ from pyjquants.adapters.endpoints import (
 __all__ = [
     "Endpoint",
     "DAILY_QUOTES",
+    "DAILY_QUOTES_AM",
     "LISTED_INFO",
+    "INVESTOR_TYPES",
     "STATEMENTS",
     "DIVIDENDS",
+    "FINANCIAL_DETAILS",
     "EARNINGS_CALENDAR",
     "TRADING_CALENDAR",
     "SECTORS_17",

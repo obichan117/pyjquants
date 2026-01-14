@@ -6,6 +6,8 @@ import datetime
 from decimal import Decimal
 
 from pyjquants.domain.models import (
+    FinancialDetails,
+    InvestorTrades,
     MarketSegment,
     PriceBar,
     Sector,
@@ -167,3 +169,89 @@ class TestTradingCalendarDay:
         assert day.is_holiday is True
 
 
+class TestInvestorTrades:
+    """Tests for InvestorTrades model."""
+
+    def test_create_from_api_data(self) -> None:
+        """Test creating InvestorTrades from API response."""
+        data = {
+            "PubDate": "2024-01-15",
+            "StDate": "2024-01-08",
+            "EnDate": "2024-01-12",
+            "Section": "TSE1",
+            "PropSell": 1000000,
+            "PropBuy": 1200000,
+            "IndSell": 500000,
+            "IndBuy": 600000,
+            "FrgnSell": 2000000,
+            "FrgnBuy": 2500000,
+        }
+        trades = InvestorTrades.model_validate(data)
+
+        assert trades.pub_date == datetime.date(2024, 1, 15)
+        assert trades.start_date == datetime.date(2024, 1, 8)
+        assert trades.end_date == datetime.date(2024, 1, 12)
+        assert trades.section == "TSE1"
+        assert trades.prop_sell == 1000000
+        assert trades.prop_buy == 1200000
+        assert trades.ind_sell == 500000
+        assert trades.frgn_buy == 2500000
+
+    def test_optional_fields(self) -> None:
+        """Test that optional fields default to None."""
+        data = {
+            "PubDate": "20240115",
+            "StDate": "20240108",
+            "EnDate": "20240112",
+        }
+        trades = InvestorTrades.model_validate(data)
+
+        assert trades.pub_date == datetime.date(2024, 1, 15)
+        assert trades.prop_sell is None
+        assert trades.ind_buy is None
+        assert trades.total_total is None
+
+
+class TestFinancialDetails:
+    """Tests for FinancialDetails model."""
+
+    def test_create_from_api_data(self) -> None:
+        """Test creating FinancialDetails from API response."""
+        data = {
+            "LocalCode": "7203",
+            "DisclosedDate": "2024-01-15",
+            "TypeOfDocument": "Annual",
+            "TotalAssets": "1000000000",
+            "NetAssets": "500000000",
+            "NetSales": "200000000",
+            "OperatingProfit": "50000000",
+            "Profit": "30000000",
+            "CashFlowsFromOperatingActivities": "40000000",
+            "CashFlowsFromInvestingActivities": "-20000000",
+            "CashFlowsFromFinancingActivities": "-10000000",
+        }
+        details = FinancialDetails.model_validate(data)
+
+        assert details.code == "7203"
+        assert details.disclosed_date == datetime.date(2024, 1, 15)
+        assert details.total_assets == Decimal("1000000000")
+        assert details.net_assets == Decimal("500000000")
+        assert details.net_sales == Decimal("200000000")
+        assert details.operating_profit == Decimal("50000000")
+        assert details.profit == Decimal("30000000")
+        assert details.cf_operating == Decimal("40000000")
+        assert details.cf_investing == Decimal("-20000000")
+        assert details.cf_financing == Decimal("-10000000")
+
+    def test_optional_fields(self) -> None:
+        """Test that optional fields default to None."""
+        data = {
+            "LocalCode": "7203",
+            "DisclosedDate": "20240115",
+        }
+        details = FinancialDetails.model_validate(data)
+
+        assert details.code == "7203"
+        assert details.total_assets is None
+        assert details.cf_operating is None
+        assert details.gross_profit is None

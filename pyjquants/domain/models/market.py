@@ -73,3 +73,63 @@ class ShortSelling(BaseModel):
                 return datetime.date.fromisoformat(v)
             return datetime.date(int(v[:4]), int(v[4:6]), int(v[6:8]))
         raise ValueError(f"Cannot parse date: {v}")
+
+
+class InvestorTrades(BaseModel):
+    """Trading by type of investors.
+
+    Contains sell/buy/total/balance data for each investor category.
+    """
+
+    # Metadata
+    pub_date: datetime.date = Field(alias="PubDate")
+    start_date: datetime.date = Field(alias="StDate")
+    end_date: datetime.date = Field(alias="EnDate")
+    section: str | None = Field(alias="Section", default=None)
+
+    # Proprietary trading
+    prop_sell: int | None = Field(alias="PropSell", default=None)
+    prop_buy: int | None = Field(alias="PropBuy", default=None)
+    prop_total: int | None = Field(alias="PropTot", default=None)
+    prop_balance: int | None = Field(alias="PropBal", default=None)
+
+    # Individuals
+    ind_sell: int | None = Field(alias="IndSell", default=None)
+    ind_buy: int | None = Field(alias="IndBuy", default=None)
+    ind_total: int | None = Field(alias="IndTot", default=None)
+    ind_balance: int | None = Field(alias="IndBal", default=None)
+
+    # Foreign investors
+    frgn_sell: int | None = Field(alias="FrgnSell", default=None)
+    frgn_buy: int | None = Field(alias="FrgnBuy", default=None)
+    frgn_total: int | None = Field(alias="FrgnTot", default=None)
+    frgn_balance: int | None = Field(alias="FrgnBal", default=None)
+
+    # Investment trusts
+    inv_tr_sell: int | None = Field(alias="InvTrSell", default=None)
+    inv_tr_buy: int | None = Field(alias="InvTrBuy", default=None)
+    inv_tr_total: int | None = Field(alias="InvTrTot", default=None)
+    inv_tr_balance: int | None = Field(alias="InvTrBal", default=None)
+
+    # Trust banks
+    trst_bnk_sell: int | None = Field(alias="TrstBnkSell", default=None)
+    trst_bnk_buy: int | None = Field(alias="TrstBnkBuy", default=None)
+    trst_bnk_total: int | None = Field(alias="TrstBnkTot", default=None)
+    trst_bnk_balance: int | None = Field(alias="TrstBnkBal", default=None)
+
+    # Total
+    total_sell: int | None = Field(alias="TotSell", default=None)
+    total_buy: int | None = Field(alias="TotBuy", default=None)
+    total_total: int | None = Field(alias="TotTot", default=None)
+    total_balance: int | None = Field(alias="TotBal", default=None)
+
+    @field_validator("pub_date", "start_date", "end_date", mode="before")
+    @classmethod
+    def parse_date(cls, v: Any) -> datetime.date:
+        if isinstance(v, datetime.date):
+            return v
+        if isinstance(v, str):
+            if "-" in v:
+                return datetime.date.fromisoformat(v)
+            return datetime.date(int(v[:4]), int(v[4:6]), int(v[6:8]))
+        raise ValueError(f"Cannot parse date: {v}")
