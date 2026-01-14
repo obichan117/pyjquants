@@ -207,9 +207,49 @@ uv build
 uv run twine upload dist/* -u __token__ -p $PYPI_TOKEN
 ```
 
-## Examples
+## Documentation
 
-- **English quickstart:** `docs/examples/quickstart.ipynb` (Colab-ready with credential helper)
+The docs support English and Japanese with `mkdocs-static-i18n` plugin.
+
+**English (default):** Technical documentation for developers
+```
+docs/
+├── index.md              # Landing page with tier table
+├── getting-started.md    # Setup and basic usage
+├── architecture.md       # DDD architecture overview
+├── api-spec.md           # J-Quants API mapping
+├── api/                  # API reference (mkdocstrings)
+└── examples/
+    └── quickstart.ipynb  # English Colab notebook
+```
+
+**Japanese:** Simplified docs for non-technical Japanese investors
+```
+docs/ja/
+├── index.md              # ホーム（投資家向け紹介）
+├── setup.md              # セットアップ（APIキー取得方法）
+├── basic-usage.md        # 基本的な使い方（コピペサンプル）
+├── tier-guide.md         # プラン別ガイド（料金・機能比較）
+└── examples/
+    └── quickstart_ja.ipynb  # 日本語クイックスタート
+```
+
+**Key differences in Japanese docs:**
+- Beginner-friendly explanations (「APIキーとは？」など)
+- Step-by-step setup with platform-specific instructions
+- Copy-paste ready examples with Japanese comments
+- Tier comparison with pricing in yen
+- No API reference or architecture docs (link to English)
+
+**Build & serve:**
+```bash
+uv run mkdocs build --strict   # Build both languages
+uv run mkdocs serve            # Preview at localhost:8000
+```
+
+**URLs:**
+- English: https://obichan117.github.io/pyjquants/
+- Japanese: https://obichan117.github.io/pyjquants/ja/
 
 ## Tier-Aware Client
 
