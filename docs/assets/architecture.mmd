@@ -1,0 +1,39 @@
+flowchart TB
+    subgraph User["User Code"]
+        UC[Your Python Code]
+    end
+
+    subgraph Entities["Entities Layer"]
+        Stock["Stock('7203')"]
+        Index["Index.topix()"]
+        Market["Market()"]
+        Universe["Universe.all()"]
+    end
+
+    subgraph Repos["Repository Layer"]
+        StockRepo[StockRepository]
+        CompanyRepo[CompanyRepository]
+        MarketRepo[MarketRepository]
+        IndexRepo[IndexRepository]
+    end
+
+    subgraph Core["Core Layer"]
+        Session[Session]
+        Cache[Cache]
+        Config[Config]
+    end
+
+    subgraph External["External"]
+        API["J-Quants API"]
+    end
+
+    UC --> Stock & Index & Market & Universe
+    Stock --> StockRepo & CompanyRepo
+    Index --> IndexRepo
+    Market --> MarketRepo
+    Universe --> CompanyRepo
+
+    StockRepo & CompanyRepo & MarketRepo & IndexRepo --> Session
+    Session --> Cache
+    Session --> Config
+    Session --> API

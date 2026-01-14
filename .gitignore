@@ -84,5 +84,5 @@ dmypy.json
 .jquants/
 *.toml.local
 
-# Claude Code
-.claude/
+# MkDocs build output
+site/

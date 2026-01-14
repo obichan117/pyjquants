@@ -4,8 +4,11 @@
 [![CI](https://github.com/obichan117/pyjquants/actions/workflows/ci.yml/badge.svg)](https://github.com/obichan117/pyjquants/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart.ipynb)
 
 Investor-friendly OOP Python library for [J-Quants API](https://jpx.gitbook.io/j-quants-en).
+
+**[Documentation](https://obichan117.github.io/pyjquants)** | **[Quickstart Notebook](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart.ipynb)**
 
 ## Features
 
@@ -242,6 +245,18 @@ order.is_filled     # True if fully filled
 | `OrderType` | `MARKET`, `LIMIT` |
 | `OrderStatus` | `PENDING`, `FILLED`, `PARTIALLY_FILLED`, `CANCELLED`, `REJECTED` |
 
+## Architecture
+
+![Architecture](docs/assets/architecture.png)
+
+PyJQuants follows a layered architecture:
+
+- **Entities Layer**: User-facing OOP interface (`Stock`, `Index`, `Market`, `Universe`)
+- **Repository Layer**: API data access (`StockRepository`, `CompanyRepository`, etc.)
+- **Core Layer**: Infrastructure (`Session`, `Cache`, `Config`)
+
+See the [Architecture documentation](https://obichan117.github.io/pyjquants/architecture/) for details.
+
 ## Development
 
 ```bash
@@ -263,6 +278,12 @@ mypy pyjquants/
 
 # Linting
 ruff check pyjquants/
+
+# Build documentation
+mkdocs build --strict
+
+# Serve documentation locally
+mkdocs serve
 ```
 
 ## License
@@ -271,5 +292,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Links
 
+- [Documentation](https://obichan117.github.io/pyjquants)
+- [Quickstart Notebook](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart.ipynb)
 - [J-Quants API Documentation](https://jpx.gitbook.io/j-quants-en)
 - [GitHub Repository](https://github.com/obichan117/pyjquants)
