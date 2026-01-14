@@ -357,3 +357,147 @@ class TestMarket:
         df = market.investor_trades()
 
         assert df.empty
+
+    # === EARNINGS CALENDAR ===
+
+    @pytest.fixture
+    def sample_earnings_calendar_response(self) -> list[dict[str, Any]]:
+        """Sample earnings calendar data."""
+        return [
+            {
+                "Code": "7203",
+                "CoName": "トヨタ自動車",
+                "Date": "2024-02-06",
+                "FY": "2024",
+                "FQ": "3Q",
+                "SectorNm": "輸送用機器",
+                "Section": "Prime",
+            },
+            {
+                "Code": "6758",
+                "CoName": "ソニーグループ",
+                "Date": "2024-02-14",
+                "FY": "2024",
+                "FQ": "3Q",
+                "SectorNm": "電気機器",
+                "Section": "Prime",
+            },
+        ]
+
+    def test_earnings_calendar(
+        self, mock_session: MagicMock, sample_earnings_calendar_response: list[dict[str, Any]]
+    ) -> None:
+        """Test Market.earnings_calendar returns DataFrame."""
+        mock_session.get_paginated.return_value = iter(sample_earnings_calendar_response)
+
+        market = Market(session=mock_session)
+        df = market.earnings_calendar(
+            start=datetime.date(2024, 2, 1),
+            end=datetime.date(2024, 2, 28),
+        )
+
+        assert len(df) == 2
+        assert "code" in df.columns
+        assert "company_name" in df.columns
+        assert "announcement_date" in df.columns
+        assert df.iloc[0]["code"] == "7203"
+
+    def test_earnings_calendar_empty(self, mock_session: MagicMock) -> None:
+        """Test Market.earnings_calendar returns empty DataFrame when no data."""
+        mock_session.get_paginated.return_value = iter([])
+
+        market = Market(session=mock_session)
+        df = market.earnings_calendar()
+
+        assert df.empty
+
+    # === SHORT RATIO ===
+
+    @pytest.fixture
+    def sample_short_ratio_response(self) -> list[dict[str, Any]]:
+        """Sample short selling ratio data."""
+        return [
+            {
+                "Date": "2024-01-15",
+                "Sector33Code": "3050",
+                "SellingValue": 1500000000.0,
+            },
+            {
+                "Date": "2024-01-15",
+                "Sector33Code": "3650",
+                "SellingValue": 2000000000.0,
+            },
+        ]
+
+    def test_short_ratio(
+        self, mock_session: MagicMock, sample_short_ratio_response: list[dict[str, Any]]
+    ) -> None:
+        """Test Market.short_ratio returns DataFrame."""
+        mock_session.get_paginated.return_value = iter(sample_short_ratio_response)
+
+        market = Market(session=mock_session)
+        df = market.short_ratio(
+            start=datetime.date(2024, 1, 15),
+            end=datetime.date(2024, 1, 15),
+        )
+
+        assert len(df) == 2
+        assert "date" in df.columns
+        assert "sector_33_code" in df.columns
+        assert "selling_value" in df.columns
+
+    def test_short_ratio_empty(self, mock_session: MagicMock) -> None:
+        """Test Market.short_ratio returns empty DataFrame when no data."""
+        mock_session.get_paginated.return_value = iter([])
+
+        market = Market(session=mock_session)
+        df = market.short_ratio()
+
+        assert df.empty
+
+    # === MARGIN INTEREST ===
+
+    @pytest.fixture
+    def sample_margin_interest_response(self) -> list[dict[str, Any]]:
+        """Sample margin interest data."""
+        return [
+            {
+                "Code": "7203",
+                "Date": "2024-01-15",
+                "MarginBuyingBalance": 5000000,
+                "MarginSellingBalance": 3000000,
+            },
+            {
+                "Code": "6758",
+                "Date": "2024-01-15",
+                "MarginBuyingBalance": 2000000,
+                "MarginSellingBalance": 1500000,
+            },
+        ]
+
+    def test_margin_interest(
+        self, mock_session: MagicMock, sample_margin_interest_response: list[dict[str, Any]]
+    ) -> None:
+        """Test Market.margin_interest returns DataFrame."""
+        mock_session.get_paginated.return_value = iter(sample_margin_interest_response)
+
+        market = Market(session=mock_session)
+        df = market.margin_interest(
+            start=datetime.date(2024, 1, 15),
+            end=datetime.date(2024, 1, 15),
+        )
+
+        assert len(df) == 2
+        assert "code" in df.columns
+        assert "date" in df.columns
+        assert "margin_buying_balance" in df.columns
+        assert "margin_selling_balance" in df.columns
+
+    def test_margin_interest_empty(self, mock_session: MagicMock) -> None:
+        """Test Market.margin_interest returns empty DataFrame when no data."""
+        mock_session.get_paginated.return_value = iter([])
+
+        market = Market(session=mock_session)
+        df = market.margin_interest()
+
+        assert df.empty

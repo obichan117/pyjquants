@@ -36,6 +36,9 @@ sectors = market.sectors_33
         - breakdown
         - short_positions
         - margin_alerts
+        - earnings_calendar
+        - short_ratio
+        - margin_interest
 
 ## Examples
 
@@ -113,4 +116,36 @@ market = pjq.Market()
 # Get margin trading alerts (Standard+ tier)
 df = market.margin_alerts()
 # Returns DataFrame with stocks flagged for margin trading limits
+```
+
+### Earnings Calendar
+
+```python
+from datetime import date
+
+market = pjq.Market()
+
+# Get scheduled earnings announcements
+df = market.earnings_calendar(start=date(2024, 1, 1), end=date(2024, 3, 31))
+# Returns DataFrame with: code, company_name, announcement_date, fiscal_year, fiscal_quarter
+```
+
+### Short Ratio
+
+```python
+market = pjq.Market()
+
+# Get short selling ratio by sector (Standard+ tier)
+df = market.short_ratio()
+# Returns DataFrame with: date, sector_33_code, selling_value
+```
+
+### Margin Interest
+
+```python
+market = pjq.Market()
+
+# Get margin trading balances
+df = market.margin_interest(code="7203")
+# Returns DataFrame with: code, date, margin_buying_balance, margin_selling_balance
 ```

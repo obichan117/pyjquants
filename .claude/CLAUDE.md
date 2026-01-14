@@ -92,6 +92,9 @@ df = market.investor_trades() # Market-wide trading by investor type
 df = market.breakdown('7203') # Trade breakdown by type (Standard+)
 df = market.short_positions() # Outstanding short positions (Standard+)
 df = market.margin_alerts()   # Margin trading alerts (Standard+)
+df = market.earnings_calendar()  # Earnings announcements
+df = market.short_ratio()     # Short selling ratio (Standard+)
+df = market.margin_interest() # Margin trading balances
 
 # Derivatives (V2 endpoints)
 futures = pjq.Futures('NK225M')    # Nikkei 225 mini futures

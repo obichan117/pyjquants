@@ -10,11 +10,14 @@ import pandas as pd
 
 from pyjquants.adapters.endpoints import (
     BREAKDOWN,
+    EARNINGS_CALENDAR,
     INVESTOR_TYPES,
     MARGIN_ALERT,
+    MARGIN_INTEREST,
     SECTORS_17,
     SECTORS_33,
     SHORT_SALE_REPORT,
+    SHORT_SELLING,
     TRADING_CALENDAR,
 )
 from pyjquants.infra.exceptions import AuthenticationError
@@ -221,3 +224,80 @@ class Market:
         """
         params = self._client.date_params(code=code, start=start, end=end)
         return self._client.fetch_dataframe(MARGIN_ALERT, params)
+
+    def earnings_calendar(
+        self,
+        start: date | None = None,
+        end: date | None = None,
+    ) -> pd.DataFrame:
+        """Get earnings announcement calendar.
+
+        Returns scheduled earnings announcements for listed companies.
+
+        Args:
+            start: Start date (optional)
+            end: End date (optional)
+
+        Returns:
+            DataFrame with earnings calendar data including:
+            - code: Stock code
+            - company_name: Company name
+            - announcement_date: Scheduled announcement date
+            - fiscal_year: Fiscal year
+            - fiscal_quarter: Fiscal quarter
+        """
+        params = self._client.date_params(start=start, end=end)
+        return self._client.fetch_dataframe(EARNINGS_CALENDAR, params)
+
+    def short_ratio(
+        self,
+        sector: str | None = None,
+        start: date | None = None,
+        end: date | None = None,
+    ) -> pd.DataFrame:
+        """Get short selling ratio data by sector.
+
+        Returns short selling statistics aggregated by TOPIX-33 sector.
+
+        Note: Requires Standard tier or higher.
+
+        Args:
+            sector: Sector code (optional, returns all sectors if not specified)
+            start: Start date (optional)
+            end: End date (optional)
+
+        Returns:
+            DataFrame with short selling ratio data including:
+            - date: Trading date
+            - sector_33_code: TOPIX-33 sector code
+            - selling_value: Short selling value
+        """
+        params = self._client.date_params(start=start, end=end)
+        if sector:
+            params["sector33code"] = sector
+        return self._client.fetch_dataframe(SHORT_SELLING, params)
+
+    def margin_interest(
+        self,
+        code: str | None = None,
+        start: date | None = None,
+        end: date | None = None,
+    ) -> pd.DataFrame:
+        """Get margin trading interest (balance) data.
+
+        Returns margin buying and selling balances for stocks.
+
+        Args:
+            code: Stock code (optional, returns all if not specified)
+            start: Start date (optional)
+            end: End date (optional)
+
+        Returns:
+            DataFrame with margin interest data including:
+            - code: Stock code
+            - date: Date
+            - margin_buying_balance: Outstanding margin buy balance
+            - margin_selling_balance: Outstanding margin sell balance
+        """
+        params = self._client.date_params(code=code, start=start, end=end)
+        return self._client.fetch_dataframe(MARGIN_INTEREST, params)

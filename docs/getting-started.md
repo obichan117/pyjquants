@@ -191,7 +191,7 @@ PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints:
 | `/equities/bars/daily` | `Ticker("7203").history("30d")` | Daily OHLCV prices |
 | `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` | Morning session prices |
 | `/equities/master` | `Ticker("7203").info` / `search("トヨタ")` | Company info |
-| `/equities/earnings-calendar` | *(via endpoints)* | Earnings announcements |
+| `/equities/earnings-calendar` | `Market().earnings_calendar()` | Earnings announcements |
 | `/equities/investor-types` | `Market().investor_trades()` | Market-wide trading by investor type |
 
 ### Financials
@@ -209,8 +209,8 @@ PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints:
 | `/markets/calendar` | `Market().is_trading_day(date)` | Trading calendar |
 | `/markets/sectors/topix17` | `Market().sectors_17` | 17-sector classification |
 | `/markets/sectors/topix33` | `Market().sectors_33` | 33-sector classification |
-| `/markets/short-ratio` | *(via endpoints)* | Short selling ratio |
-| `/markets/margin-interest` | *(via endpoints)* | Margin interest |
+| `/markets/short-ratio` | `Market().short_ratio()` | Short selling ratio |
+| `/markets/margin-interest` | `Market().margin_interest()` | Margin interest |
 | `/markets/breakdown` | `Market().breakdown("7203")` | Trade breakdown by type |
 | `/markets/short-sale-report` | `Market().short_positions()` | Short positions |
 | `/markets/margin-alert` | `Market().margin_alerts()` | Margin alerts |
