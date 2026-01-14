@@ -7,10 +7,10 @@
 ## Interactive Documentation
 
 <div style="text-align: center; margin: 20px 0;">
-<a href="openapi/" class="md-button md-button--primary" target="_blank">
+<a href="../openapi/" class="md-button md-button--primary" target="_blank">
     Open Swagger UI
 </a>
-<a href="openapi/openapi.yaml" class="md-button" download>
+<a href="../openapi/openapi.yaml" class="md-button" download>
     Download OpenAPI Spec (YAML)
 </a>
 </div>

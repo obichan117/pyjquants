@@ -66,7 +66,7 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Architecture: architecture.md
-  - J-Quants API Spec: openapi.md
+  - J-Quants API Spec: api-spec.md
   - API Reference:
       - Overview: api/index.md
       - Ticker: api/stock.md
