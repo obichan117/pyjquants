@@ -5,13 +5,13 @@ from __future__ import annotations
 import datetime
 from decimal import Decimal
 
-import pytest
-
-from pyjquants.models.price import PriceBar
-from pyjquants.models.company import Sector, StockInfo
-from pyjquants.models.enums import MarketSegment, OrderSide, OrderType, OrderStatus
-from pyjquants.models.financials import FinancialStatement, Dividend
-from pyjquants.models.market import TradingCalendarDay
+from pyjquants.domain.models import (
+    MarketSegment,
+    PriceBar,
+    Sector,
+    StockInfo,
+    TradingCalendarDay,
+)
 
 
 class TestPriceBar:
@@ -167,21 +167,3 @@ class TestTradingCalendarDay:
         assert day.is_holiday is True
 
 
-class TestEnums:
-    """Tests for enum types."""
-
-    def test_order_side(self) -> None:
-        """Test OrderSide enum."""
-        assert OrderSide.BUY.value == "buy"
-        assert OrderSide.SELL.value == "sell"
-
-    def test_order_type(self) -> None:
-        """Test OrderType enum."""
-        assert OrderType.MARKET.value == "market"
-        assert OrderType.LIMIT.value == "limit"
-
-    def test_order_status(self) -> None:
-        """Test OrderStatus enum."""
-        assert OrderStatus.PENDING.value == "pending"
-        assert OrderStatus.FILLED.value == "filled"
-        assert OrderStatus.CANCELLED.value == "cancelled"

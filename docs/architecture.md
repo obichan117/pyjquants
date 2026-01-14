@@ -1,6 +1,6 @@
 # Architecture
 
-PyJQuants follows a layered architecture that separates concerns and provides a clean, intuitive API.
+PyJQuants follows a **Clean Domain-Driven Design** with a yfinance-style public API.
 
 ## High-Level Overview
 
@@ -10,37 +10,33 @@ flowchart TB
         UC[Your Python Code]
     end
 
-    subgraph Entities["Entities Layer"]
-        Stock["Stock('7203')"]
+    subgraph Domain["Domain Layer"]
+        Ticker["Ticker('7203')"]
         Index["Index.topix()"]
         Market["Market()"]
-        Universe["Universe.all()"]
+        Download["download()"]
+        Search["search()"]
     end
 
-    subgraph Repos["Repository Layer"]
-        StockRepo[StockRepository]
-        CompanyRepo[CompanyRepository]
-        MarketRepo[MarketRepository]
-        IndexRepo[IndexRepository]
-    end
-
-    subgraph Core["Core Layer"]
+    subgraph Infra["Infrastructure Layer"]
+        Client[JQuantsClient]
         Session[Session]
         Cache[Cache]
         Config[Config]
+    end
+
+    subgraph Adapters["Adapters Layer"]
+        Endpoints[Endpoint Definitions]
     end
 
     subgraph External["External"]
         API["J-Quants API"]
     end
 
-    UC --> Stock & Index & Market & Universe
-    Stock --> StockRepo & CompanyRepo
-    Index --> IndexRepo
-    Market --> MarketRepo
-    Universe --> CompanyRepo
-
-    StockRepo & CompanyRepo & MarketRepo & IndexRepo --> Session
+    UC --> Ticker & Index & Market & Download & Search
+    Ticker & Index & Market --> Client
+    Client --> Endpoints
+    Client --> Session
     Session --> Cache
     Session --> Config
     Session --> API
@@ -48,159 +44,196 @@ flowchart TB
 
 ## Layer Responsibilities
 
-### Entities Layer
+### Domain Layer (`pyjquants/domain/`)
 
-The **entities layer** provides the user-facing OOP interface. These classes are what you import and use directly.
+The **domain layer** provides the user-facing OOP interface. These classes are what you import and use directly.
 
-| Entity | Purpose |
+| Module | Purpose |
 |--------|---------|
-| `Stock` | Single stock with lazy-loaded properties |
-| `Index` | Market indices (TOPIX, etc.) |
-| `Market` | Trading calendar and sector info |
-| `Universe` | Filterable collection of stocks |
+| `ticker.py` | `Ticker` class with `.info`, `.history()`, `.financials`, `.dividends` |
+| `index.py` | `Index` class with `.history()` for market indices |
+| `market.py` | `Market` class with trading calendar and sector info |
+| `info.py` | `TickerInfo` dataclass for convenient attribute access |
+| `utils.py` | Date parsing utilities (`parse_period`, `parse_date`) |
+| `models/` | Pydantic models organized by domain |
 
-**Key pattern**: Lazy loading. Properties like `stock.name` fetch data only on first access.
+**Key pattern**: Lazy loading. Properties like `ticker.info` fetch data only on first access, then cache.
 
-### Repository Layer
+### Infrastructure Layer (`pyjquants/infra/`)
 
-The **repository layer** handles all API communication. Each repository is responsible for a specific domain.
+The **infrastructure layer** handles HTTP, authentication, caching, and configuration.
 
-| Repository | API Endpoints |
-|------------|---------------|
-| `StockRepository` | Daily quotes, prices |
-| `CompanyRepository` | Listed info, financials, dividends |
-| `MarketRepository` | Trading calendar, sectors, margin data |
-| `IndexRepository` | Index prices and components |
+| Module | Purpose |
+|--------|---------|
+| `session.py` | `Session` with auth, rate limiting; `TokenManager` for token lifecycle |
+| `client.py` | `JQuantsClient` - generic fetch/parse with typed endpoints |
+| `config.py` | `JQuantsConfig` - environment and configuration loading |
+| `cache.py` | `TTLCache`, `NullCache` - response caching |
+| `exceptions.py` | Exception hierarchy (`APIError`, `AuthenticationError`, etc.) |
 
-### Core Layer
+### Adapters Layer (`pyjquants/adapters/`)
 
-The **core layer** provides infrastructure services.
+The **adapters layer** contains declarative API endpoint definitions.
 
-| Component | Purpose |
-|-----------|---------|
-| `Session` | HTTP client with authentication |
-| `Cache` | Disk-based response caching |
-| `Config` | Environment and TOML configuration |
+| Module | Purpose |
+|--------|---------|
+| `endpoints.py` | `Endpoint` definitions for all J-Quants API endpoints |
+
+**Key pattern**: Declarative endpoints. Each endpoint defines its path, response key, model class, and pagination behavior:
+
+```python
+DAILY_QUOTES: Endpoint[PriceBar] = Endpoint(
+    path="/prices/daily_quotes",
+    response_key="daily_quotes",
+    model="PriceBar",
+    paginated=True,
+)
+```
 
 ## Data Flow
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant Stock
-    participant CompanyRepo
+    participant Ticker
+    participant Client as JQuantsClient
+    participant Endpoints
     participant Session
     participant Cache
     participant API
 
-    User->>Stock: stock.name
-    Stock->>Stock: Check _info cache
+    User->>Ticker: ticker.info.name
+    Ticker->>Ticker: Check _info_cache
     alt Not cached
-        Stock->>CompanyRepo: listed_info(code)
-        CompanyRepo->>Session: GET /listed/info
+        Ticker->>Client: fetch_list(LISTED_INFO)
+        Client->>Endpoints: Get endpoint definition
+        Client->>Session: GET /listed/info
         Session->>Cache: Check cache
         alt Cache hit
             Cache-->>Session: Cached response
         else Cache miss
-            Session->>API: HTTP GET
+            Session->>API: HTTP GET with auth
             API-->>Session: JSON response
             Session->>Cache: Store response
         end
-        Session-->>CompanyRepo: Response data
-        CompanyRepo-->>Stock: StockInfo
-        Stock->>Stock: Store in _info
+        Session-->>Client: Response data
+        Client->>Client: Parse with Pydantic model
+        Client-->>Ticker: List[StockInfo]
+        Ticker->>Ticker: Store in _info_cache
     end
-    Stock-->>User: "トヨタ自動車"
+    Ticker-->>User: "トヨタ自動車"
 ```
 
 ## Package Structure
 
 ```
 pyjquants/
-├── __init__.py         # Public API exports
-├── core/               # Infrastructure
-│   ├── session.py      # HTTP + auth
-│   ├── async_session.py
-│   ├── config.py       # Config loading
-│   ├── cache.py        # Disk cache
-│   └── exceptions.py   # Custom errors
-├── entities/           # User-facing OOP
-│   ├── stock.py        # Stock class
-│   └── index.py        # Index class
-├── models/             # Pydantic models
-│   ├── price.py        # PriceBar
-│   ├── company.py      # StockInfo, Sector
-│   ├── financials.py   # Statements
-│   ├── market.py       # Market data
-│   └── enums.py        # Enumerations
-├── repositories/       # API access
-│   ├── base.py         # BaseRepository
-│   ├── stock.py
-│   ├── company.py
-│   ├── market.py
-│   └── index.py
-├── collections/        # Multi-entity
-│   ├── universe.py     # Universe
-│   └── market.py       # Market
-├── trading/            # Paper trading
-│   ├── trader.py       # Trader
-│   ├── order.py        # Order, Execution
-│   └── portfolio.py    # Portfolio, Position
-└── utils/
-    └── date.py         # Date helpers
+├── __init__.py           # Public API exports
+├── py.typed              # PEP 561 marker
+├── domain/               # Business logic
+│   ├── ticker.py         # Ticker class + download() + search()
+│   ├── index.py          # Index class with .history()
+│   ├── market.py         # Market utilities (calendar, sectors)
+│   ├── info.py           # TickerInfo dataclass
+│   ├── utils.py          # Date parsing utilities
+│   └── models/           # Pydantic models (split by domain)
+│       ├── __init__.py   # Re-exports all models
+│       ├── base.py       # BaseModel, MarketSegment enum
+│       ├── price.py      # PriceBar, IndexPrice
+│       ├── company.py    # StockInfo, Sector
+│       ├── financial.py  # FinancialStatement, Dividend
+│       └── market.py     # TradingCalendarDay, MarginInterest
+├── infra/                # Infrastructure layer
+│   ├── session.py        # HTTP session with auth
+│   ├── client.py         # Generic fetch/parse client
+│   ├── config.py         # Configuration
+│   ├── cache.py          # Caching utilities
+│   └── exceptions.py     # Exception hierarchy
+└── adapters/             # API layer
+    └── endpoints.py      # Declarative endpoint definitions
 ```
 
-## Trading System
+## Authentication Flow
 
 ```mermaid
-flowchart LR
-    subgraph Trading["Paper Trading"]
-        Trader --> |creates| Order
-        Trader --> |manages| Portfolio
-        Portfolio --> |contains| Position
-        Order --> |becomes| Execution
-        Execution --> |updates| Portfolio
+sequenceDiagram
+    participant User
+    participant Session
+    participant TokenManager
+    participant API
+
+    User->>Session: Session()
+    Session->>TokenManager: from_config(config)
+
+    User->>Session: authenticate()
+    Session->>TokenManager: id_token()
+
+    alt Has refresh_token
+        TokenManager->>API: POST /token/auth_refresh
+        API-->>TokenManager: idToken
+    else Has email/password
+        TokenManager->>API: POST /token/auth_user
+        API-->>TokenManager: refreshToken
+        TokenManager->>API: POST /token/auth_refresh
+        API-->>TokenManager: idToken
     end
 
-    subgraph Data["Market Data"]
-        Stock --> |provides| PriceBar
-    end
-
-    Trader --> |uses| Stock
-    PriceBar --> |fills| Order
+    TokenManager-->>Session: id_token (valid 24h)
+    Session-->>User: Ready
 ```
 
 ## Design Decisions
 
+### Why yfinance-style API?
+
+Familiar interface for quantitative analysts:
+
+```python
+# yfinance
+import yfinance as yf
+ticker = yf.Ticker("AAPL")
+ticker.info["shortName"]
+df = ticker.history(period="1mo")
+
+# pyjquants (same pattern)
+import pyjquants as pjq
+ticker = pjq.Ticker("7203")
+ticker.info.name
+df = ticker.history(period="1mo")
+```
+
 ### Why Lazy Loading?
 
-Stock objects are cheap to create. Fetching data happens only when needed:
+Ticker objects are cheap to create. Fetching data happens only when needed:
 
 ```python
 # No API call yet
-stock = pjq.Stock("7203")
+ticker = pjq.Ticker("7203")
 
 # API call happens here (cached afterward)
-name = stock.name
+name = ticker.info.name
 ```
 
-### Why Repository Pattern?
+### Why Declarative Endpoints?
 
-Separates API details from business logic:
+Centralizes API knowledge and enables generic client:
 
-- Entities don't know about HTTP
-- Repositories can be mocked for testing
-- API changes are isolated to one layer
+- All endpoint metadata in one file (`endpoints.py`)
+- `JQuantsClient` works with any endpoint definition
+- Easy to add new endpoints
+- Type safety with generics
 
-### Why Global Session?
+### Why Separate Domain/Infra/Adapters?
 
-Convenience without complexity:
+Clean architecture with clear dependencies:
 
-```python
-# Session auto-created from env vars
-stock = pjq.Stock("7203")
-
-# Or explicit session for testing
-session = pjq.Session(mail="...", password="...")
-stock = pjq.Stock("7203", session=session)
 ```
+Domain  →  Infra  →  Adapters
+   ↓          ↓
+ Models    Session
+```
+
+- **Domain** knows nothing about HTTP
+- **Infra** handles all I/O concerns
+- **Adapters** maps external API to internal models
+- Easy to mock for testing

@@ -57,27 +57,61 @@ requests_per_minute = 60
 
 ## Basic Usage
 
-### Working with Stocks
+### Working with Tickers
 
 ```python
 import pyjquants as pjq
 
-# Create a stock by code
-stock = pjq.Stock("7203")  # Toyota
+# Create a ticker by code
+ticker = pjq.Ticker("7203")  # Toyota
 
 # Basic info (lazy-loaded from API)
-print(stock.name)           # "トヨタ自動車"
-print(stock.name_english)   # "Toyota Motor Corporation"
-print(stock.sector_33.name) # "輸送用機器"
-print(stock.market_segment) # MarketSegment.TSE_PRIME
+print(ticker.info.name)           # "トヨタ自動車"
+print(ticker.info.name_english)   # "Toyota Motor Corporation"
+print(ticker.info.sector)         # "輸送用機器"
+print(ticker.info.market)         # "Prime"
 
-# Price data as DataFrame
-prices = stock.prices  # Recent 30 trading days
-print(prices[['date', 'open', 'high', 'low', 'close', 'volume']])
+# Price history (yfinance-style)
+df = ticker.history("30d")        # Recent 30 days
+df = ticker.history("1y")         # Last year
+df = ticker.history(start="2024-01-01", end="2024-06-30")  # Custom range
 
-# Custom date range
-from datetime import date
-prices = stock.prices_between(date(2024, 1, 1), date(2024, 6, 30))
+print(df[['date', 'open', 'high', 'low', 'close', 'volume']])
+```
+
+### Multi-Ticker Download
+
+```python
+import pyjquants as pjq
+
+# Download multiple tickers at once
+df = pjq.download(["7203", "6758", "9984"], period="30d")
+print(df.head())
+```
+
+### Search for Tickers
+
+```python
+import pyjquants as pjq
+
+# Search by name or code
+tickers = pjq.search("トヨタ")
+for t in tickers:
+    print(f"{t.code}: {t.info.name}")
+```
+
+### Market Indices
+
+```python
+import pyjquants as pjq
+
+# Get TOPIX index
+topix = pjq.Index.topix()
+df = topix.history("1y")
+
+# Get Nikkei 225
+nikkei = pjq.Index.nikkei225()
+df = nikkei.history("30d")
 ```
 
 ### Market Information
@@ -96,29 +130,18 @@ market.next_trading_day(date(2024, 1, 1))  # Next open day
 sectors = market.sectors_33  # 33-sector classification
 ```
 
-### Paper Trading
+### Financial Data
 
 ```python
 import pyjquants as pjq
-from datetime import date
 
-# Initialize trader
-trader = pjq.Trader(initial_cash=10_000_000)
+ticker = pjq.Ticker("7203")
 
-# Get stock
-toyota = pjq.Stock("7203")
+# Financial statements
+financials = ticker.financials
 
-# Place orders
-order = trader.buy(toyota, 100)              # Market buy
-order = trader.buy(toyota, 100, price=2500)  # Limit buy
-
-# Simulate fills with historical prices
-executions = trader.simulate_fills(date(2024, 6, 15))
-
-# Check portfolio
-print(f"Cash: {trader.cash}")
-print(f"Total value: {trader.portfolio.total_value}")
-print(f"Positions: {trader.portfolio.positions}")
+# Dividend history
+dividends = ticker.dividends
 ```
 
 ## Next Steps

@@ -5,13 +5,12 @@ from __future__ import annotations
 import datetime
 from decimal import Decimal
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from pyjquants.core.session import Session
-from pyjquants.models.price import PriceBar
-from pyjquants.models.company import StockInfo
+from pyjquants.domain.models import PriceBar, StockInfo
+from pyjquants.infra.session import Session
 
 
 @pytest.fixture

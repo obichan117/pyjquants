@@ -1,0 +1,142 @@
+"""Index class for market index data (yfinance-style API)."""
+
+from __future__ import annotations
+
+from datetime import date, timedelta
+from typing import TYPE_CHECKING
+
+import pandas as pd
+
+from pyjquants.adapters.endpoints import INDEX_PRICES, TOPIX
+from pyjquants.domain.utils import parse_date, parse_period
+from pyjquants.infra.client import JQuantsClient
+from pyjquants.infra.session import _get_global_session
+
+if TYPE_CHECKING:
+    from pyjquants.infra.session import Session
+
+
+# Known index codes
+TOPIX_CODE = "0000"
+NIKKEI225_CODE = "0001"
+
+
+class Index:
+    """Market index with yfinance-style API.
+
+    Example:
+        >>> topix = Index.topix()
+        >>> df = topix.history(period="30d")
+        >>> df = topix.history(start="2024-01-01", end="2024-12-31")
+    """
+
+    _KNOWN_INDICES = {
+        TOPIX_CODE: "TOPIX",
+        NIKKEI225_CODE: "Nikkei 225",
+    }
+
+    def __init__(self, code: str, name: str | None = None, session: Session | None = None) -> None:
+        """Initialize Index.
+
+        Args:
+            code: Index code (e.g., "0000" for TOPIX)
+            name: Index name (optional, auto-detected for known indices)
+            session: Optional session (uses global session if not provided)
+        """
+        self.code = code
+        self._name = name or self._KNOWN_INDICES.get(code)
+        self._session = session or _get_global_session()
+        self._client = JQuantsClient(self._session)
+
+    @property
+    def name(self) -> str:
+        """Index name."""
+        return self._name or self.code
+
+    def __repr__(self) -> str:
+        return f"Index('{self.code}')"
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.code})"
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Index):
+            return self.code == other.code
+        if isinstance(other, str):
+            return self.code == other
+        return False
+
+    def __hash__(self) -> int:
+        return hash(self.code)
+
+    # === HISTORY (yfinance-style) ===
+
+    def history(
+        self,
+        period: str | None = "30d",
+        start: str | date | None = None,
+        end: str | date | None = None,
+    ) -> pd.DataFrame:
+        """Get price history (yfinance-style).
+
+        Args:
+            period: Time period (e.g., "30d", "1y"). Ignored if start/end provided.
+            start: Start date (YYYY-MM-DD string or date object)
+            end: End date (YYYY-MM-DD string or date object)
+
+        Returns:
+            DataFrame with columns: date, open, high, low, close
+        """
+        # Parse dates
+        start_date = parse_date(start) if start is not None else None
+        end_date = parse_date(end) if end is not None else None
+
+        # If no explicit dates, use period
+        if start_date is None and end_date is None:
+            days = parse_period(period or "30d")
+            end_date = date.today()
+            start_date = end_date - timedelta(days=days + 15)  # Buffer for non-trading days
+
+        params = self._client.date_params(code=self.code, start=start_date, end=end_date)
+
+        # Use TOPIX-specific endpoint for TOPIX, otherwise general index endpoint
+        if self.code == TOPIX_CODE:
+            endpoint = TOPIX
+            # TOPIX endpoint doesn't need code param
+            params.pop("code", None)
+        else:
+            endpoint = INDEX_PRICES
+
+        df = self._client.fetch_dataframe(endpoint, params)
+
+        if df.empty:
+            return df
+
+        # Trim to requested period if using period parameter
+        if period and start is None and end is None:
+            days = parse_period(period)
+            df = df.tail(days)
+
+        return df.reset_index(drop=True)
+
+    # === FACTORY METHODS ===
+
+    @classmethod
+    def topix(cls, session: Session | None = None) -> Index:
+        """Get TOPIX index."""
+        return cls(code=TOPIX_CODE, name="TOPIX", session=session)
+
+    @classmethod
+    def nikkei225(cls, session: Session | None = None) -> Index:
+        """Get Nikkei 225 index."""
+        return cls(code=NIKKEI225_CODE, name="Nikkei 225", session=session)
+
+    @classmethod
+    def all(cls, session: Session | None = None) -> list[Index]:
+        """Get all known indices."""
+        session = session or _get_global_session()
+        return [
+            cls(code=code, name=name, session=session)
+            for code, name in cls._KNOWN_INDICES.items()
+        ]
+

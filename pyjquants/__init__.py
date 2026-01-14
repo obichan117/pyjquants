@@ -1,62 +1,79 @@
 """
-PyJQuants - Investor-friendly OOP Python library for J-Quants API.
+PyJQuants - yfinance-style Python library for J-Quants API.
 
 Usage:
     import pyjquants as pjq
 
     # Env vars JQUANTS_MAIL_ADDRESS & JQUANTS_PASSWORD are auto-read
-    stock = pjq.Stock("7203")
-    stock.name              # "Toyota Motor Corporation"
-    stock.prices            # Recent 30 days DataFrame
+    ticker = pjq.Ticker("7203")
+    ticker.info.name          # "トヨタ自動車"
+    df = ticker.history("30d")  # Recent 30 days DataFrame
 
-    # Trading simulation
-    trader = pjq.Trader(initial_cash=10_000_000)
-    trader.buy(stock, 100)
+    # Multi-ticker download
+    df = pjq.download(["7203", "6758"], period="1y")
+
+    # Search by name
+    tickers = pjq.search("トヨタ")
+
+    # Market indices
+    topix = pjq.Index.topix()
+    df = topix.history("1y")
+
+    # Market utilities
+    market = pjq.Market()
+    market.is_trading_day(date(2024, 12, 25))
 """
 
-# Collections
-from pyjquants.collections.market import Market
-from pyjquants.collections.universe import Universe
-from pyjquants.core.exceptions import (
+# Domain entities
+from pyjquants.domain import (
+    Dividend,
+    EarningsAnnouncement,
+    FinancialStatement,
+    Index,
+    IndexPrice,
+    MarginInterest,
+    Market,
+    MarketSegment,
+    PriceBar,
+    Sector,
+    ShortSelling,
+    StockInfo,
+    Ticker,
+    TradingCalendarDay,
+    download,
+    search,
+)
+
+# Infrastructure
+from pyjquants.infra import (
     APIError,
     AuthenticationError,
     ConfigurationError,
     NotFoundError,
     PyJQuantsError,
     RateLimitError,
+    Session,
     TokenExpiredError,
     ValidationError,
 )
-from pyjquants.core.session import Session, set_global_session
-from pyjquants.entities.index import Index
 
-# Entities
-from pyjquants.entities.stock import Stock
-from pyjquants.models.company import Sector
+# Backward compatibility aliases
+Stock = Ticker  # Alias for migration
 
-# Models
-from pyjquants.models.enums import (
-    MarketSegment,
-    OptionType,
-    OrderSide,
-    OrderStatus,
-    OrderType,
-)
-from pyjquants.models.price import PriceBar
-
-# Trading
-from pyjquants.trading.order import Execution, Order
-from pyjquants.trading.portfolio import Portfolio, Position
-from pyjquants.trading.trader import Trader
-
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     # Version
     "__version__",
+    # Main API (yfinance-style)
+    "Ticker",
+    "download",
+    "search",
+    # Entities
+    "Index",
+    "Market",
     # Session
     "Session",
-    "set_global_session",
     # Exceptions
     "PyJQuantsError",
     "AuthenticationError",
@@ -66,24 +83,19 @@ __all__ = [
     "NotFoundError",
     "ValidationError",
     "ConfigurationError",
-    # Entities
-    "Stock",
-    "Index",
-    # Collections
-    "Market",
-    "Universe",
-    # Trading
-    "Order",
-    "Execution",
-    "Portfolio",
-    "Position",
-    "Trader",
-    # Models/Enums
-    "MarketSegment",
-    "OrderSide",
-    "OrderStatus",
-    "OrderType",
-    "OptionType",
-    "Sector",
+    # Models
     "PriceBar",
+    "StockInfo",
+    "Sector",
+    "FinancialStatement",
+    "Dividend",
+    "EarningsAnnouncement",
+    "TradingCalendarDay",
+    "IndexPrice",
+    "MarginInterest",
+    "ShortSelling",
+    # Enums
+    "MarketSegment",
+    # Backward compatibility
+    "Stock",
 ]

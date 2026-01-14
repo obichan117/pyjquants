@@ -4,12 +4,12 @@ This section documents all public classes and functions in PyJQuants.
 
 ## Quick Links
 
-| Category | Classes |
-|----------|---------|
-| [Entities](stock.md) | `Stock`, `Index` |
-| [Collections](market.md) | `Market`, `Universe` |
-| [Trading](trading.md) | `Trader`, `Order`, `Portfolio`, `Position`, `Execution` |
-| [Models](models.md) | `PriceBar`, `Sector`, enums |
+| Category | Classes & Functions |
+|----------|---------------------|
+| [Ticker](stock.md) | `Ticker`, `download()`, `search()` |
+| [Index](index-entity.md) | `Index` |
+| [Market](market.md) | `Market` |
+| [Models](models.md) | `PriceBar`, `Sector`, `MarketSegment` |
 
 ## Import Patterns
 
@@ -18,48 +18,45 @@ This section documents all public classes and functions in PyJQuants.
 ```python
 import pyjquants as pjq
 
-stock = pjq.Stock("7203")
-trader = pjq.Trader(initial_cash=10_000_000)
+# Single ticker
+ticker = pjq.Ticker("7203")
+df = ticker.history("30d")
+
+# Multiple tickers
+df = pjq.download(["7203", "6758"], period="1y")
+
+# Search
+tickers = pjq.search("トヨタ")
 ```
 
 ### Explicit Imports
 
 ```python
-from pyjquants import Stock, Trader, Market
-from pyjquants import MarketSegment, OrderSide, OrderType
+from pyjquants import Ticker, Index, Market, download, search
+from pyjquants import PriceBar, Sector, MarketSegment
 ```
 
 ## All Exports
 
 The following are available from `pyjquants`:
 
+### Main API (yfinance-style)
+- `Ticker` - Stock ticker with `.history()` method
+- `download()` - Download price data for multiple tickers
+- `search()` - Search tickers by name or code
+
 ### Entities
-- `Stock` - Japanese stock with lazy-loaded data
-- `Index` - Market index (TOPIX, etc.)
-
-### Collections
+- `Index` - Market index (TOPIX, Nikkei 225)
 - `Market` - Market utilities (calendar, sectors)
-- `Universe` - Filterable collection of stocks
-
-### Trading
-- `Trader` - Paper trading interface
-- `Order` - Buy/sell order
-- `Execution` - Filled order record
-- `Portfolio` - Holdings and cash
-- `Position` - Single stock holding
 
 ### Models & Enums
 - `PriceBar` - OHLCV price data
+- `StockInfo` - Stock information
 - `Sector` - Industry sector
 - `MarketSegment` - TSE_PRIME, TSE_STANDARD, TSE_GROWTH, OTHER
-- `OrderSide` - BUY, SELL
-- `OrderType` - MARKET, LIMIT
-- `OrderStatus` - PENDING, FILLED, PARTIALLY_FILLED, CANCELLED, REJECTED
-- `OptionType` - Option type enum
 
 ### Session & Exceptions
 - `Session` - HTTP session with authentication
-- `set_global_session` - Set global session
 - `PyJQuantsError` - Base exception
 - `AuthenticationError` - Auth failures
 - `TokenExpiredError` - Token expiration
@@ -68,3 +65,6 @@ The following are available from `pyjquants`:
 - `NotFoundError` - Resource not found
 - `ValidationError` - Validation errors
 - `ConfigurationError` - Configuration errors
+
+### Backward Compatibility
+- `Stock` - Alias for `Ticker`

@@ -3,37 +3,33 @@ flowchart TB
         UC[Your Python Code]
     end
 
-    subgraph Entities["Entities Layer"]
-        Stock["Stock('7203')"]
+    subgraph Domain["Domain Layer"]
+        Ticker["Ticker('7203')"]
         Index["Index.topix()"]
         Market["Market()"]
-        Universe["Universe.all()"]
+        Download["download()"]
+        Search["search()"]
     end
 
-    subgraph Repos["Repository Layer"]
-        StockRepo[StockRepository]
-        CompanyRepo[CompanyRepository]
-        MarketRepo[MarketRepository]
-        IndexRepo[IndexRepository]
-    end
-
-    subgraph Core["Core Layer"]
+    subgraph Infra["Infrastructure Layer"]
+        Client[JQuantsClient]
         Session[Session]
         Cache[Cache]
         Config[Config]
+    end
+
+    subgraph Adapters["Adapters Layer"]
+        Endpoints[Endpoint Definitions]
     end
 
     subgraph External["External"]
         API["J-Quants API"]
     end
 
-    UC --> Stock & Index & Market & Universe
-    Stock --> StockRepo & CompanyRepo
-    Index --> IndexRepo
-    Market --> MarketRepo
-    Universe --> CompanyRepo
-
-    StockRepo & CompanyRepo & MarketRepo & IndexRepo --> Session
+    UC --> Ticker & Index & Market & Download & Search
+    Ticker & Index & Market --> Client
+    Client --> Endpoints
+    Client --> Session
     Session --> Cache
     Session --> Config
     Session --> API

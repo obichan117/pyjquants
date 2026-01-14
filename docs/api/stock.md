@@ -1,103 +1,138 @@
-# Stock
+# Ticker
 
-The `Stock` class represents a Japanese stock with lazy-loaded data.
+The `Ticker` class provides a yfinance-style API for accessing Japanese stock data.
 
 ## Basic Usage
 
 ```python
 import pyjquants as pjq
 
-stock = pjq.Stock("7203")  # Toyota
+ticker = pjq.Ticker("7203")  # Toyota
 
-# Properties are lazy-loaded
-stock.name           # API call on first access
-stock.prices         # DataFrame of recent prices
+# Stock info (lazy-loaded)
+ticker.info.name           # "トヨタ自動車"
+ticker.info.sector         # "輸送用機器"
+
+# Price history
+df = ticker.history("30d")        # Recent 30 days
+df = ticker.history("1y")         # Last year
+df = ticker.history(start="2024-01-01", end="2024-12-31")  # Custom range
 ```
 
 ## API Reference
 
-::: pyjquants.entities.stock.Stock
+::: pyjquants.domain.ticker.Ticker
     options:
       show_source: false
       members:
         - __init__
-        - name
-        - name_english
-        - sector_17
-        - sector_33
-        - market_segment
-        - listing_date
-        - prices
-        - adjusted_prices
-        - latest_price
-        - prices_between
-        - adjusted_prices_between
-        - price_bars
+        - info
+        - history
         - financials
         - dividends
-        - next_earnings
-        - dividends_between
-        - margin_data
-        - short_selling
-        - margin_data_between
-        - short_selling_between
-        - all
-        - search
+        - refresh
+
+## Module Functions
+
+### download
+
+Download price data for multiple tickers:
+
+```python
+df = pjq.download(["7203", "6758"], period="1y")
+```
+
+::: pyjquants.domain.ticker.download
+    options:
+      show_source: false
+
+### search
+
+Search for tickers by name or code:
+
+```python
+tickers = pjq.search("トヨタ")
+```
+
+::: pyjquants.domain.ticker.search
+    options:
+      show_source: false
 
 ## Examples
 
-### Basic Info
+### Stock Info
 
 ```python
-stock = pjq.Stock("7203")
+ticker = pjq.Ticker("7203")
 
-print(stock.code)           # "7203"
-print(stock.name)           # "トヨタ自動車"
-print(stock.name_english)   # "Toyota Motor Corporation"
-print(stock.sector_33.name) # "輸送用機器"
-print(stock.market_segment) # MarketSegment.TSE_PRIME
+print(ticker.info.code)            # "7203"
+print(ticker.info.name)            # "トヨタ自動車"
+print(ticker.info.name_english)    # "Toyota Motor Corporation"
+print(ticker.info.sector)          # "輸送用機器"
+print(ticker.info.market)          # "Prime"
 ```
 
-### Price Data
+### Price History
 
 ```python
-from datetime import date
+# Recent 30 days (default)
+df = ticker.history()
 
-# Recent 30 days
-prices = stock.prices
-print(prices[['date', 'close', 'volume']])
+# Specific period
+df = ticker.history("1y")    # 1 year
+df = ticker.history("6mo")   # 6 months
+df = ticker.history("30d")   # 30 days
 
 # Custom date range
-prices = stock.prices_between(date(2024, 1, 1), date(2024, 6, 30))
+df = ticker.history(start="2024-01-01", end="2024-06-30")
 
-# Adjusted for splits
-adjusted = stock.adjusted_prices_between(date(2024, 1, 1), date(2024, 6, 30))
+# With date objects
+from datetime import date
+df = ticker.history(start=date(2024, 1, 1), end=date(2024, 6, 30))
+```
 
-# As typed objects
-bars = stock.price_bars(date(2024, 1, 1), date(2024, 1, 31))
-for bar in bars:
-    print(f"{bar.date}: {bar.close}")
+### Multi-Ticker Download
+
+```python
+# Download close prices for multiple tickers
+df = pjq.download(["7203", "6758", "9984"], period="1y")
+print(df.head())
+#         date     7203     6758     9984
+# 0 2024-01-04  2530.0  1245.0  5678.0
+# 1 2024-01-05  2545.0  1256.0  5690.0
 ```
 
 ### Financial Data
 
 ```python
-# Latest financial statements
-financials = stock.financials
+# Financial statements
+financials = ticker.financials
 
 # Dividend history
-dividends = stock.dividends
-
-# Next earnings date
-next_earnings = stock.next_earnings
+dividends = ticker.dividends
 ```
 
-### Discovery
+### Search
 
 ```python
-# Get all listed stocks
-all_stocks = pjq.Stock.all()
+# Search by Japanese name
+tickers = pjq.search("トヨタ")
+for t in tickers:
+    print(f"{t.code}: {t.info.name}")
 
-# Search by name or code
-results = pjq.Stock.search("toyota")
+# Search by English name
+tickers = pjq.search("Toyota")
+
+# Search by code prefix
+tickers = pjq.search("72")  # All codes starting with 72
+```
+
+## Backward Compatibility
+
+`Stock` is available as an alias for `Ticker`:
+
+```python
+# Both work the same
+ticker = pjq.Ticker("7203")
+stock = pjq.Stock("7203")  # Alias
 ```

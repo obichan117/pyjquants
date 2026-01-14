@@ -19,9 +19,19 @@ sectors = market.sectors_33
 
 ## API Reference
 
-::: pyjquants.collections.market.Market
+::: pyjquants.domain.market.Market
     options:
       show_source: false
+      members:
+        - __init__
+        - trading_calendar
+        - is_trading_day
+        - trading_days
+        - next_trading_day
+        - prev_trading_day
+        - sectors
+        - sectors_33
+        - sectors_17
 
 ## Examples
 

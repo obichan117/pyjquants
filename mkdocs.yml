@@ -63,11 +63,9 @@ nav:
   - Architecture: architecture.md
   - API Reference:
       - Overview: api/index.md
-      - Stock: api/stock.md
+      - Ticker: api/stock.md
       - Index: api/index-entity.md
       - Market: api/market.md
-      - Universe: api/universe.md
-      - Trading: api/trading.md
       - Models: api/models.md
   - Examples:
       - Quickstart: examples/quickstart.ipynb

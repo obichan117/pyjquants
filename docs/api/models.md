@@ -6,23 +6,27 @@ PyJQuants uses Pydantic models for type safety and validation.
 
 Represents a single OHLCV price bar.
 
-::: pyjquants.models.price.PriceBar
+::: pyjquants.domain.models.PriceBar
     options:
       show_source: false
 
 ### Example
 
 ```python
-stock = pjq.Stock("7203")
-bar = stock.latest_price
+ticker = pjq.Ticker("7203")
+df = ticker.history("1d")
 
-print(f"Date: {bar.date}")
-print(f"Open: {bar.open}")
-print(f"High: {bar.high}")
-print(f"Low: {bar.low}")
-print(f"Close: {bar.close}")
-print(f"Volume: {bar.volume}")
-print(f"Adjustment factor: {bar.adjustment_factor}")
+# Or access raw model data
+from pyjquants import PriceBar
+
+bar = PriceBar(
+    date=datetime.date(2024, 1, 15),
+    open=Decimal("2500"),
+    high=Decimal("2550"),
+    low=Decimal("2480"),
+    close=Decimal("2530"),
+    volume=1000000,
+)
 print(f"Adjusted close: {bar.adjusted_close}")
 ```
 
@@ -30,20 +34,32 @@ print(f"Adjusted close: {bar.adjusted_close}")
 
 Represents an industry sector classification.
 
-::: pyjquants.models.company.Sector
+::: pyjquants.domain.models.Sector
     options:
       show_source: false
 
 ### Example
 
 ```python
-stock = pjq.Stock("7203")
+ticker = pjq.Ticker("7203")
 
-# 33-sector classification
-sector = stock.sector_33
-print(f"Code: {sector.code}")
-print(f"Name: {sector.name}")
+# Access sector via info
+print(ticker.info.sector)      # "輸送用機器" (33-sector name)
+print(ticker.info.sector_17)   # 17-sector name
+
+# Or use Market for all sectors
+market = pjq.Market()
+for sector in market.sectors_33:
+    print(f"{sector.code}: {sector.name}")
 ```
+
+## StockInfo
+
+Detailed stock information from the API.
+
+::: pyjquants.domain.models.StockInfo
+    options:
+      show_source: false
 
 ## Enums
 
@@ -56,37 +72,11 @@ from pyjquants import MarketSegment
 MarketSegment.TSE_PRIME     # TSE Prime Market
 MarketSegment.TSE_STANDARD  # TSE Standard Market
 MarketSegment.TSE_GROWTH    # TSE Growth Market
+MarketSegment.TOKYO_PRO     # Tokyo Pro Market
 MarketSegment.OTHER         # Other markets
-```
 
-### OrderSide
-
-```python
-from pyjquants import OrderSide
-
-OrderSide.BUY   # Buy order
-OrderSide.SELL  # Sell order
-```
-
-### OrderType
-
-```python
-from pyjquants import OrderType
-
-OrderType.MARKET  # Market order (fill at current price)
-OrderType.LIMIT   # Limit order (fill at specified price or better)
-```
-
-### OrderStatus
-
-```python
-from pyjquants import OrderStatus
-
-OrderStatus.PENDING          # Order placed, waiting to fill
-OrderStatus.FILLED           # Order fully executed
-OrderStatus.PARTIALLY_FILLED # Order partially executed
-OrderStatus.CANCELLED        # Order cancelled
-OrderStatus.REJECTED         # Order rejected
+# Convert from market code
+segment = MarketSegment.from_code("0111")  # TSE_PRIME
 ```
 
 ## Type Hints
@@ -94,15 +84,15 @@ OrderStatus.REJECTED         # Order rejected
 All models are fully typed. Use them for better IDE support:
 
 ```python
-from pyjquants import Stock, PriceBar
-from pyjquants.models.company import Sector
+from pyjquants import Ticker, PriceBar
+from pyjquants.domain.models import Sector
 
-def analyze_stock(stock: Stock) -> float:
-    bar: PriceBar | None = stock.latest_price
-    if bar is None:
+def get_latest_close(ticker: Ticker) -> float:
+    df = ticker.history("1d")
+    if df.empty:
         return 0.0
-    return float(bar.close)
+    return float(df["close"].iloc[-1])
 
-def get_sector(stock: Stock) -> Sector:
-    return stock.sector_33
+def get_sector_name(ticker: Ticker) -> str:
+    return ticker.info.sector
 ```
