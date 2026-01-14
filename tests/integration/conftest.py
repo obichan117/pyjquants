@@ -17,15 +17,34 @@ from pathlib import Path
 
 import pytest
 
-# Load .env file if it exists
-env_file = Path(__file__).parent.parent.parent / ".env"
-if env_file.exists():
+
+def load_dotenv() -> None:
+    """Load .env file into environment variables."""
+    env_file = Path(__file__).parent.parent.parent / ".env"
+    if not env_file.exists():
+        return
+
     with open(env_file) as f:
         for line in f:
             line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
+            # Skip empty lines and comments
+            if not line or line.startswith("#"):
+                continue
+            # Parse key=value (handle values with = in them)
+            if "=" in line:
                 key, value = line.split("=", 1)
-                os.environ.setdefault(key.strip(), value.strip())
+                key = key.strip()
+                value = value.strip()
+                # Remove surrounding quotes if present
+                if value and value[0] in ('"', "'") and value[-1] == value[0]:
+                    value = value[1:-1]
+                # Only set if not already in environment
+                if key and key not in os.environ:
+                    os.environ[key] = value
+
+
+# Load .env at module import time
+load_dotenv()
 
 
 def pytest_configure(config: pytest.Config) -> None:
