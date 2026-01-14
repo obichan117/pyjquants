@@ -159,7 +159,7 @@ class TestTradingCalendarDay:
         """Test trading day identification."""
         day = TradingCalendarDay(
             date=datetime.date(2024, 1, 15),
-            holiday_division="0",
+            holiday_division="1",  # "1" = trading day
         )
         assert day.is_trading_day is True
         assert day.is_holiday is False
@@ -168,7 +168,7 @@ class TestTradingCalendarDay:
         """Test holiday identification."""
         day = TradingCalendarDay(
             date=datetime.date(2024, 1, 1),
-            holiday_division="1",
+            holiday_division="0",  # "0" = holiday
         )
         assert day.is_trading_day is False
         assert day.is_holiday is True

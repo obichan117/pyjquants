@@ -36,7 +36,8 @@ class TestTickerIntegration:
         """Test that ticker info loads correctly."""
         ticker = pjq.Ticker("7203")  # Toyota
 
-        assert ticker.info.code == "7203"
+        # API returns 5-digit codes (e.g., "72030" for Toyota)
+        assert ticker.info.code.startswith("7203")
         assert ticker.info.name is not None
         assert len(ticker.info.name) > 0
         assert ticker.info.name_english is not None
@@ -87,9 +88,9 @@ class TestSearchIntegration:
         assert len(results) > 0
         assert all(isinstance(t, pjq.Ticker) for t in results)
 
-        # Toyota should be in results
+        # Toyota should be in results (API returns 5-digit codes)
         codes = [t.code for t in results]
-        assert "7203" in codes
+        assert any(c.startswith("7203") for c in codes)
 
     @pytest.mark.integration
     def test_search_by_code(self, api_key: str) -> None:
@@ -97,7 +98,8 @@ class TestSearchIntegration:
         results = pjq.search("7203")
 
         assert len(results) >= 1
-        assert any(t.code == "7203" for t in results)
+        # Ticker.code stores the API-returned code (5-digit)
+        assert any(t.code.startswith("7203") for t in results)
 
 
 class TestDownloadIntegration:
@@ -172,19 +174,6 @@ class TestMarketIntegration:
             expected_cols = ["code", "company_name", "announcement_date"]
             for col in expected_cols:
                 assert col in df.columns, f"Missing column: {col}"
-
-    @pytest.mark.integration
-    def test_margin_interest(self, api_key: str) -> None:
-        """Test margin interest data."""
-        market = pjq.Market()
-        df = market.margin_interest(code="7203")
-
-        assert isinstance(df, pd.DataFrame)
-        # Structure check if data exists
-        if len(df) > 0:
-            assert "code" in df.columns
-            assert "date" in df.columns
-
 
 # =============================================================================
 # STANDARD+ TIER TESTS
@@ -320,6 +309,22 @@ class TestStandardTierIntegration:
         df = market.margin_alerts()
 
         assert isinstance(df, pd.DataFrame)
+
+    @pytest.mark.integration
+    @pytest.mark.standard_tier
+    def test_margin_interest(self, api_key: str, is_standard_tier: bool) -> None:
+        """Test margin interest data (Standard+ only)."""
+        if not is_standard_tier:
+            pytest.skip("Requires Standard+ tier")
+
+        market = pjq.Market()
+        df = market.margin_interest(code="7203")
+
+        assert isinstance(df, pd.DataFrame)
+        # Structure check if data exists
+        if len(df) > 0:
+            assert "code" in df.columns
+            assert "date" in df.columns
 
     @pytest.mark.integration
     @pytest.mark.standard_tier

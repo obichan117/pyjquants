@@ -26,9 +26,9 @@ class TestMarket:
     def sample_calendar_response(self) -> list[dict[str, Any]]:
         """Sample trading calendar API response (V2 abbreviated field names)."""
         return [
-            {"Date": "2024-01-15", "HolDiv": "0"},  # Trading day
-            {"Date": "2024-01-16", "HolDiv": "0"},  # Trading day
-            {"Date": "2024-01-17", "HolDiv": "1"},  # Holiday
+            {"Date": "2024-01-15", "HolDiv": "1"},  # Trading day
+            {"Date": "2024-01-16", "HolDiv": "1"},  # Trading day
+            {"Date": "2024-01-17", "HolDiv": "0"},  # Holiday
         ]
 
     @pytest.fixture
@@ -68,7 +68,7 @@ class TestMarket:
     ) -> None:
         """Test Market.is_trading_day returns True for trading day."""
         mock_session.get.return_value = {
-            "data": [{"Date": "2024-01-15", "HolDiv": "0"}]
+            "data": [{"Date": "2024-01-15", "HolDiv": "1"}]
         }
 
         market = Market(session=mock_session)
@@ -81,7 +81,7 @@ class TestMarket:
     ) -> None:
         """Test Market.is_trading_day returns False for holiday."""
         mock_session.get.return_value = {
-            "data": [{"Date": "2024-01-01", "HolDiv": "1"}]
+            "data": [{"Date": "2024-01-01", "HolDiv": "0"}]
         }
 
         market = Market(session=mock_session)
@@ -123,8 +123,8 @@ class TestMarket:
         """Test Market.next_trading_day."""
         # First call returns holiday, second returns trading day
         mock_session.get.side_effect = [
-            {"data": [{"Date": "2024-01-14", "HolDiv": "1"}]},
-            {"data": [{"Date": "2024-01-15", "HolDiv": "0"}]},
+            {"data": [{"Date": "2024-01-14", "HolDiv": "0"}]},
+            {"data": [{"Date": "2024-01-15", "HolDiv": "1"}]},
         ]
 
         market = Market(session=mock_session)
@@ -138,8 +138,8 @@ class TestMarket:
         """Test Market.prev_trading_day."""
         # First call returns holiday, second returns trading day
         mock_session.get.side_effect = [
-            {"data": [{"Date": "2024-01-14", "HolDiv": "1"}]},
-            {"data": [{"Date": "2024-01-13", "HolDiv": "0"}]},
+            {"data": [{"Date": "2024-01-14", "HolDiv": "0"}]},
+            {"data": [{"Date": "2024-01-13", "HolDiv": "1"}]},
         ]
 
         market = Market(session=mock_session)

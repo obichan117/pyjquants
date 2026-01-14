@@ -30,7 +30,8 @@ class TradingCalendarDay(BaseModel):
 
     @property
     def is_trading_day(self) -> bool:
-        return self.holiday_division == "0"
+        # HolDiv: "0" = holiday/weekend, "1" = trading day
+        return self.holiday_division == "1"
 
     @property
     def is_holiday(self) -> bool:

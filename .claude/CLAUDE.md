@@ -260,4 +260,18 @@ Reorganized `docs/examples/quickstart.ipynb` and documentation for clear tier se
 - README.md updated with "Feature Availability by Tier" matrix
 - API endpoint mapping tables updated with tier markers in README and getting-started.md
 
-**Codebase Status**: Clean. All 106 tests pass, docs build with `--strict`.
+**Integration Tests Added (Jan 14, 2026):**
+
+Integration tests with real API key added in `tests/integration/`:
+- Tests require `JQUANTS_API_KEY` in `.env` file
+- Free/Light tier tests (10 tests): Ticker, Search, Download, Index (TOPIX), Market
+- Standard+ tier tests (13 tests): morning session, dividends, Nikkei 225, sectors, derivatives
+- Run with: `uv run pytest tests/integration/ -v -m "not standard_tier"`
+- Unit tests exclude integration by default via `addopts = "--ignore=tests/integration/"`
+
+Bugs found and fixed via integration tests:
+1. **`TradingCalendarDay.is_trading_day` inverted**: HolDiv "0" = holiday, "1" = trading day (was reversed)
+2. **Stock codes are 5-digit**: API returns "72030" for Toyota, not "7203"
+3. **`margin_interest` requires Standard+ tier**: Was incorrectly documented as Free/Light
+
+**Codebase Status**: Clean. All 106 unit tests + 10 integration tests pass, docs build with `--strict`.
