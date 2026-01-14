@@ -32,7 +32,6 @@ df = ticker.history(start="2024-01-01", end="2024-12-31")  # Custom range
         - financials
         - financial_details
         - dividends
-        - investor_trades
         - refresh
 
 ## Module Functions
@@ -124,14 +123,6 @@ dividends = ticker.dividends
 # Get morning session (AM) prices only
 df = ticker.history_am("30d")
 df = ticker.history_am(start="2024-01-01", end="2024-06-30")
-```
-
-### Investor Trading Data
-
-```python
-# Get trading by investor type
-trades = ticker.investor_trades
-# Contains: prop_sell, prop_buy, ind_sell, ind_buy, frgn_sell, frgn_buy, etc.
 ```
 
 ### Search

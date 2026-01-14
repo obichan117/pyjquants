@@ -32,6 +32,10 @@ sectors = market.sectors_33
         - sectors
         - sectors_33
         - sectors_17
+        - investor_trades
+        - breakdown
+        - short_positions
+        - margin_alerts
 
 ## Examples
 
@@ -67,4 +71,46 @@ for s in sectors_17:
 sectors_33 = market.sectors_33
 for s in sectors_33:
     print(f"{s.code}: {s.name}")
+```
+
+### Investor Trades
+
+```python
+from datetime import date
+
+market = pjq.Market()
+
+# Get market-wide trading by investor type
+df = market.investor_trades(start=date(2024, 1, 1), end=date(2024, 12, 31))
+# Returns DataFrame with: date, proprietary, individual, foreign, etc.
+```
+
+### Trade Breakdown
+
+```python
+market = pjq.Market()
+
+# Get trade breakdown by type for a specific stock (Standard+ tier)
+df = market.breakdown("7203")
+# Returns DataFrame with trade counts by investor category
+```
+
+### Short Positions
+
+```python
+market = pjq.Market()
+
+# Get outstanding short positions (Standard+ tier)
+df = market.short_positions()
+# Returns DataFrame with short sale reports across the market
+```
+
+### Margin Alerts
+
+```python
+market = pjq.Market()
+
+# Get margin trading alerts (Standard+ tier)
+df = market.margin_alerts()
+# Returns DataFrame with stocks flagged for margin trading limits
 ```

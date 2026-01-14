@@ -20,9 +20,9 @@
 | Tier | Requests/min | Monthly Price |
 |------|-------------|---------------|
 | Free | 5 | Free |
-| Light | 60 | ~3,300 JPY |
-| Standard | 120 | ~16,500 JPY |
-| Premium | 500 | ~55,000 JPY |
+| Light | 60 | ~1,650 JPY |
+| Standard | 120 | ~3,300 JPY |
+| Premium | 500 | ~16,500 JPY |
 
 ## Endpoint Availability
 

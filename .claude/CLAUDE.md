@@ -30,7 +30,7 @@ Clean Domain-Driven Design with yfinance-style public API:
 
 ```
 pyjquants/
-├── __init__.py       # Public API exports (version 0.2.0)
+├── __init__.py       # Public API exports (version 0.2.1)
 ├── py.typed          # PEP 561 marker
 ├── domain/           # Business logic
 │   ├── ticker.py         # Ticker class + download() + search()
@@ -55,7 +55,7 @@ pyjquants/
 │   ├── cache.py          # Caching utilities
 │   └── exceptions.py     # Exception hierarchy
 └── adapters/         # API layer
-    └── endpoints.py      # Declarative endpoint definitions (20 V2 endpoints)
+    └── endpoints.py      # Declarative endpoint definitions (21 V2 endpoints)
 ```
 
 ## Public API (yfinance-style)
@@ -117,7 +117,7 @@ df = idx_opts.history('30d')
 | `pyjquants/domain/models/` | Pydantic models split by domain |
 | `pyjquants/infra/session.py` | API key auth and HTTP handling (V2) |
 | `pyjquants/infra/client.py` | Generic fetch/parse |
-| `pyjquants/adapters/endpoints.py` | Declarative API endpoints (20 V2 endpoints) |
+| `pyjquants/adapters/endpoints.py` | Declarative API endpoints (21 V2 endpoints) |
 | `pyproject.toml` | Dependencies and tools config |
 
 ## V2 API Endpoints Coverage
@@ -201,7 +201,7 @@ uv run twine upload dist/* -u __token__ -p $PYPI_TOKEN
 
 ## Audit Notes (Jan 2026)
 
-**Issues Found and Fixed:**
+**Previous Issues Found and Fixed:**
 
 1. **`investor_trades` moved from Ticker to Market**: The `/equities/investor-types` endpoint returns market-wide aggregate data, not per-stock data. Moved from `Ticker.investor_trades` to `Market.investor_trades()`.
 
@@ -212,3 +212,15 @@ uv run twine upload dist/* -u __token__ -p $PYPI_TOKEN
 4. **Stock codes are 5-digit in API**: J-Quants uses 5-digit codes (e.g., "72030" for Toyota). The library handles this internally.
 
 **Tier Availability**: Many endpoints are restricted to Standard+ tier. The library handles 403 errors gracefully for tier-restricted endpoints like sectors.
+
+**Latest Audit (Jan 14, 2026):**
+
+Documentation inconsistencies fixed:
+- `investor_trades` incorrectly documented as `Ticker` property in docs → fixed to `Market().investor_trades()`
+- Missing Market methods in API reference (`breakdown`, `short_positions`, `margin_alerts`, `investor_trades`) → added
+- Pricing table inconsistency between `getting-started.md` and `api-spec.md` → unified
+- `TOPIX` endpoint not exported in `adapters/__init__.py` → added
+- Outdated sector endpoint comment ("may not exist") → updated to clarify tier requirement
+- Quickstart notebook "Next Steps" section incomplete → expanded with derivatives and more features
+
+**Codebase Status**: Clean. All 100 tests pass, docs build with `--strict`.

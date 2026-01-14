@@ -20,6 +20,7 @@ from pyjquants.adapters.endpoints import (
     SHORT_SALE_REPORT,
     SHORT_SELLING,
     STATEMENTS,
+    TOPIX,
     TRADING_CALENDAR,
     Endpoint,
 )
@@ -43,6 +44,7 @@ __all__ = [
     "SHORT_SALE_REPORT",
     "MARGIN_ALERT",
     "INDEX_PRICES",
+    "TOPIX",
     "FUTURES",
     "OPTIONS",
     "INDEX_OPTIONS",

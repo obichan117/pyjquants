@@ -143,9 +143,6 @@ dividends = ticker.dividends
 
 # Detailed financials (BS/PL/CF)
 details = ticker.financial_details
-
-# Trading by investor type
-investor_trades = ticker.investor_trades
 ```
 
 ### Derivatives
@@ -195,7 +192,7 @@ PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints:
 | `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` | Morning session prices |
 | `/equities/master` | `Ticker("7203").info` / `search("トヨタ")` | Company info |
 | `/equities/earnings-calendar` | *(via endpoints)* | Earnings announcements |
-| `/equities/investor-types` | `Ticker("7203").investor_trades` | Trading by investor type |
+| `/equities/investor-types` | `Market().investor_trades()` | Market-wide trading by investor type |
 
 ### Financials
 

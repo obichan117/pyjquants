@@ -119,7 +119,7 @@ TRADING_CALENDAR: Endpoint[TradingCalendarDay] = Endpoint(
     model="TradingCalendarDay",  # type: ignore[arg-type]
 )
 
-# Note: Sector endpoints may not exist in V2 - verify with API docs
+# Note: Sector endpoints require Standard+ tier (return 403 on Free/Light)
 SECTORS_17: Endpoint[Sector] = Endpoint(
     path="/markets/sectors/topix17",
     response_key="data",
