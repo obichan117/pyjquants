@@ -57,10 +57,16 @@ markdown_extensions:
   - md_in_html
   - tables
 
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/obichan117/pyjquants
+
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Architecture: architecture.md
+  - J-Quants API Spec: openapi.md
   - API Reference:
       - Overview: api/index.md
       - Ticker: api/stock.md

@@ -8,7 +8,7 @@
 
 yfinance-style Python library for [J-Quants API](https://jpx.gitbook.io/j-quants-en) (Japanese stock market data).
 
-**[Documentation](https://obichan117.github.io/pyjquants)** | **[Quickstart Notebook](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart.ipynb)**
+**[Documentation](https://obichan117.github.io/pyjquants)** | **[API Spec](https://obichan117.github.io/pyjquants/openapi/)** | **[Quickstart Notebook](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart.ipynb)**
 
 ## Features
 
@@ -292,6 +292,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Links
 
 - [Documentation](https://obichan117.github.io/pyjquants)
+- [J-Quants API Spec (OpenAPI)](https://obichan117.github.io/pyjquants/openapi/) - Unofficial OpenAPI 3.0 spec for J-Quants V2
 - [Quickstart Notebook](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart.ipynb)
-- [J-Quants API Documentation](https://jpx.gitbook.io/j-quants-en)
+- [J-Quants Official](https://jpx-jquants.com/) - Official J-Quants site
 - [GitHub Repository](https://github.com/obichan117/pyjquants)

@@ -1,0 +1,1529 @@
+openapi: 3.0.3
+info:
+  title: J-Quants API V2
+  description: |
+    Unofficial OpenAPI specification for the J-Quants API V2 - Japanese stock market data API.
+
+    This specification was created by the [pyjquants](https://github.com/obichan117/pyjquants) project
+    since no official OpenAPI spec is provided by J-Quants.
+
+    ## Authentication
+
+    All endpoints require authentication via the `x-api-key` header.
+    Get your API key from the [J-Quants dashboard](https://application.jpx-jquants.com/).
+
+    ## Rate Limits
+
+    | Tier | Requests/min |
+    |------|-------------|
+    | Free | 5 |
+    | Light | 60 |
+    | Standard | 120 |
+    | Premium | 500 |
+
+    ## Pagination
+
+    Paginated endpoints return a `pagination_key` in the response.
+    Pass this value as a query parameter to get the next page.
+
+    ## Response Format
+
+    All V2 endpoints return data in this format:
+    ```json
+    {
+      "data": [...],
+      "pagination_key": "..." // optional
+    }
+    ```
+  version: 2.0.0
+  contact:
+    name: pyjquants
+    url: https://github.com/obichan117/pyjquants
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.jquants.com/v2
+    description: J-Quants API V2 Production
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Equities
+    description: Stock price and company information
+  - name: Financials
+    description: Financial statements and dividends
+  - name: Markets
+    description: Market data, calendar, and trading statistics
+  - name: Indices
+    description: Index price data (TOPIX, Nikkei 225, etc.)
+  - name: Derivatives
+    description: Futures and options data
+
+paths:
+  # === EQUITIES ===
+  /equities/bars/daily:
+    get:
+      tags:
+        - Equities
+      summary: Daily Stock Prices
+      description: |
+        Get daily OHLCV price data for stocks.
+        Returns paginated results.
+      operationId: getDailyQuotes
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PriceBar'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /equities/bars/daily/am:
+    get:
+      tags:
+        - Equities
+      summary: AM Session Prices
+      description: |
+        Get morning session (AM) price data.
+        **Requires Standard tier or higher.**
+      operationId: getAMPrices
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AMPriceBar'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /equities/master:
+    get:
+      tags:
+        - Equities
+      summary: Listed Securities Info
+      description: |
+        Get listed company master data including sector classifications.
+        Returns paginated results.
+      operationId: getListedInfo
+      parameters:
+        - name: code
+          in: query
+          description: Stock code (4-5 digits). If omitted, returns all stocks.
+          schema:
+            type: string
+            example: "7203"
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StockInfo'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /equities/earnings-calendar:
+    get:
+      tags:
+        - Equities
+      summary: Earnings Announcement Calendar
+      description: |
+        Get scheduled earnings announcement dates.
+        Returns paginated results.
+      operationId: getEarningsCalendar
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EarningsAnnouncement'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /equities/investor-types:
+    get:
+      tags:
+        - Equities
+      summary: Trading by Investor Type
+      description: |
+        Get trading statistics by investor type (proprietary, individual, foreign, etc.).
+        **Requires Standard tier or higher.**
+      operationId: getInvestorTypes
+      parameters:
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - name: section
+          in: query
+          description: Market section filter
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InvestorTrades'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # === FINANCIALS ===
+  /fins/summary:
+    get:
+      tags:
+        - Financials
+      summary: Financial Statements Summary
+      description: |
+        Get financial statement summaries (income statement, balance sheet, cash flow).
+        Returns paginated results.
+      operationId: getFinancialStatements
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FinancialStatement'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /fins/details:
+    get:
+      tags:
+        - Financials
+      summary: Financial Details (BS/PL/CF)
+      description: |
+        Get detailed financial statement data.
+        **Requires Standard tier or higher.**
+      operationId: getFinancialDetails
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FinancialDetails'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /fins/dividend:
+    get:
+      tags:
+        - Financials
+      summary: Dividend Information
+      description: |
+        Get dividend data including record dates and payment amounts.
+        **Requires Standard tier or higher.**
+      operationId: getDividends
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Dividend'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # === MARKETS ===
+  /markets/calendar:
+    get:
+      tags:
+        - Markets
+      summary: Trading Calendar
+      description: Get trading calendar with holiday information.
+      operationId: getTradingCalendar
+      parameters:
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TradingCalendarDay'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /markets/sectors/topix17:
+    get:
+      tags:
+        - Markets
+      summary: TOPIX-17 Sectors
+      description: Get TOPIX-17 sector classifications.
+      operationId: getSectors17
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Sector'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /markets/sectors/topix33:
+    get:
+      tags:
+        - Markets
+      summary: TOPIX-33 Sectors
+      description: Get TOPIX-33 sector classifications.
+      operationId: getSectors33
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Sector'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /markets/breakdown:
+    get:
+      tags:
+        - Markets
+      summary: Trading Breakdown
+      description: |
+        Get trading breakdown by trade type (long/short/margin).
+        **Requires Standard tier or higher.**
+      operationId: getBreakdown
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BreakdownTrade'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /markets/short-ratio:
+    get:
+      tags:
+        - Markets
+      summary: Short Selling Ratio
+      description: |
+        Get short selling ratio by sector.
+      operationId: getShortRatio
+      parameters:
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ShortSelling'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /markets/short-sale-report:
+    get:
+      tags:
+        - Markets
+      summary: Short Sale Report
+      description: |
+        Get reported short positions (>= 0.5% ratio).
+        **Requires Standard tier or higher.**
+      operationId: getShortSaleReport
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ShortSaleReport'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /markets/margin-alert:
+    get:
+      tags:
+        - Markets
+      summary: Margin Alert (Daily Publication)
+      description: |
+        Get margin trading outstanding for issues subject to daily publication.
+        **Requires Standard tier or higher.**
+      operationId: getMarginAlert
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MarginAlert'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /markets/margin-interest:
+    get:
+      tags:
+        - Markets
+      summary: Margin Interest
+      description: Get margin trading interest data.
+      operationId: getMarginInterest
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MarginInterest'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # === INDICES ===
+  /indices/bars/daily:
+    get:
+      tags:
+        - Indices
+      summary: Index Daily Prices
+      description: |
+        Get daily prices for indices.
+        **Requires Standard tier or higher for most indices.**
+      operationId: getIndexPrices
+      parameters:
+        - name: code
+          in: query
+          description: |
+            Index code:
+            - 0000: TOPIX
+            - 0040: TOPIX Core30
+            - 0028: Nikkei 225
+          required: true
+          schema:
+            type: string
+            example: "0000"
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/IndexPrice'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /indices/bars/daily/topix:
+    get:
+      tags:
+        - Indices
+      summary: TOPIX Daily Prices
+      description: Get TOPIX index daily prices (available for Light tier).
+      operationId: getTopixPrices
+      parameters:
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/IndexPrice'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # === DERIVATIVES ===
+  /derivatives/bars/daily/futures:
+    get:
+      tags:
+        - Derivatives
+      summary: Futures Daily Prices
+      description: |
+        Get daily prices for futures contracts.
+        **Requires Standard tier or higher.**
+      operationId: getFuturesPrices
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FuturesPrice'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /derivatives/bars/daily/options:
+    get:
+      tags:
+        - Derivatives
+      summary: Options Daily Prices
+      description: |
+        Get daily prices for options contracts.
+        **Requires Standard tier or higher.**
+      operationId: getOptionsPrices
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OptionsPrice'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /derivatives/bars/daily/options/225:
+    get:
+      tags:
+        - Derivatives
+      summary: Nikkei 225 Options Daily Prices
+      description: |
+        Get daily prices for Nikkei 225 index options.
+        **Requires Standard tier or higher.**
+      operationId: getIndexOptionsPrices
+      parameters:
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/PaginationKey'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OptionsPrice'
+                  pagination_key:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key from J-Quants dashboard
+
+  parameters:
+    Code:
+      name: code
+      in: query
+      description: Stock code (4-5 digits)
+      schema:
+        type: string
+        example: "7203"
+
+    Date:
+      name: date
+      in: query
+      description: Specific date (YYYY-MM-DD)
+      schema:
+        type: string
+        format: date
+        example: "2024-01-15"
+
+    FromDate:
+      name: from
+      in: query
+      description: Start date for range query (YYYY-MM-DD)
+      schema:
+        type: string
+        format: date
+        example: "2024-01-01"
+
+    ToDate:
+      name: to
+      in: query
+      description: End date for range query (YYYY-MM-DD)
+      schema:
+        type: string
+        format: date
+        example: "2024-01-31"
+
+    PaginationKey:
+      name: pagination_key
+      in: query
+      description: Pagination key from previous response
+      schema:
+        type: string
+
+  responses:
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Unauthorized"
+
+    Forbidden:
+      description: Subscription tier insufficient for this endpoint
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Forbidden"
+
+  schemas:
+    PriceBar:
+      type: object
+      description: Daily OHLCV price bar
+      required:
+        - Date
+        - O
+        - H
+        - L
+        - C
+      properties:
+        Date:
+          type: string
+          format: date
+          description: Trading date
+          example: "2024-01-15"
+        O:
+          type: string
+          description: Open price
+          example: "2500.0"
+        H:
+          type: string
+          description: High price
+          example: "2550.0"
+        L:
+          type: string
+          description: Low price
+          example: "2480.0"
+        C:
+          type: string
+          description: Close price
+          example: "2530.0"
+        Vo:
+          type: integer
+          description: Volume (shares)
+          example: 1000000
+        Va:
+          type: string
+          description: Turnover value (JPY)
+          example: "2530000000"
+        AdjFactor:
+          type: string
+          description: Adjustment factor for stock splits
+          example: "1.0"
+        AdjO:
+          type: string
+          description: Adjusted open price
+        AdjH:
+          type: string
+          description: Adjusted high price
+        AdjL:
+          type: string
+          description: Adjusted low price
+        AdjC:
+          type: string
+          description: Adjusted close price
+        AdjVo:
+          type: integer
+          description: Adjusted volume
+        UL:
+          type: string
+          description: Upper limit flag (1 if at upper limit)
+        LL:
+          type: string
+          description: Lower limit flag (1 if at lower limit)
+
+    AMPriceBar:
+      type: object
+      description: Morning session (AM) price bar
+      required:
+        - Date
+      properties:
+        Date:
+          type: string
+          format: date
+          description: Trading date
+          example: "2024-01-15"
+        MO:
+          type: string
+          description: Morning session open price
+          example: "2500.0"
+        MH:
+          type: string
+          description: Morning session high price
+          example: "2530.0"
+        ML:
+          type: string
+          description: Morning session low price
+          example: "2495.0"
+        MC:
+          type: string
+          description: Morning session close price
+          example: "2520.0"
+        MVo:
+          type: integer
+          description: Morning session volume
+          example: 500000
+        MVa:
+          type: string
+          description: Morning session turnover value
+          example: "1260000000"
+
+    StockInfo:
+      type: object
+      description: Listed company information
+      required:
+        - Code
+        - CoName
+        - S17
+        - S17Nm
+        - S33
+        - S33Nm
+        - Mkt
+        - MktNm
+      properties:
+        Code:
+          type: string
+          description: Stock code
+          example: "7203"
+        CoName:
+          type: string
+          description: Company name (Japanese)
+          example: "トヨタ自動車"
+        CoNameEn:
+          type: string
+          description: Company name (English)
+          example: "Toyota Motor Corporation"
+        S17:
+          type: string
+          description: TOPIX-17 sector code
+          example: "6"
+        S17Nm:
+          type: string
+          description: TOPIX-17 sector name
+          example: "自動車・輸送機"
+        S33:
+          type: string
+          description: TOPIX-33 sector code
+          example: "3050"
+        S33Nm:
+          type: string
+          description: TOPIX-33 sector name
+          example: "輸送用機器"
+        Mkt:
+          type: string
+          description: Market segment code
+          example: "0111"
+        MktNm:
+          type: string
+          description: Market segment name
+          example: "プライム"
+        ScaleCat:
+          type: string
+          description: Scale category
+          example: "TOPIX Large70"
+        Mrgn:
+          type: string
+          description: Margin trading code
+        MrgnNm:
+          type: string
+          description: Margin trading name
+        Date:
+          type: string
+          format: date
+          description: Data as of date
+
+    EarningsAnnouncement:
+      type: object
+      description: Earnings announcement calendar entry
+      required:
+        - Code
+        - CoName
+        - Date
+      properties:
+        Code:
+          type: string
+          description: Stock code
+          example: "7203"
+        CoName:
+          type: string
+          description: Company name
+          example: "トヨタ自動車"
+        Date:
+          type: string
+          format: date
+          description: Announcement date
+          example: "2024-02-06"
+        FY:
+          type: string
+          description: Fiscal year
+          example: "2024"
+        FQ:
+          type: string
+          description: Fiscal quarter
+          example: "3Q"
+        SectorNm:
+          type: string
+          description: Sector name
+        Section:
+          type: string
+          description: Market section
+
+    InvestorTrades:
+      type: object
+      description: Trading by investor type
+      required:
+        - PubDate
+        - StDate
+        - EnDate
+      properties:
+        PubDate:
+          type: string
+          format: date
+          description: Publication date
+        StDate:
+          type: string
+          format: date
+          description: Period start date
+        EnDate:
+          type: string
+          format: date
+          description: Period end date
+        Section:
+          type: string
+          description: Market section
+        PropSell:
+          type: integer
+          description: Proprietary trading - sell
+        PropBuy:
+          type: integer
+          description: Proprietary trading - buy
+        PropTot:
+          type: integer
+          description: Proprietary trading - total
+        PropBal:
+          type: integer
+          description: Proprietary trading - balance
+        IndSell:
+          type: integer
+          description: Individual investors - sell
+        IndBuy:
+          type: integer
+          description: Individual investors - buy
+        FrgnSell:
+          type: integer
+          description: Foreign investors - sell
+        FrgnBuy:
+          type: integer
+          description: Foreign investors - buy
+
+    FinancialStatement:
+      type: object
+      description: Financial statement summary
+      required:
+        - Code
+        - DiscDate
+      properties:
+        Code:
+          type: string
+          description: Stock code
+          example: "7203"
+        DiscDate:
+          type: string
+          format: date
+          description: Disclosure date
+        DiscTime:
+          type: string
+          description: Disclosure time
+        DocType:
+          type: string
+          description: Document type
+        CurPerType:
+          type: string
+          description: Current period type
+        CurPerSt:
+          type: string
+          description: Current period start
+        CurPerEn:
+          type: string
+          description: Current period end
+        Sales:
+          type: string
+          description: Net sales
+        OP:
+          type: string
+          description: Operating profit
+        OdP:
+          type: string
+          description: Ordinary profit
+        NP:
+          type: string
+          description: Net profit
+        EPS:
+          type: string
+          description: Earnings per share
+        DEPS:
+          type: string
+          description: Diluted EPS
+        BPS:
+          type: string
+          description: Book value per share
+        TA:
+          type: string
+          description: Total assets
+        Eq:
+          type: string
+          description: Equity
+        EqAR:
+          type: string
+          description: Equity ratio
+        CFO:
+          type: string
+          description: Cash flow from operations
+        CFI:
+          type: string
+          description: Cash flow from investing
+        CFF:
+          type: string
+          description: Cash flow from financing
+
+    FinancialDetails:
+      type: object
+      description: Detailed financial statement (BS/PL/CF)
+      required:
+        - LocalCode
+        - DisclosedDate
+      properties:
+        LocalCode:
+          type: string
+          description: Stock code
+        DisclosedDate:
+          type: string
+          format: date
+          description: Disclosure date
+        TypeOfDocument:
+          type: string
+          description: Document type
+        TotalAssets:
+          type: string
+          description: Total assets
+        TotalLiabilities:
+          type: string
+          description: Total liabilities
+        NetAssets:
+          type: string
+          description: Net assets
+        NetSales:
+          type: string
+          description: Net sales
+        OperatingProfit:
+          type: string
+          description: Operating profit
+        OrdinaryProfit:
+          type: string
+          description: Ordinary profit
+        Profit:
+          type: string
+          description: Net profit
+
+    Dividend:
+      type: object
+      description: Dividend information
+      required:
+        - Code
+        - RecordDate
+      properties:
+        Code:
+          type: string
+          description: Stock code
+        RecordDate:
+          type: string
+          format: date
+          description: Record date
+        ExDividendDate:
+          type: string
+          format: date
+          description: Ex-dividend date
+        PaymentDate:
+          type: string
+          format: date
+          description: Payment date
+        DividendPerShare:
+          type: string
+          description: Dividend per share (JPY)
+
+    TradingCalendarDay:
+      type: object
+      description: Trading calendar day
+      required:
+        - Date
+        - HolDiv
+      properties:
+        Date:
+          type: string
+          format: date
+          description: Date
+          example: "2024-01-15"
+        HolDiv:
+          type: string
+          description: Holiday division (0=trading day, 1=holiday)
+          example: "0"
+
+    Sector:
+      type: object
+      description: Sector classification
+      properties:
+        code:
+          type: string
+          description: Sector code
+        name:
+          type: string
+          description: Sector name (Japanese)
+        name_english:
+          type: string
+          description: Sector name (English)
+
+    BreakdownTrade:
+      type: object
+      description: Trading breakdown by type
+      required:
+        - Date
+        - Code
+      properties:
+        Date:
+          type: string
+          format: date
+          description: Trading date
+        Code:
+          type: string
+          description: Stock code
+        LongSellVa:
+          type: string
+          description: Long sell value
+        ShrtNoMrgnVa:
+          type: string
+          description: Short sell (ex-margin) value
+        MrgnSellNewVa:
+          type: string
+          description: Margin sell new value
+        MrgnSellCloseVa:
+          type: string
+          description: Margin sell close value
+        LongBuyVa:
+          type: string
+          description: Long buy value
+        MrgnBuyNewVa:
+          type: string
+          description: Margin buy new value
+        MrgnBuyCloseVa:
+          type: string
+          description: Margin buy close value
+        LongSellVo:
+          type: integer
+          description: Long sell volume
+        ShrtNoMrgnVo:
+          type: integer
+          description: Short sell (ex-margin) volume
+
+    ShortSelling:
+      type: object
+      description: Short selling ratio
+      required:
+        - Date
+        - Sector33Code
+      properties:
+        Date:
+          type: string
+          format: date
+          description: Trading date
+        Sector33Code:
+          type: string
+          description: TOPIX-33 sector code
+        SellingValue:
+          type: number
+          description: Short selling value
+
+    ShortSaleReport:
+      type: object
+      description: Short sale position report
+      required:
+        - DisclosedDate
+        - CalculatedDate
+        - Code
+      properties:
+        DisclosedDate:
+          type: string
+          format: date
+          description: Disclosure date
+        CalculatedDate:
+          type: string
+          format: date
+          description: Position calculated date
+        Code:
+          type: string
+          description: Stock code
+        StockName:
+          type: string
+          description: Stock name
+        ShortSellerName:
+          type: string
+          description: Short seller name
+        ShortPositionsToSharesOutstandingRatio:
+          type: string
+          description: Short position ratio (%)
+        ShortPositionsInSharesNumber:
+          type: integer
+          description: Short position in shares
+
+    MarginAlert:
+      type: object
+      description: Margin alert (daily publication)
+      required:
+        - PubDate
+        - Code
+      properties:
+        PubDate:
+          type: string
+          format: date
+          description: Publication date
+        Code:
+          type: string
+          description: Stock code
+        AppDate:
+          type: string
+          format: date
+          description: Apply date
+        ShrtOut:
+          type: integer
+          description: Short outstanding
+        ShrtOutChg:
+          type: integer
+          description: Short outstanding change
+        ShrtOutRatio:
+          type: string
+          description: Short outstanding ratio
+        LongOut:
+          type: integer
+          description: Long outstanding
+        LongOutChg:
+          type: integer
+          description: Long outstanding change
+        SLRatio:
+          type: string
+          description: Short/Long ratio
+
+    MarginInterest:
+      type: object
+      description: Margin interest data
+      required:
+        - Code
+        - Date
+      properties:
+        Code:
+          type: string
+          description: Stock code
+        Date:
+          type: string
+          format: date
+          description: Date
+        MarginBuyingBalance:
+          type: integer
+          description: Margin buying balance
+        MarginSellingBalance:
+          type: integer
+          description: Margin selling balance
+
+    IndexPrice:
+      type: object
+      description: Index price data
+      required:
+        - Date
+      properties:
+        Date:
+          type: string
+          format: date
+          description: Trading date
+        Code:
+          type: string
+          description: Index code (not present in TOPIX endpoint)
+        O:
+          type: string
+          description: Open price
+        H:
+          type: string
+          description: High price
+        L:
+          type: string
+          description: Low price
+        C:
+          type: string
+          description: Close price
+
+    FuturesPrice:
+      type: object
+      description: Futures price data
+      required:
+        - Date
+        - Code
+        - ProdCat
+        - CM
+      properties:
+        Date:
+          type: string
+          format: date
+          description: Trading date
+        Code:
+          type: string
+          description: Contract code
+        ProdCat:
+          type: string
+          description: Product category
+        CM:
+          type: string
+          description: Contract month (YYYYMM)
+        O:
+          type: string
+          description: Open price
+        H:
+          type: string
+          description: High price
+        L:
+          type: string
+          description: Low price
+        C:
+          type: string
+          description: Close price
+        Vo:
+          type: integer
+          description: Volume
+        OI:
+          type: integer
+          description: Open interest
+        Settle:
+          type: string
+          description: Settlement price
+        LTD:
+          type: string
+          format: date
+          description: Last trading day
+        MO:
+          type: string
+          description: Morning session open
+        MH:
+          type: string
+          description: Morning session high
+        ML:
+          type: string
+          description: Morning session low
+        MC:
+          type: string
+          description: Morning session close
+
+    OptionsPrice:
+      type: object
+      description: Options price data
+      required:
+        - Date
+        - Code
+        - ProdCat
+        - CM
+      properties:
+        Date:
+          type: string
+          format: date
+          description: Trading date
+        Code:
+          type: string
+          description: Contract code
+        ProdCat:
+          type: string
+          description: Product category
+        CM:
+          type: string
+          description: Contract month (YYYYMM)
+        Strike:
+          type: string
+          description: Strike price
+        PCDiv:
+          type: string
+          description: Put/Call division (1=Put, 2=Call)
+        UndSSO:
+          type: string
+          description: Underlying SSO code
+        O:
+          type: string
+          description: Open price
+        H:
+          type: string
+          description: High price
+        L:
+          type: string
+          description: Low price
+        C:
+          type: string
+          description: Close price
+        Vo:
+          type: integer
+          description: Volume
+        OI:
+          type: integer
+          description: Open interest
+        Settle:
+          type: string
+          description: Settlement price
+        IV:
+          type: string
+          description: Implied volatility
+        Theo:
+          type: string
+          description: Theoretical price
