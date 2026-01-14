@@ -67,11 +67,10 @@ import pyjquants as pjq
 ticker = pjq.Ticker('7203')
 ticker.info.name          # "トヨタ自動車"
 df = ticker.history('30d')
-df = ticker.history_am('30d')  # Morning session prices
+df = ticker.history_am('30d')  # Morning session prices (Standard+)
 df = ticker.financials        # Financial statements
-df = ticker.financial_details # Detailed BS/PL/CF
-df = ticker.dividends         # Dividend history
-df = ticker.investor_trades   # Trading by investor type
+df = ticker.financial_details # Detailed BS/PL/CF (Standard+)
+df = ticker.dividends         # Dividend history (Standard+)
 
 # Multi-ticker download
 df = pjq.download(['7203', '6758'], period='1y')
@@ -87,9 +86,12 @@ df = topix.history('1y')
 # Market utilities
 market = pjq.Market()
 market.is_trading_day(date(2024, 12, 25))
-df = market.breakdown('7203')      # Trade breakdown by type
-df = market.short_positions()      # Outstanding short positions
-df = market.margin_alerts()        # Margin trading alerts
+market.sectors_17             # TOPIX-17 sectors (Standard+, returns [] on lower tiers)
+market.sectors_33             # TOPIX-33 sectors (Standard+, returns [] on lower tiers)
+df = market.investor_trades() # Market-wide trading by investor type
+df = market.breakdown('7203') # Trade breakdown by type (Standard+)
+df = market.short_positions() # Outstanding short positions (Standard+)
+df = market.margin_alerts()   # Margin trading alerts (Standard+)
 
 # Derivatives (V2 endpoints)
 futures = pjq.Futures('NK225M')    # Nikkei 225 mini futures
@@ -120,38 +122,38 @@ df = idx_opts.history('30d')
 
 ## V2 API Endpoints Coverage
 
-All J-Quants V2 endpoints are supported:
+All J-Quants V2 endpoints are supported. Endpoints marked with *(Standard+)* require Standard tier or higher.
 
 **Equities:**
 - `/equities/bars/daily` - Daily OHLCV prices
-- `/equities/bars/daily/am` - Morning session prices
+- `/equities/bars/daily/am` - Morning session prices *(Standard+)*
 - `/equities/master` - Listed company info
 - `/equities/earnings-calendar` - Earnings announcements
-- `/equities/investor-types` - Trading by investor type
+- `/equities/investor-types` - Market-wide trading by investor type (not per-stock)
 
 **Financials:**
 - `/fins/summary` - Financial statements
-- `/fins/dividend` - Dividends
-- `/fins/details` - Detailed BS/PL/CF
+- `/fins/dividend` - Dividends *(Standard+)*
+- `/fins/details` - Detailed BS/PL/CF *(Standard+)*
 
 **Markets:**
 - `/markets/calendar` - Trading calendar
-- `/markets/sectors/topix17` - 17-sector classification
-- `/markets/sectors/topix33` - 33-sector classification
-- `/markets/short-ratio` - Short selling ratio
+- `/markets/sectors/topix17` - 17-sector classification *(Standard+)*
+- `/markets/sectors/topix33` - 33-sector classification *(Standard+)*
+- `/markets/short-ratio` - Short selling ratio *(Standard+)*
 - `/markets/margin-interest` - Margin trading interest
-- `/markets/breakdown` - Trade breakdown by type
-- `/markets/short-sale-report` - Outstanding short positions
-- `/markets/margin-alert` - Margin trading alerts
+- `/markets/breakdown` - Trade breakdown by type *(Standard+)*
+- `/markets/short-sale-report` - Outstanding short positions *(Standard+)*
+- `/markets/margin-alert` - Margin trading alerts *(Standard+)*
 
 **Indices:**
-- `/indices/bars/daily` - Index prices
+- `/indices/bars/daily` - Index prices *(Standard+)*
 - `/indices/bars/daily/topix` - TOPIX prices
 
 **Derivatives:**
-- `/derivatives/bars/daily/futures` - Futures prices
-- `/derivatives/bars/daily/options` - Options prices
-- `/derivatives/bars/daily/options/225` - Nikkei 225 index options
+- `/derivatives/bars/daily/futures` - Futures prices *(Standard+)*
+- `/derivatives/bars/daily/options` - Options prices *(Standard+)*
+- `/derivatives/bars/daily/options/225` - Nikkei 225 index options *(Standard+)*
 
 ## Environment Variables
 
@@ -196,3 +198,17 @@ uv run twine upload dist/* -u __token__ -p $PYPI_TOKEN
 - Old architecture: `entities/`, `repositories/`, `collections/`, `core/`, `models/`, `utils/`
 - Outdated notebooks
 - Backward compatibility shims for V1
+
+## Audit Notes (Jan 2026)
+
+**Issues Found and Fixed:**
+
+1. **`investor_trades` moved from Ticker to Market**: The `/equities/investor-types` endpoint returns market-wide aggregate data, not per-stock data. Moved from `Ticker.investor_trades` to `Market.investor_trades()`.
+
+2. **Sectors endpoints require Standard+ tier**: `Market.sectors_17` and `Market.sectors_33` return 403 on Free/Light tiers. Fixed to return empty list gracefully instead of raising an error.
+
+3. **InvestorTrades model missing fields**: API returns many more investor categories (BrkSell, SecCoSell, BusCoSell, OthCoSell, InsCoSell, BankSell, OthFinSell, etc.). Added all missing fields and changed types from `int` to `float`.
+
+4. **Stock codes are 5-digit in API**: J-Quants uses 5-digit codes (e.g., "72030" for Toyota). The library handles this internally.
+
+**Tier Availability**: Many endpoints are restricted to Standard+ tier. The library handles 403 errors gracefully for tier-restricted endpoints like sectors.

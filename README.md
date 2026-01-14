@@ -189,31 +189,31 @@ PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints:
 | J-Quants API | PyJQuants |
 |--------------|-----------|
 | `/equities/bars/daily` | `Ticker("7203").history("30d")` |
-| `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` |
+| `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` *(Standard+)* |
 | `/equities/master` | `Ticker("7203").info` / `search("トヨタ")` |
 | `/equities/earnings-calendar` | *(via endpoints)* |
-| `/equities/investor-types` | `Ticker("7203").investor_trades` |
 
 ### Financials
 
 | J-Quants API | PyJQuants |
 |--------------|-----------|
 | `/fins/summary` | `Ticker("7203").financials` |
-| `/fins/dividend` | `Ticker("7203").dividends` |
-| `/fins/details` | `Ticker("7203").financial_details` |
+| `/fins/dividend` | `Ticker("7203").dividends` *(Standard+)* |
+| `/fins/details` | `Ticker("7203").financial_details` *(Standard+)* |
 
 ### Markets
 
 | J-Quants API | PyJQuants |
 |--------------|-----------|
 | `/markets/calendar` | `Market().is_trading_day(date)` / `trading_days(start, end)` |
-| `/markets/sectors/topix17` | `Market().sectors_17` |
-| `/markets/sectors/topix33` | `Market().sectors_33` |
-| `/markets/short-ratio` | *(via endpoints)* |
+| `/markets/sectors/topix17` | `Market().sectors_17` *(Standard+)* |
+| `/markets/sectors/topix33` | `Market().sectors_33` *(Standard+)* |
+| `/equities/investor-types` | `Market().investor_trades()` |
+| `/markets/short-ratio` | *(via endpoints)* *(Standard+)* |
 | `/markets/margin-interest` | *(via endpoints)* |
-| `/markets/breakdown` | `Market().breakdown("7203")` |
-| `/markets/short-sale-report` | `Market().short_positions()` |
-| `/markets/margin-alert` | `Market().margin_alerts()` |
+| `/markets/breakdown` | `Market().breakdown("7203")` *(Standard+)* |
+| `/markets/short-sale-report` | `Market().short_positions()` *(Standard+)* |
+| `/markets/margin-alert` | `Market().margin_alerts()` *(Standard+)* |
 
 ### Indices
 

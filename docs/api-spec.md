@@ -26,23 +26,24 @@
 
 ## Endpoint Availability
 
-### Free Tier
+### Free/Light Tier
 - `/equities/bars/daily` - Daily stock prices
 - `/equities/master` - Listed securities info
-- `/markets/calendar` - Trading calendar
-
-### Light Tier (adds)
-- `/indices/bars/daily/topix` - TOPIX prices
-- `/fins/summary` - Financial statements summary
 - `/equities/earnings-calendar` - Earnings calendar
+- `/equities/investor-types` - Trading by investor type (market-wide)
+- `/fins/summary` - Financial statements summary
+- `/markets/calendar` - Trading calendar
+- `/indices/bars/daily/topix` - TOPIX prices
 
 ### Standard Tier (adds)
 - `/equities/bars/daily/am` - AM session prices
-- `/equities/investor-types` - Trading by investor type
 - `/fins/details` - Detailed financials
 - `/fins/dividend` - Dividend data
 - `/indices/bars/daily` - All index prices (incl. Nikkei 225)
+- `/markets/sectors/topix17` - TOPIX-17 sectors
+- `/markets/sectors/topix33` - TOPIX-33 sectors
 - `/markets/breakdown` - Trading breakdown
+- `/markets/short-ratio` - Short selling ratio
 - `/markets/short-sale-report` - Short positions
 - `/markets/margin-alert` - Margin alerts
 - `/derivatives/bars/daily/futures` - Futures prices

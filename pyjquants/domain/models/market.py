@@ -77,9 +77,10 @@ class ShortSelling(BaseModel):
 
 
 class InvestorTrades(BaseModel):
-    """Trading by type of investors.
+    """Market-wide trading by type of investors.
 
     Contains sell/buy/total/balance data for each investor category.
+    Note: This is aggregate market data, not per-stock data.
     """
 
     # Metadata
@@ -89,40 +90,82 @@ class InvestorTrades(BaseModel):
     section: str | None = Field(alias="Section", default=None)
 
     # Proprietary trading
-    prop_sell: int | None = Field(alias="PropSell", default=None)
-    prop_buy: int | None = Field(alias="PropBuy", default=None)
-    prop_total: int | None = Field(alias="PropTot", default=None)
-    prop_balance: int | None = Field(alias="PropBal", default=None)
+    prop_sell: float | None = Field(alias="PropSell", default=None)
+    prop_buy: float | None = Field(alias="PropBuy", default=None)
+    prop_total: float | None = Field(alias="PropTot", default=None)
+    prop_balance: float | None = Field(alias="PropBal", default=None)
+
+    # Brokers
+    brk_sell: float | None = Field(alias="BrkSell", default=None)
+    brk_buy: float | None = Field(alias="BrkBuy", default=None)
+    brk_total: float | None = Field(alias="BrkTot", default=None)
+    brk_balance: float | None = Field(alias="BrkBal", default=None)
 
     # Individuals
-    ind_sell: int | None = Field(alias="IndSell", default=None)
-    ind_buy: int | None = Field(alias="IndBuy", default=None)
-    ind_total: int | None = Field(alias="IndTot", default=None)
-    ind_balance: int | None = Field(alias="IndBal", default=None)
+    ind_sell: float | None = Field(alias="IndSell", default=None)
+    ind_buy: float | None = Field(alias="IndBuy", default=None)
+    ind_total: float | None = Field(alias="IndTot", default=None)
+    ind_balance: float | None = Field(alias="IndBal", default=None)
 
     # Foreign investors
-    frgn_sell: int | None = Field(alias="FrgnSell", default=None)
-    frgn_buy: int | None = Field(alias="FrgnBuy", default=None)
-    frgn_total: int | None = Field(alias="FrgnTot", default=None)
-    frgn_balance: int | None = Field(alias="FrgnBal", default=None)
+    frgn_sell: float | None = Field(alias="FrgnSell", default=None)
+    frgn_buy: float | None = Field(alias="FrgnBuy", default=None)
+    frgn_total: float | None = Field(alias="FrgnTot", default=None)
+    frgn_balance: float | None = Field(alias="FrgnBal", default=None)
+
+    # Securities companies
+    sec_co_sell: float | None = Field(alias="SecCoSell", default=None)
+    sec_co_buy: float | None = Field(alias="SecCoBuy", default=None)
+    sec_co_total: float | None = Field(alias="SecCoTot", default=None)
+    sec_co_balance: float | None = Field(alias="SecCoBal", default=None)
 
     # Investment trusts
-    inv_tr_sell: int | None = Field(alias="InvTrSell", default=None)
-    inv_tr_buy: int | None = Field(alias="InvTrBuy", default=None)
-    inv_tr_total: int | None = Field(alias="InvTrTot", default=None)
-    inv_tr_balance: int | None = Field(alias="InvTrBal", default=None)
+    inv_tr_sell: float | None = Field(alias="InvTrSell", default=None)
+    inv_tr_buy: float | None = Field(alias="InvTrBuy", default=None)
+    inv_tr_total: float | None = Field(alias="InvTrTot", default=None)
+    inv_tr_balance: float | None = Field(alias="InvTrBal", default=None)
+
+    # Business corporations
+    bus_co_sell: float | None = Field(alias="BusCoSell", default=None)
+    bus_co_buy: float | None = Field(alias="BusCoBuy", default=None)
+    bus_co_total: float | None = Field(alias="BusCoTot", default=None)
+    bus_co_balance: float | None = Field(alias="BusCoBal", default=None)
+
+    # Other corporations
+    oth_co_sell: float | None = Field(alias="OthCoSell", default=None)
+    oth_co_buy: float | None = Field(alias="OthCoBuy", default=None)
+    oth_co_total: float | None = Field(alias="OthCoTot", default=None)
+    oth_co_balance: float | None = Field(alias="OthCoBal", default=None)
+
+    # Insurance companies
+    ins_co_sell: float | None = Field(alias="InsCoSell", default=None)
+    ins_co_buy: float | None = Field(alias="InsCoBuy", default=None)
+    ins_co_total: float | None = Field(alias="InsCoTot", default=None)
+    ins_co_balance: float | None = Field(alias="InsCoBal", default=None)
+
+    # Banks
+    bank_sell: float | None = Field(alias="BankSell", default=None)
+    bank_buy: float | None = Field(alias="BankBuy", default=None)
+    bank_total: float | None = Field(alias="BankTot", default=None)
+    bank_balance: float | None = Field(alias="BankBal", default=None)
 
     # Trust banks
-    trst_bnk_sell: int | None = Field(alias="TrstBnkSell", default=None)
-    trst_bnk_buy: int | None = Field(alias="TrstBnkBuy", default=None)
-    trst_bnk_total: int | None = Field(alias="TrstBnkTot", default=None)
-    trst_bnk_balance: int | None = Field(alias="TrstBnkBal", default=None)
+    trst_bnk_sell: float | None = Field(alias="TrstBnkSell", default=None)
+    trst_bnk_buy: float | None = Field(alias="TrstBnkBuy", default=None)
+    trst_bnk_total: float | None = Field(alias="TrstBnkTot", default=None)
+    trst_bnk_balance: float | None = Field(alias="TrstBnkBal", default=None)
+
+    # Other financials
+    oth_fin_sell: float | None = Field(alias="OthFinSell", default=None)
+    oth_fin_buy: float | None = Field(alias="OthFinBuy", default=None)
+    oth_fin_total: float | None = Field(alias="OthFinTot", default=None)
+    oth_fin_balance: float | None = Field(alias="OthFinBal", default=None)
 
     # Total
-    total_sell: int | None = Field(alias="TotSell", default=None)
-    total_buy: int | None = Field(alias="TotBuy", default=None)
-    total_total: int | None = Field(alias="TotTot", default=None)
-    total_balance: int | None = Field(alias="TotBal", default=None)
+    total_sell: float | None = Field(alias="TotSell", default=None)
+    total_buy: float | None = Field(alias="TotBuy", default=None)
+    total_total: float | None = Field(alias="TotTot", default=None)
+    total_balance: float | None = Field(alias="TotBal", default=None)
 
     @field_validator("pub_date", "start_date", "end_date", mode="before")
     @classmethod

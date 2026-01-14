@@ -12,7 +12,6 @@ from pyjquants.adapters.endpoints import (
     DAILY_QUOTES_AM,
     DIVIDENDS,
     FINANCIAL_DETAILS,
-    INVESTOR_TYPES,
     LISTED_INFO,
     STATEMENTS,
 )
@@ -175,19 +174,6 @@ class Ticker:
         """
         return self._client.fetch_dataframe(FINANCIAL_DETAILS, {"code": self.code})
 
-    @property
-    def investor_trades(self) -> pd.DataFrame:
-        """Trading by type of investors.
-
-        Returns trading volumes broken down by investor category:
-        - Proprietary (prop_*)
-        - Individual (ind_*)
-        - Foreign (frgn_*)
-        - Investment trusts (inv_tr_*)
-        - Trust banks (trst_bnk_*)
-        - Total (total_*)
-        """
-        return self._client.fetch_dataframe(INVESTOR_TYPES, {"code": self.code})
 
     # === CACHE CONTROL ===
 

@@ -310,3 +310,50 @@ class TestMarket:
         df = market.margin_alerts(code="9999")
 
         assert df.empty
+
+    # === INVESTOR TRADES ===
+
+    @pytest.fixture
+    def sample_investor_trades_response(self) -> list[dict[str, Any]]:
+        """Sample investor trades data."""
+        return [
+            {
+                "PubDate": "2024-01-15",
+                "StDate": "2024-01-08",
+                "EnDate": "2024-01-12",
+                "Section": "TokyoNagoya",
+                "PropSell": 1000000.0,
+                "PropBuy": 1200000.0,
+                "BrkSell": 500000.0,
+                "BrkBuy": 600000.0,
+                "IndSell": 300000.0,
+                "IndBuy": 400000.0,
+                "FrgnSell": 2000000.0,
+                "FrgnBuy": 2500000.0,
+                "TotSell": 3800000.0,
+                "TotBuy": 4700000.0,
+            },
+        ]
+
+    def test_investor_trades(
+        self, mock_session: MagicMock, sample_investor_trades_response: list[dict[str, Any]]
+    ) -> None:
+        """Test Market.investor_trades returns DataFrame."""
+        mock_session.get_paginated.return_value = iter(sample_investor_trades_response)
+
+        market = Market(session=mock_session)
+        df = market.investor_trades()
+
+        assert len(df) == 1
+        assert "prop_sell" in df.columns
+        assert "brk_sell" in df.columns
+        assert "frgn_buy" in df.columns
+
+    def test_investor_trades_empty(self, mock_session: MagicMock) -> None:
+        """Test Market.investor_trades returns empty DataFrame when no data."""
+        mock_session.get_paginated.return_value = iter([])
+
+        market = Market(session=mock_session)
+        df = market.investor_trades()
+
+        assert df.empty

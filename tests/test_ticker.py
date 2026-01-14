@@ -348,7 +348,7 @@ class TestSearch:
 
 
 class TestTickerNewMethods:
-    """Tests for new Ticker methods (history_am, investor_trades, financial_details)."""
+    """Tests for new Ticker methods (history_am, financial_details)."""
 
     @pytest.fixture
     def mock_session(self) -> MagicMock:
@@ -370,24 +370,6 @@ class TestTickerNewMethods:
                 "C": "2520.0",
                 "Vo": 500000,
                 "AdjFactor": "1.0",
-            },
-        ]
-
-    @pytest.fixture
-    def sample_investor_trades_response(self) -> list[dict[str, Any]]:
-        """Sample investor trades data."""
-        return [
-            {
-                "PubDate": "2024-01-15",
-                "StDate": "2024-01-08",
-                "EnDate": "2024-01-12",
-                "Section": "TSE1",
-                "PropSell": 1000000,
-                "PropBuy": 1200000,
-                "IndSell": 500000,
-                "IndBuy": 600000,
-                "FrgnSell": 2000000,
-                "FrgnBuy": 2500000,
             },
         ]
 
@@ -428,30 +410,6 @@ class TestTickerNewMethods:
 
         ticker = Ticker("7203", session=mock_session)
         df = ticker.history_am(period="30d")
-
-        assert isinstance(df, pd.DataFrame)
-        assert df.empty
-
-    def test_investor_trades(
-        self, mock_session: MagicMock, sample_investor_trades_response: list[dict[str, Any]]
-    ) -> None:
-        """Test Ticker.investor_trades property."""
-        mock_session.get_paginated.return_value = iter(sample_investor_trades_response)
-
-        ticker = Ticker("7203", session=mock_session)
-        df = ticker.investor_trades
-
-        assert isinstance(df, pd.DataFrame)
-        assert len(df) == 1
-        assert "prop_sell" in df.columns
-        assert "frgn_buy" in df.columns
-
-    def test_investor_trades_empty(self, mock_session: MagicMock) -> None:
-        """Test Ticker.investor_trades returns empty DataFrame when no data."""
-        mock_session.get_paginated.return_value = iter([])
-
-        ticker = Ticker("7203", session=mock_session)
-        df = ticker.investor_trades
 
         assert isinstance(df, pd.DataFrame)
         assert df.empty

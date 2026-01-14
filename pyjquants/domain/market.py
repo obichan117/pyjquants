@@ -10,12 +10,14 @@ import pandas as pd
 
 from pyjquants.adapters.endpoints import (
     BREAKDOWN,
+    INVESTOR_TYPES,
     MARGIN_ALERT,
     SECTORS_17,
     SECTORS_33,
     SHORT_SALE_REPORT,
     TRADING_CALENDAR,
 )
+from pyjquants.infra.exceptions import AuthenticationError
 from pyjquants.infra.client import JQuantsClient
 from pyjquants.infra.session import _get_global_session
 
@@ -87,18 +89,70 @@ class Market:
 
     @cached_property
     def sectors(self) -> list[Sector]:
-        """Get 33-sector classification list (alias for sectors_33)."""
+        """Get 33-sector classification list (alias for sectors_33).
+
+        Note: Requires Standard tier or higher.
+        """
         return self.sectors_33
 
     @cached_property
     def sectors_33(self) -> list[Sector]:
-        """Get 33-sector classification list."""
-        return self._client.fetch_list(SECTORS_33)
+        """Get 33-sector classification list.
+
+        Note: Requires Standard tier or higher.
+        """
+        try:
+            return self._client.fetch_list(SECTORS_33)
+        except AuthenticationError:
+            return []
 
     @cached_property
     def sectors_17(self) -> list[Sector]:
-        """Get 17-sector classification list."""
-        return self._client.fetch_list(SECTORS_17)
+        """Get 17-sector classification list.
+
+        Note: Requires Standard tier or higher.
+        """
+        try:
+            return self._client.fetch_list(SECTORS_17)
+        except AuthenticationError:
+            return []
+
+    # === INVESTOR TRADING ===
+
+    def investor_trades(
+        self,
+        start: date | None = None,
+        end: date | None = None,
+        section: str | None = None,
+    ) -> pd.DataFrame:
+        """Get market-wide trading by investor type.
+
+        Returns aggregate trading volumes broken down by investor category:
+        - Proprietary (prop_*)
+        - Brokers (brk_*)
+        - Individual (ind_*)
+        - Foreign (frgn_*)
+        - Securities companies (sec_co_*)
+        - Investment trusts (inv_tr_*)
+        - Business corporations (bus_co_*)
+        - Insurance companies (ins_co_*)
+        - Banks (bank_*)
+        - Trust banks (trst_bnk_*)
+        - Other financials (oth_fin_*)
+        - Total (total_*)
+
+        Args:
+            start: Start date (optional)
+            end: End date (optional)
+            section: Market section filter (optional)
+
+        Returns:
+            DataFrame with investor trading data
+        """
+        params = self._client.date_params(start=start, end=end)
+        if section:
+            params["section"] = section
+        return self._client.fetch_dataframe(INVESTOR_TYPES, params)
 
     # === MARKET DATA ===
 
