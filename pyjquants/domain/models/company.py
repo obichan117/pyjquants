@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import datetime
-from typing import Any
+from pydantic import Field
 
-from pydantic import Field, field_validator
-
-from pyjquants.domain.models.base import BaseModel, MarketSegment
+from pyjquants.domain.models.base import BaseModel, JQuantsDateOptional, MarketSegment
 
 
 class Sector(BaseModel):
@@ -50,24 +47,11 @@ class StockInfo(BaseModel):
     market_name: str = Field(alias="MktNm")
 
     scale_category: str | None = Field(alias="ScaleCat", default=None)
-    listing_date: datetime.date | None = Field(alias="Date", default=None)
+    listing_date: JQuantsDateOptional = Field(alias="Date", default=None)
 
     # V2 new fields
     margin_code: str | None = Field(alias="Mrgn", default=None)
     margin_name: str | None = Field(alias="MrgnNm", default=None)
-
-    @field_validator("listing_date", mode="before")
-    @classmethod
-    def parse_date(cls, v: Any) -> datetime.date | None:
-        if v is None or v == "":
-            return None
-        if isinstance(v, datetime.date):
-            return v
-        if isinstance(v, str):
-            if "-" in v:
-                return datetime.date.fromisoformat(v)
-            return datetime.date(int(v[:4]), int(v[4:6]), int(v[6:8]))
-        return None
 
     @property
     def sector_17(self) -> Sector:

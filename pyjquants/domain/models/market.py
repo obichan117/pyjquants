@@ -2,31 +2,23 @@
 
 from __future__ import annotations
 
-import datetime
-from decimal import Decimal
 from typing import Any
 
-from pydantic import Field, field_validator
+from pydantic import Field
 
-from pyjquants.domain.models.base import BaseModel
+from pyjquants.domain.models.base import (
+    BaseModel,
+    JQuantsDate,
+    JQuantsDateOptional,
+    JQuantsDecimal,
+)
 
 
 class TradingCalendarDay(BaseModel):
     """Single trading calendar day (V2 API abbreviated field names)."""
 
-    date: datetime.date = Field(alias="Date")
+    date: JQuantsDate = Field(alias="Date")
     holiday_division: str = Field(alias="HolDiv")
-
-    @field_validator("date", mode="before")
-    @classmethod
-    def parse_date(cls, v: Any) -> datetime.date:
-        if isinstance(v, datetime.date):
-            return v
-        if isinstance(v, str):
-            if "-" in v:
-                return datetime.date.fromisoformat(v)
-            return datetime.date(int(v[:4]), int(v[4:6]), int(v[6:8]))
-        raise ValueError(f"Cannot parse date: {v}")
 
     @property
     def is_trading_day(self) -> bool:
@@ -42,20 +34,9 @@ class MarginInterest(BaseModel):
     """Margin trading interest data."""
 
     code: str = Field(alias="Code")
-    date: datetime.date = Field(alias="Date")
+    date: JQuantsDate = Field(alias="Date")
     margin_buying_balance: int | None = Field(alias="MarginBuyingBalance", default=None)
     margin_selling_balance: int | None = Field(alias="MarginSellingBalance", default=None)
-
-    @field_validator("date", mode="before")
-    @classmethod
-    def parse_date(cls, v: Any) -> datetime.date:
-        if isinstance(v, datetime.date):
-            return v
-        if isinstance(v, str):
-            if "-" in v:
-                return datetime.date.fromisoformat(v)
-            return datetime.date(int(v[:4]), int(v[4:6]), int(v[6:8]))
-        raise ValueError(f"Cannot parse date: {v}")
 
 
 class ShortSelling(BaseModel):
@@ -65,34 +46,11 @@ class ShortSelling(BaseModel):
     Contains long selling and short selling (with/without price restrictions) by 33-sector.
     """
 
-    date: datetime.date = Field(alias="Date")
+    date: JQuantsDate = Field(alias="Date")
     sector_33_code: str = Field(alias="S33")
-    long_selling_value: Decimal | None = Field(alias="SellExShortVa", default=None)
-    short_with_restriction_value: Decimal | None = Field(alias="ShrtWithResVa", default=None)
-    short_no_restriction_value: Decimal | None = Field(alias="ShrtNoResVa", default=None)
-
-    @field_validator("date", mode="before")
-    @classmethod
-    def parse_date(cls, v: Any) -> datetime.date:
-        if isinstance(v, datetime.date):
-            return v
-        if isinstance(v, str):
-            if "-" in v:
-                return datetime.date.fromisoformat(v)
-            return datetime.date(int(v[:4]), int(v[4:6]), int(v[6:8]))
-        raise ValueError(f"Cannot parse date: {v}")
-
-    @field_validator(
-        "long_selling_value",
-        "short_with_restriction_value",
-        "short_no_restriction_value",
-        mode="before",
-    )
-    @classmethod
-    def parse_decimal(cls, v: Any) -> Decimal | None:
-        if v is None or v == "":
-            return None
-        return Decimal(str(v))
+    long_selling_value: JQuantsDecimal = Field(alias="SellExShortVa", default=None)
+    short_with_restriction_value: JQuantsDecimal = Field(alias="ShrtWithResVa", default=None)
+    short_no_restriction_value: JQuantsDecimal = Field(alias="ShrtNoResVa", default=None)
 
 
 class InvestorTrades(BaseModel):
@@ -103,9 +61,9 @@ class InvestorTrades(BaseModel):
     """
 
     # Metadata
-    pub_date: datetime.date = Field(alias="PubDate")
-    start_date: datetime.date = Field(alias="StDate")
-    end_date: datetime.date = Field(alias="EnDate")
+    pub_date: JQuantsDate = Field(alias="PubDate")
+    start_date: JQuantsDate = Field(alias="StDate")
+    end_date: JQuantsDate = Field(alias="EnDate")
     section: str | None = Field(alias="Section", default=None)
 
     # Proprietary trading
@@ -186,17 +144,6 @@ class InvestorTrades(BaseModel):
     total_total: float | None = Field(alias="TotTot", default=None)
     total_balance: float | None = Field(alias="TotBal", default=None)
 
-    @field_validator("pub_date", "start_date", "end_date", mode="before")
-    @classmethod
-    def parse_date(cls, v: Any) -> datetime.date:
-        if isinstance(v, datetime.date):
-            return v
-        if isinstance(v, str):
-            if "-" in v:
-                return datetime.date.fromisoformat(v)
-            return datetime.date(int(v[:4]), int(v[4:6]), int(v[6:8]))
-        raise ValueError(f"Cannot parse date: {v}")
-
 
 class BreakdownTrade(BaseModel):
     """Breakdown trading data by trade type.
@@ -207,19 +154,19 @@ class BreakdownTrade(BaseModel):
     - Margin selling/buying (new and closing)
     """
 
-    date: datetime.date = Field(alias="Date")
+    date: JQuantsDate = Field(alias="Date")
     code: str = Field(alias="Code")
 
     # Selling - Value
-    long_sell_value: Decimal | None = Field(alias="LongSellVa", default=None)
-    short_no_margin_value: Decimal | None = Field(alias="ShrtNoMrgnVa", default=None)
-    margin_sell_new_value: Decimal | None = Field(alias="MrgnSellNewVa", default=None)
-    margin_sell_close_value: Decimal | None = Field(alias="MrgnSellCloseVa", default=None)
+    long_sell_value: JQuantsDecimal = Field(alias="LongSellVa", default=None)
+    short_no_margin_value: JQuantsDecimal = Field(alias="ShrtNoMrgnVa", default=None)
+    margin_sell_new_value: JQuantsDecimal = Field(alias="MrgnSellNewVa", default=None)
+    margin_sell_close_value: JQuantsDecimal = Field(alias="MrgnSellCloseVa", default=None)
 
     # Buying - Value
-    long_buy_value: Decimal | None = Field(alias="LongBuyVa", default=None)
-    margin_buy_new_value: Decimal | None = Field(alias="MrgnBuyNewVa", default=None)
-    margin_buy_close_value: Decimal | None = Field(alias="MrgnBuyCloseVa", default=None)
+    long_buy_value: JQuantsDecimal = Field(alias="LongBuyVa", default=None)
+    margin_buy_new_value: JQuantsDecimal = Field(alias="MrgnBuyNewVa", default=None)
+    margin_buy_close_value: JQuantsDecimal = Field(alias="MrgnBuyCloseVa", default=None)
 
     # Selling - Volume
     long_sell_volume: int | None = Field(alias="LongSellVo", default=None)
@@ -232,33 +179,6 @@ class BreakdownTrade(BaseModel):
     margin_buy_new_volume: int | None = Field(alias="MrgnBuyNewVo", default=None)
     margin_buy_close_volume: int | None = Field(alias="MrgnBuyCloseVo", default=None)
 
-    @field_validator("date", mode="before")
-    @classmethod
-    def parse_date(cls, v: Any) -> datetime.date:
-        if isinstance(v, datetime.date):
-            return v
-        if isinstance(v, str):
-            if "-" in v:
-                return datetime.date.fromisoformat(v)
-            return datetime.date(int(v[:4]), int(v[4:6]), int(v[6:8]))
-        raise ValueError(f"Cannot parse date: {v}")
-
-    @field_validator(
-        "long_sell_value",
-        "short_no_margin_value",
-        "margin_sell_new_value",
-        "margin_sell_close_value",
-        "long_buy_value",
-        "margin_buy_new_value",
-        "margin_buy_close_value",
-        mode="before",
-    )
-    @classmethod
-    def parse_decimal(cls, v: Any) -> Decimal | None:
-        if v is None or v == "":
-            return None
-        return Decimal(str(v))
-
 
 class ShortSaleReport(BaseModel):
     """Outstanding short selling positions reported.
@@ -266,8 +186,8 @@ class ShortSaleReport(BaseModel):
     Contains reported short positions where ratio >= 0.5%.
     """
 
-    disclosed_date: datetime.date = Field(alias="DisclosedDate")
-    calculated_date: datetime.date = Field(alias="CalculatedDate")
+    disclosed_date: JQuantsDate = Field(alias="DisclosedDate")
+    calculated_date: JQuantsDate = Field(alias="CalculatedDate")
     code: str = Field(alias="Code")
     stock_name: str | None = Field(alias="StockName", default=None)
     stock_name_english: str | None = Field(alias="StockNameEnglish", default=None)
@@ -277,7 +197,7 @@ class ShortSaleReport(BaseModel):
     short_seller_address: str | None = Field(alias="ShortSellerAddress", default=None)
 
     # Position data
-    short_position_ratio: Decimal | None = Field(
+    short_position_ratio: JQuantsDecimal = Field(
         alias="ShortPositionsToSharesOutstandingRatio", default=None
     )
     short_position_shares: int | None = Field(
@@ -288,34 +208,14 @@ class ShortSaleReport(BaseModel):
     )
 
     # Previous report
-    prev_report_date: datetime.date | None = Field(
+    prev_report_date: JQuantsDateOptional = Field(
         alias="CalculationInPreviousReportingDate", default=None
     )
-    prev_position_ratio: Decimal | None = Field(
+    prev_position_ratio: JQuantsDecimal = Field(
         alias="ShortPositionsInPreviousReportingRatio", default=None
     )
 
     notes: str | None = Field(alias="Notes", default=None)
-
-    @field_validator("disclosed_date", "calculated_date", "prev_report_date", mode="before")
-    @classmethod
-    def parse_date(cls, v: Any) -> datetime.date | None:
-        if v is None or v == "":
-            return None
-        if isinstance(v, datetime.date):
-            return v
-        if isinstance(v, str):
-            if "-" in v:
-                return datetime.date.fromisoformat(v)
-            return datetime.date(int(v[:4]), int(v[4:6]), int(v[6:8]))
-        return None
-
-    @field_validator("short_position_ratio", "prev_position_ratio", mode="before")
-    @classmethod
-    def parse_decimal(cls, v: Any) -> Decimal | None:
-        if v is None or v == "":
-            return None
-        return Decimal(str(v))
 
 
 class MarginAlert(BaseModel):
@@ -325,9 +225,9 @@ class MarginAlert(BaseModel):
     Includes both negotiable and standardized margin positions.
     """
 
-    pub_date: datetime.date = Field(alias="PubDate")
+    pub_date: JQuantsDate = Field(alias="PubDate")
     code: str = Field(alias="Code")
-    apply_date: datetime.date | None = Field(alias="AppDate", default=None)
+    apply_date: JQuantsDateOptional = Field(alias="AppDate", default=None)
 
     # Publication reason (map of flags)
     pub_reason: dict[str, Any] | None = Field(alias="PubReason", default=None)
@@ -335,15 +235,15 @@ class MarginAlert(BaseModel):
     # Total short positions
     short_outstanding: int | None = Field(alias="ShrtOut", default=None)
     short_outstanding_change: int | str | None = Field(alias="ShrtOutChg", default=None)
-    short_outstanding_ratio: Decimal | None = Field(alias="ShrtOutRatio", default=None)
+    short_outstanding_ratio: JQuantsDecimal = Field(alias="ShrtOutRatio", default=None)
 
     # Total long positions
     long_outstanding: int | None = Field(alias="LongOut", default=None)
     long_outstanding_change: int | str | None = Field(alias="LongOutChg", default=None)
-    long_outstanding_ratio: Decimal | None = Field(alias="LongOutRatio", default=None)
+    long_outstanding_ratio: JQuantsDecimal = Field(alias="LongOutRatio", default=None)
 
     # Short/Long ratio
-    sl_ratio: Decimal | None = Field(alias="SLRatio", default=None)
+    sl_ratio: JQuantsDecimal = Field(alias="SLRatio", default=None)
 
     # Negotiable short breakdown
     short_neg_outstanding: int | None = Field(alias="ShrtNegOut", default=None)
@@ -363,23 +263,3 @@ class MarginAlert(BaseModel):
 
     # TSE margin regulation classification
     tse_margin_reg_class: str | None = Field(alias="TSEMrgnRegCls", default=None)
-
-    @field_validator("pub_date", "apply_date", mode="before")
-    @classmethod
-    def parse_date(cls, v: Any) -> datetime.date | None:
-        if v is None or v == "":
-            return None
-        if isinstance(v, datetime.date):
-            return v
-        if isinstance(v, str):
-            if "-" in v:
-                return datetime.date.fromisoformat(v)
-            return datetime.date(int(v[:4]), int(v[4:6]), int(v[6:8]))
-        return None
-
-    @field_validator("sl_ratio", "short_outstanding_ratio", "long_outstanding_ratio", mode="before")
-    @classmethod
-    def parse_decimal(cls, v: Any) -> Decimal | None:
-        if v is None or v == "" or v == "*":
-            return None
-        return Decimal(str(v))
