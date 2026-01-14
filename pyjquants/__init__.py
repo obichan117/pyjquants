@@ -1,10 +1,10 @@
 """
-PyJQuants - yfinance-style Python library for J-Quants API.
+PyJQuants - yfinance-style Python library for J-Quants API (V2).
 
 Usage:
     import pyjquants as pjq
 
-    # Env vars JQUANTS_MAIL_ADDRESS & JQUANTS_PASSWORD are auto-read
+    # Set JQUANTS_API_KEY environment variable
     ticker = pjq.Ticker("7203")
     ticker.info.name          # "トヨタ自動車"
     df = ticker.history("30d")  # Recent 30 days DataFrame
@@ -53,14 +53,13 @@ from pyjquants.infra import (
     PyJQuantsError,
     RateLimitError,
     Session,
-    TokenExpiredError,
     ValidationError,
 )
 
 # Backward compatibility aliases
 Stock = Ticker  # Alias for migration
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 __all__ = [
     # Version
@@ -77,7 +76,6 @@ __all__ = [
     # Exceptions
     "PyJQuantsError",
     "AuthenticationError",
-    "TokenExpiredError",
     "APIError",
     "RateLimitError",
     "NotFoundError",

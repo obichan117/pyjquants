@@ -25,9 +25,9 @@ class TestTicker:
 
     @pytest.fixture
     def sample_stock_info_response(self) -> dict[str, Any]:
-        """Sample stock info API response."""
+        """Sample stock info API response (V2 uses 'data' key)."""
         return {
-            "info": [
+            "data": [
                 {
                     "Code": "7203",
                     "CompanyName": "トヨタ自動車",
@@ -46,25 +46,25 @@ class TestTicker:
 
     @pytest.fixture
     def sample_price_response(self) -> list[dict[str, Any]]:
-        """Sample price data API response."""
+        """Sample price data API response (V2 abbreviated field names)."""
         return [
             {
                 "Date": "2024-01-15",
-                "Open": "2500.0",
-                "High": "2550.0",
-                "Low": "2480.0",
-                "Close": "2530.0",
-                "Volume": 1000000,
-                "AdjustmentFactor": "1.0",
+                "O": "2500.0",
+                "H": "2550.0",
+                "L": "2480.0",
+                "C": "2530.0",
+                "Vo": 1000000,
+                "AdjFactor": "1.0",
             },
             {
                 "Date": "2024-01-16",
-                "Open": "2530.0",
-                "High": "2580.0",
-                "Low": "2520.0",
-                "Close": "2570.0",
-                "Volume": 1200000,
-                "AdjustmentFactor": "1.0",
+                "O": "2530.0",
+                "H": "2580.0",
+                "L": "2520.0",
+                "C": "2570.0",
+                "Vo": 1200000,
+                "AdjFactor": "1.0",
             },
         ]
 
@@ -83,7 +83,7 @@ class TestTicker:
     ) -> None:
         """Test Ticker.info property loads and caches data."""
         mock_session.get.return_value = sample_stock_info_response
-        mock_session.get_paginated.return_value = iter(sample_stock_info_response["info"])
+        mock_session.get_paginated.return_value = iter(sample_stock_info_response["data"])
 
         ticker = Ticker("7203", session=mock_session)
         info = ticker.info
@@ -100,7 +100,7 @@ class TestTicker:
 
     def test_ticker_info_not_found(self, mock_session: MagicMock) -> None:
         """Test Ticker.info raises error for unknown ticker."""
-        mock_session.get.return_value = {"info": []}
+        mock_session.get.return_value = {"data": []}
         mock_session.get_paginated.return_value = iter([])
 
         ticker = Ticker("9999", session=mock_session)
@@ -151,7 +151,7 @@ class TestTicker:
     ) -> None:
         """Test Ticker.refresh clears cache."""
         mock_session.get.return_value = sample_stock_info_response
-        mock_session.get_paginated.return_value = iter(sample_stock_info_response["info"])
+        mock_session.get_paginated.return_value = iter(sample_stock_info_response["data"])
 
         ticker = Ticker("7203", session=mock_session)
 
@@ -184,12 +184,12 @@ class TestDownload:
         price_data = [
             {
                 "Date": "2024-01-15",
-                "Open": "2500.0",
-                "High": "2550.0",
-                "Low": "2480.0",
-                "Close": "2530.0",
-                "Volume": 1000000,
-                "AdjustmentFactor": "1.0",
+                "O": "2500.0",
+                "H": "2550.0",
+                "L": "2480.0",
+                "C": "2530.0",
+                "Vo": 1000000,
+                "AdjFactor": "1.0",
             }
         ]
         mock_session.get_paginated.return_value = iter(price_data)
@@ -205,23 +205,23 @@ class TestDownload:
         price_data_7203 = [
             {
                 "Date": "2024-01-15",
-                "Open": "2500.0",
-                "High": "2550.0",
-                "Low": "2480.0",
-                "Close": "2530.0",
-                "Volume": 1000000,
-                "AdjustmentFactor": "1.0",
+                "O": "2500.0",
+                "H": "2550.0",
+                "L": "2480.0",
+                "C": "2530.0",
+                "Vo": 1000000,
+                "AdjFactor": "1.0",
             }
         ]
         price_data_6758 = [
             {
                 "Date": "2024-01-15",
-                "Open": "1200.0",
-                "High": "1220.0",
-                "Low": "1190.0",
-                "Close": "1210.0",
-                "Volume": 500000,
-                "AdjustmentFactor": "1.0",
+                "O": "1200.0",
+                "H": "1220.0",
+                "L": "1190.0",
+                "C": "1210.0",
+                "Vo": 500000,
+                "AdjFactor": "1.0",
             }
         ]
 

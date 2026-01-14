@@ -10,13 +10,7 @@ class PyJQuantsError(Exception):
 
 
 class AuthenticationError(PyJQuantsError):
-    """Authentication failed."""
-
-    pass
-
-
-class TokenExpiredError(AuthenticationError):
-    """Token has expired and refresh failed."""
+    """Authentication failed (invalid API key)."""
 
     pass
 

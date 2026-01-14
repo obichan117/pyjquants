@@ -96,12 +96,11 @@ market.is_trading_day(date(2024, 12, 25))
 ## Environment Variables
 
 ```bash
-JQUANTS_MAIL_ADDRESS=your_email@example.com
-JQUANTS_PASSWORD=your_password
+JQUANTS_API_KEY=your_api_key  # Get from J-Quants dashboard
 # Optional:
-JQUANTS_REFRESH_TOKEN=...
 JQUANTS_CACHE_ENABLED=true
 JQUANTS_CACHE_TTL=3600
+JQUANTS_RATE_LIMIT=60  # V2 tiers: Free=5, Light=60, Standard=120, Premium=500
 ```
 
 ## Testing

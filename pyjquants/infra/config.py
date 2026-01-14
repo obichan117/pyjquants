@@ -25,18 +25,20 @@ else:
 
 @dataclass
 class JQuantsConfig:
-    """Configuration for J-Quants API."""
+    """Configuration for J-Quants API (V2).
 
-    mail_address: str | None = None
-    password: str | None = None
-    refresh_token: str | None = None
+    V2 uses API key authentication instead of email/password token flow.
+    Get your API key from the J-Quants dashboard.
+    """
+
+    api_key: str | None = None
 
     # Cache settings
     cache_enabled: bool = True
     cache_directory: Path | None = None
     cache_ttl_seconds: int = 3600
 
-    # Rate limiting
+    # Rate limiting (V2 tiers: Free=5, Light=60, Standard=120, Premium=500)
     requests_per_minute: int = 60
 
     @classmethod
@@ -44,9 +46,7 @@ class JQuantsConfig:
         """Load configuration from environment variables."""
         cache_dir = os.environ.get("JQUANTS_CACHE_DIR")
         return cls(
-            mail_address=os.environ.get("JQUANTS_MAIL_ADDRESS"),
-            password=os.environ.get("JQUANTS_PASSWORD"),
-            refresh_token=os.environ.get("JQUANTS_REFRESH_TOKEN"),
+            api_key=os.environ.get("JQUANTS_API_KEY"),
             cache_enabled=os.environ.get("JQUANTS_CACHE_ENABLED", "true").lower() == "true",
             cache_directory=Path(cache_dir) if cache_dir else None,
             cache_ttl_seconds=int(os.environ.get("JQUANTS_CACHE_TTL", "3600")),
@@ -80,15 +80,13 @@ class JQuantsConfig:
         with open(path, "rb") as f:
             data = _tomllib.load(f)
 
-        credentials = data.get("credentials", {})
+        auth = data.get("auth", {})
         cache = data.get("cache", {})
         rate_limit = data.get("rate_limit", {})
 
         cache_dir = cache.get("directory")
         return cls(
-            mail_address=credentials.get("mail_address"),
-            password=credentials.get("password"),
-            refresh_token=credentials.get("refresh_token"),
+            api_key=auth.get("api_key"),
             cache_enabled=cache.get("enabled", True),
             cache_directory=Path(cache_dir).expanduser() if cache_dir else None,
             cache_ttl_seconds=cache.get("ttl_seconds", 3600),
@@ -104,12 +102,8 @@ class JQuantsConfig:
         # Override with environment variables
         env_config = cls.from_environment()
 
-        if env_config.mail_address:
-            config.mail_address = env_config.mail_address
-        if env_config.password:
-            config.password = env_config.password
-        if env_config.refresh_token:
-            config.refresh_token = env_config.refresh_token
+        if env_config.api_key:
+            config.api_key = env_config.api_key
         if os.environ.get("JQUANTS_CACHE_ENABLED"):
             config.cache_enabled = env_config.cache_enabled
         if os.environ.get("JQUANTS_CACHE_DIR"):
@@ -121,6 +115,6 @@ class JQuantsConfig:
 
         return config
 
-    def has_credentials(self) -> bool:
-        """Check if credentials are available."""
-        return bool(self.refresh_token or (self.mail_address and self.password))
+    def has_api_key(self) -> bool:
+        """Check if API key is available."""
+        return bool(self.api_key)

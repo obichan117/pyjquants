@@ -24,23 +24,23 @@ class TestIndex:
 
     @pytest.fixture
     def sample_index_price_response(self) -> list[dict[str, Any]]:
-        """Sample index price API response."""
+        """Sample index price API response (V2 abbreviated field names)."""
         return [
             {
                 "Date": "2024-01-15",
                 "Code": "0000",
-                "Open": "2500.0",
-                "High": "2520.0",
-                "Low": "2480.0",
-                "Close": "2510.0",
+                "O": "2500.0",
+                "H": "2520.0",
+                "L": "2480.0",
+                "C": "2510.0",
             },
             {
                 "Date": "2024-01-16",
                 "Code": "0000",
-                "Open": "2510.0",
-                "High": "2530.0",
-                "Low": "2500.0",
-                "Close": "2520.0",
+                "O": "2510.0",
+                "H": "2530.0",
+                "L": "2500.0",
+                "C": "2520.0",
             },
         ]
 

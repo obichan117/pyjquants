@@ -153,34 +153,29 @@ pyjquants/
     └── endpoints.py      # Declarative endpoint definitions
 ```
 
-## Authentication Flow
+## Authentication (V2 API Key)
+
+V2 API uses simple API key authentication - no token flow needed:
 
 ```mermaid
 sequenceDiagram
     participant User
     participant Session
-    participant TokenManager
     participant API
 
-    User->>Session: Session()
-    Session->>TokenManager: from_config(config)
+    User->>Session: Session(api_key)
+    Note over Session: Store API key from env or param
 
-    User->>Session: authenticate()
-    Session->>TokenManager: id_token()
-
-    alt Has refresh_token
-        TokenManager->>API: POST /token/auth_refresh
-        API-->>TokenManager: idToken
-    else Has email/password
-        TokenManager->>API: POST /token/auth_user
-        API-->>TokenManager: refreshToken
-        TokenManager->>API: POST /token/auth_refresh
-        API-->>TokenManager: idToken
-    end
-
-    TokenManager-->>Session: id_token (valid 24h)
-    Session-->>User: Ready
+    User->>Session: get("/equities/bars/daily")
+    Session->>API: GET with header x-api-key
+    API-->>Session: JSON response
+    Session-->>User: Parsed data
 ```
+
+**Key points:**
+- Get API key from [J-Quants dashboard](https://application.jpx-jquants.com/)
+- Set via `JQUANTS_API_KEY` environment variable
+- No token expiry or refresh needed
 
 ## Design Decisions
 

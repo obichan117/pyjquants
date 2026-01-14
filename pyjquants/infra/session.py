@@ -1,4 +1,4 @@
-"""HTTP session with authentication, caching, and rate limiting."""
+"""HTTP session with API key authentication, caching, and rate limiting."""
 
 from __future__ import annotations
 
@@ -6,7 +6,6 @@ import threading
 import time
 from collections import deque
 from collections.abc import Iterator
-from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import requests
@@ -18,10 +17,9 @@ from pyjquants.infra.exceptions import (
     AuthenticationError,
     ConfigurationError,
     RateLimitError,
-    TokenExpiredError,
 )
 
-BASE_URL = "https://api.jquants.com/v1"
+BASE_URL = "https://api.jquants.com/v2"
 
 # Global session instance
 _global_session: Session | None = None
@@ -34,7 +32,6 @@ def _get_global_session() -> Session:
     with _global_session_lock:
         if _global_session is None:
             _global_session = Session()
-            _global_session.authenticate()
         return _global_session
 
 
@@ -76,114 +73,36 @@ class RateLimiter:
             self._request_timestamps.append(time.time())
 
 
-class TokenManager:
-    """Manages J-Quants API token lifecycle."""
-
-    def __init__(
-        self,
-        mail_address: str | None = None,
-        password: str | None = None,
-        refresh_token: str | None = None,
-    ) -> None:
-        self._mail_address = mail_address
-        self._password = password
-        self._refresh_token = refresh_token
-        self._id_token: str | None = None
-        self._id_token_expiry: datetime | None = None
-        self._http_session = requests.Session()
-
-    @classmethod
-    def from_config(cls, config: JQuantsConfig) -> TokenManager:
-        """Create TokenManager from config object."""
-        return cls(
-            mail_address=config.mail_address,
-            password=config.password,
-            refresh_token=config.refresh_token,
-        )
-
-    def _obtain_refresh_token(self) -> str:
-        """Obtain refresh token from email/password."""
-        if not self._mail_address or not self._password:
-            raise ConfigurationError(
-                "No credentials available. Set JQUANTS_MAIL_ADDRESS and JQUANTS_PASSWORD."
-            )
-
-        response = self._http_session.post(
-            f"{BASE_URL}/token/auth_user",
-            json={"mailaddress": self._mail_address, "password": self._password},
-        )
-
-        if response.status_code != 200:
-            raise AuthenticationError(f"Failed to authenticate: {response.text}")
-
-        data = response.json()
-        self._refresh_token = data.get("refreshToken")
-        if not self._refresh_token:
-            raise AuthenticationError("No refresh token in response")
-
-        return self._refresh_token
-
-    def _obtain_id_token(self) -> str:
-        """Obtain ID token from refresh token."""
-        if not self._refresh_token:
-            self._obtain_refresh_token()
-
-        response = self._http_session.post(
-            f"{BASE_URL}/token/auth_refresh",
-            params={"refreshtoken": self._refresh_token},
-        )
-
-        if response.status_code != 200:
-            if self._mail_address and self._password:
-                self._refresh_token = None
-                self._obtain_refresh_token()
-                return self._obtain_id_token()
-            raise TokenExpiredError(f"Failed to refresh token: {response.text}")
-
-        data = response.json()
-        self._id_token = data.get("idToken")
-        if not self._id_token:
-            raise AuthenticationError("No ID token in response")
-
-        self._id_token_expiry = datetime.now(timezone.utc) + timedelta(hours=23)
-        return self._id_token
-
-    def id_token(self) -> str:
-        """Get valid ID token, refreshing if necessary."""
-        if self._id_token and self._id_token_expiry:
-            if datetime.now(timezone.utc) < self._id_token_expiry:
-                return self._id_token
-        return self._obtain_id_token()
-
-    def is_authenticated(self) -> bool:
-        """Check if we have valid credentials."""
-        return bool(self._refresh_token) or bool(self._mail_address and self._password)
-
-
 class Session:
-    """HTTP session with authentication, caching, and rate limiting."""
+    """HTTP session with API key authentication, caching, and rate limiting.
+
+    V2 API uses simple API key authentication via x-api-key header.
+    Get your API key from the J-Quants dashboard.
+
+    Example:
+        # Via environment variable (recommended)
+        os.environ["JQUANTS_API_KEY"] = "your_api_key"
+        session = Session()
+
+        # Or explicit
+        session = Session(api_key="your_api_key")
+    """
 
     def __init__(
         self,
-        mail_address: str | None = None,
-        password: str | None = None,
-        refresh_token: str | None = None,
+        api_key: str | None = None,
         config: JQuantsConfig | None = None,
         cache: Cache | None = None,
     ) -> None:
         if config is None:
             config = JQuantsConfig.load()
 
-        # Override config with explicit parameters
-        if mail_address:
-            config.mail_address = mail_address
-        if password:
-            config.password = password
-        if refresh_token:
-            config.refresh_token = refresh_token
+        # Override config with explicit parameter
+        if api_key:
+            config.api_key = api_key
 
         self._config = config
-        self._token_manager = TokenManager.from_config(config)
+        self._api_key = config.api_key
         self._rate_limiter = RateLimiter(config.requests_per_minute)
         self._http_session = requests.Session()
 
@@ -195,19 +114,17 @@ class Session:
         else:
             self._cache = NullCache()
 
-    def authenticate(self) -> Session:
-        """Authenticate and obtain tokens."""
-        if not self._config.has_credentials():
+        # Validate API key is available
+        if not self._api_key:
             raise ConfigurationError(
-                "No credentials available. Set JQUANTS_MAIL_ADDRESS and JQUANTS_PASSWORD."
+                "No API key available. Set JQUANTS_API_KEY environment variable "
+                "or pass api_key parameter."
             )
-        self._token_manager.id_token()
-        return self
 
     @property
     def is_authenticated(self) -> bool:
-        """Check if session is authenticated."""
-        return self._token_manager.is_authenticated()
+        """Check if session has API key."""
+        return bool(self._api_key)
 
     def get(
         self, endpoint: str, params: dict[str, Any] | None = None, use_cache: bool = True
@@ -216,9 +133,12 @@ class Session:
         return self._request("GET", endpoint, params=params, use_cache=use_cache)
 
     def get_paginated(
-        self, endpoint: str, params: dict[str, Any] | None = None, data_key: str = "list"
+        self, endpoint: str, params: dict[str, Any] | None = None, data_key: str = "data"
     ) -> Iterator[dict[str, Any]]:
-        """Iterate through paginated API responses."""
+        """Iterate through paginated API responses.
+
+        V2 API uses unified 'data' key for all responses.
+        """
         params = params.copy() if params else {}
 
         while True:
@@ -247,9 +167,8 @@ class Session:
             if cached is not None:
                 return dict(cached)
 
-        # Get auth token
-        token = self._token_manager.id_token()
-        headers = {"Authorization": f"Bearer {token}"}
+        # V2 uses x-api-key header
+        headers = {"x-api-key": self._api_key}
 
         # Make request
         url = f"{BASE_URL}{endpoint}"
@@ -264,14 +183,9 @@ class Session:
         if response.status_code == 429:
             raise RateLimitError("Rate limit exceeded")
         if response.status_code == 401:
-            self._token_manager._id_token = None
-            token = self._token_manager.id_token()
-            headers = {"Authorization": f"Bearer {token}"}
-            response = self._http_session.request(
-                method=method, url=url, params=params, headers=headers
-            )
-            if response.status_code == 401:
-                raise AuthenticationError("Authentication failed")
+            raise AuthenticationError("Invalid API key")
+        if response.status_code == 403:
+            raise AuthenticationError("API key does not have access to this endpoint")
 
         if response.status_code >= 400:
             raise APIError(response.status_code, response.text)

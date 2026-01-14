@@ -38,25 +38,25 @@ def sample_price_bar() -> PriceBar:
 
 @pytest.fixture
 def sample_price_data() -> list[dict[str, Any]]:
-    """Sample price data as returned by API."""
+    """Sample price data as returned by V2 API (abbreviated field names)."""
     return [
         {
             "Date": "2024-01-15",
-            "Open": "2500.0",
-            "High": "2550.0",
-            "Low": "2480.0",
-            "Close": "2530.0",
-            "Volume": 1000000,
-            "AdjustmentFactor": "1.0",
+            "O": "2500.0",
+            "H": "2550.0",
+            "L": "2480.0",
+            "C": "2530.0",
+            "Vo": 1000000,
+            "AdjFactor": "1.0",
         },
         {
             "Date": "2024-01-16",
-            "Open": "2530.0",
-            "High": "2580.0",
-            "Low": "2520.0",
-            "Close": "2570.0",
-            "Volume": 1200000,
-            "AdjustmentFactor": "1.0",
+            "O": "2530.0",
+            "H": "2580.0",
+            "L": "2520.0",
+            "C": "2570.0",
+            "Vo": 1200000,
+            "AdjFactor": "1.0",
         },
     ]
 

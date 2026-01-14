@@ -31,11 +31,10 @@ pip install pyjquants[dev]
 
 ### Environment Variables
 
-Set your J-Quants credentials:
+Set your J-Quants API key (get it from the [J-Quants dashboard](https://application.jpx-jquants.com/)):
 
 ```bash
-export JQUANTS_MAIL_ADDRESS="your_email@example.com"
-export JQUANTS_PASSWORD="your_password"
+export JQUANTS_API_KEY="your_api_key_here"
 ```
 
 ### TOML Configuration (Optional)
@@ -43,16 +42,15 @@ export JQUANTS_PASSWORD="your_password"
 Create `~/.jquants/config.toml`:
 
 ```toml
-[credentials]
-mail_address = "your_email@example.com"
-password = "your_password"
+[auth]
+api_key = "your_api_key_here"
 
 [cache]
 enabled = true
 ttl_seconds = 3600
 
 [rate_limit]
-requests_per_minute = 60
+requests_per_minute = 60  # V2 tiers: Free=5, Light=60, Standard=120, Premium=500
 ```
 
 ## Basic Usage

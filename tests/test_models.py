@@ -18,14 +18,14 @@ class TestPriceBar:
     """Tests for PriceBar model."""
 
     def test_create_from_dict(self) -> None:
-        """Test creating PriceBar from API response dict."""
+        """Test creating PriceBar from API response dict (V2 abbreviated names)."""
         data = {
             "Date": "2024-01-15",
-            "Open": "2500.0",
-            "High": "2550.0",
-            "Low": "2480.0",
-            "Close": "2530.0",
-            "Volume": 1000000,
+            "O": "2500.0",
+            "H": "2550.0",
+            "L": "2480.0",
+            "C": "2530.0",
+            "Vo": 1000000,
         }
         bar = PriceBar.model_validate(data)
 
@@ -40,11 +40,11 @@ class TestPriceBar:
         """Test parsing YYYYMMDD date format."""
         data = {
             "Date": "20240115",
-            "Open": "2500.0",
-            "High": "2550.0",
-            "Low": "2480.0",
-            "Close": "2530.0",
-            "Volume": 1000000,
+            "O": "2500.0",
+            "H": "2550.0",
+            "L": "2480.0",
+            "C": "2530.0",
+            "Vo": 1000000,
         }
         bar = PriceBar.model_validate(data)
         assert bar.date == datetime.date(2024, 1, 15)

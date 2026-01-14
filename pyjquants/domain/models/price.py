@@ -1,4 +1,4 @@
-"""Price-related models."""
+"""Price-related models for J-Quants API V2."""
 
 from __future__ import annotations
 
@@ -12,22 +12,25 @@ from pyjquants.domain.models.base import BaseModel
 
 
 class PriceBar(BaseModel):
-    """Single OHLCV price bar."""
+    """Single OHLCV price bar.
+
+    V2 API uses abbreviated field names (O, H, L, C, Vo, Va).
+    """
 
     date: datetime.date = Field(alias="Date")
-    open: Decimal = Field(alias="Open")
-    high: Decimal = Field(alias="High")
-    low: Decimal = Field(alias="Low")
-    close: Decimal = Field(alias="Close")
-    volume: int = Field(alias="Volume", default=0)
-    turnover_value: Decimal | None = Field(alias="TurnoverValue", default=None)
+    open: Decimal = Field(alias="O")
+    high: Decimal = Field(alias="H")
+    low: Decimal = Field(alias="L")
+    close: Decimal = Field(alias="C")
+    volume: int = Field(alias="Vo", default=0)
+    turnover_value: Decimal | None = Field(alias="Va", default=None)
 
-    adjustment_factor: Decimal = Field(alias="AdjustmentFactor", default=Decimal("1.0"))
-    adjustment_open: Decimal | None = Field(alias="AdjustmentOpen", default=None)
-    adjustment_high: Decimal | None = Field(alias="AdjustmentHigh", default=None)
-    adjustment_low: Decimal | None = Field(alias="AdjustmentLow", default=None)
-    adjustment_close: Decimal | None = Field(alias="AdjustmentClose", default=None)
-    adjustment_volume: int | None = Field(alias="AdjustmentVolume", default=None)
+    adjustment_factor: Decimal = Field(alias="AdjFactor", default=Decimal("1.0"))
+    adjustment_open: Decimal | None = Field(alias="AdjO", default=None)
+    adjustment_high: Decimal | None = Field(alias="AdjH", default=None)
+    adjustment_low: Decimal | None = Field(alias="AdjL", default=None)
+    adjustment_close: Decimal | None = Field(alias="AdjC", default=None)
+    adjustment_volume: int | None = Field(alias="AdjVo", default=None)
 
     @field_validator("date", mode="before")
     @classmethod
@@ -107,14 +110,17 @@ class PriceBar(BaseModel):
 
 
 class IndexPrice(BaseModel):
-    """Index price data."""
+    """Index price data.
+
+    V2 API uses abbreviated field names.
+    """
 
     date: datetime.date = Field(alias="Date")
     code: str = Field(alias="Code")
-    open: Decimal | None = Field(alias="Open", default=None)
-    high: Decimal | None = Field(alias="High", default=None)
-    low: Decimal | None = Field(alias="Low", default=None)
-    close: Decimal | None = Field(alias="Close", default=None)
+    open: Decimal | None = Field(alias="O", default=None)
+    high: Decimal | None = Field(alias="H", default=None)
+    low: Decimal | None = Field(alias="L", default=None)
+    close: Decimal | None = Field(alias="C", default=None)
 
     @field_validator("date", mode="before")
     @classmethod

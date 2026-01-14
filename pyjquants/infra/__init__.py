@@ -9,7 +9,6 @@ from pyjquants.infra.exceptions import (
     NotFoundError,
     PyJQuantsError,
     RateLimitError,
-    TokenExpiredError,
     ValidationError,
 )
 from pyjquants.infra.session import Session
@@ -20,7 +19,6 @@ __all__ = [
     "Session",
     "PyJQuantsError",
     "AuthenticationError",
-    "TokenExpiredError",
     "APIError",
     "RateLimitError",
     "NotFoundError",

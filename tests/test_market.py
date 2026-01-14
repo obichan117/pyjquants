@@ -49,7 +49,8 @@ class TestMarket:
         self, mock_session: MagicMock, sample_calendar_response: list[dict[str, Any]]
     ) -> None:
         """Test Market.trading_calendar returns list of TradingCalendarDay."""
-        mock_session.get.return_value = {"trading_calendar": sample_calendar_response}
+        # V2 uses "data" key for all responses
+        mock_session.get.return_value = {"data": sample_calendar_response}
 
         market = Market(session=mock_session)
         calendar = market.trading_calendar(
@@ -67,7 +68,7 @@ class TestMarket:
     ) -> None:
         """Test Market.is_trading_day returns True for trading day."""
         mock_session.get.return_value = {
-            "trading_calendar": [{"Date": "2024-01-15", "HolidayDivision": "0"}]
+            "data": [{"Date": "2024-01-15", "HolidayDivision": "0"}]
         }
 
         market = Market(session=mock_session)
@@ -80,7 +81,7 @@ class TestMarket:
     ) -> None:
         """Test Market.is_trading_day returns False for holiday."""
         mock_session.get.return_value = {
-            "trading_calendar": [{"Date": "2024-01-01", "HolidayDivision": "1"}]
+            "data": [{"Date": "2024-01-01", "HolidayDivision": "1"}]
         }
 
         market = Market(session=mock_session)
@@ -92,7 +93,7 @@ class TestMarket:
         self, mock_session: MagicMock
     ) -> None:
         """Test Market.is_trading_day returns False when date not found."""
-        mock_session.get.return_value = {"trading_calendar": []}
+        mock_session.get.return_value = {"data": []}
 
         market = Market(session=mock_session)
         result = market.is_trading_day(datetime.date(2099, 1, 1))
@@ -103,7 +104,7 @@ class TestMarket:
         self, mock_session: MagicMock, sample_calendar_response: list[dict[str, Any]]
     ) -> None:
         """Test Market.trading_days returns list of trading days."""
-        mock_session.get.return_value = {"trading_calendar": sample_calendar_response}
+        mock_session.get.return_value = {"data": sample_calendar_response}
 
         market = Market(session=mock_session)
         days = market.trading_days(
@@ -122,8 +123,8 @@ class TestMarket:
         """Test Market.next_trading_day."""
         # First call returns holiday, second returns trading day
         mock_session.get.side_effect = [
-            {"trading_calendar": [{"Date": "2024-01-14", "HolidayDivision": "1"}]},
-            {"trading_calendar": [{"Date": "2024-01-15", "HolidayDivision": "0"}]},
+            {"data": [{"Date": "2024-01-14", "HolidayDivision": "1"}]},
+            {"data": [{"Date": "2024-01-15", "HolidayDivision": "0"}]},
         ]
 
         market = Market(session=mock_session)
@@ -137,8 +138,8 @@ class TestMarket:
         """Test Market.prev_trading_day."""
         # First call returns holiday, second returns trading day
         mock_session.get.side_effect = [
-            {"trading_calendar": [{"Date": "2024-01-14", "HolidayDivision": "1"}]},
-            {"trading_calendar": [{"Date": "2024-01-13", "HolidayDivision": "0"}]},
+            {"data": [{"Date": "2024-01-14", "HolidayDivision": "1"}]},
+            {"data": [{"Date": "2024-01-13", "HolidayDivision": "0"}]},
         ]
 
         market = Market(session=mock_session)
@@ -150,7 +151,7 @@ class TestMarket:
         self, mock_session: MagicMock, sample_sectors_response: list[dict[str, Any]]
     ) -> None:
         """Test Market.sectors_33 property."""
-        mock_session.get.return_value = {"sectors_topix33": sample_sectors_response}
+        mock_session.get.return_value = {"data": sample_sectors_response}
 
         market = Market(session=mock_session)
         sectors = market.sectors_33
@@ -167,7 +168,7 @@ class TestMarket:
             {"code": "1", "name": "食品"},
             {"code": "2", "name": "エネルギー資源"},
         ]
-        mock_session.get.return_value = {"sectors_topix17": sectors_17_response}
+        mock_session.get.return_value = {"data": sectors_17_response}
 
         market = Market(session=mock_session)
         sectors = market.sectors_17
@@ -178,7 +179,7 @@ class TestMarket:
         self, mock_session: MagicMock, sample_sectors_response: list[dict[str, Any]]
     ) -> None:
         """Test Market.sectors is alias for sectors_33."""
-        mock_session.get.return_value = {"sectors_topix33": sample_sectors_response}
+        mock_session.get.return_value = {"data": sample_sectors_response}
 
         market = Market(session=mock_session)
 

@@ -1,6 +1,7 @@
-"""J-Quants API endpoint definitions.
+"""J-Quants API V2 endpoint definitions.
 
-All J-Quants endpoints defined in one place for easy maintenance.
+All J-Quants V2 endpoints defined in one place for easy maintenance.
+V2 uses unified 'data' response key for all endpoints.
 """
 
 from __future__ import annotations
@@ -30,8 +31,8 @@ class Endpoint(Generic[T]):
     """Declarative endpoint definition.
 
     Attributes:
-        path: API endpoint path (e.g., "/prices/daily_quotes")
-        response_key: Key in JSON response containing data
+        path: API endpoint path (e.g., "/equities/bars/daily")
+        response_key: Key in JSON response containing data (V2 uses "data" for all)
         model: Pydantic model class for parsing
         paginated: Whether endpoint uses pagination
     """
@@ -42,28 +43,32 @@ class Endpoint(Generic[T]):
     paginated: bool = False
 
 
-# === PRICES ===
+# === EQUITIES ===
 
 DAILY_QUOTES: Endpoint[PriceBar] = Endpoint(
-    path="/prices/daily_quotes",
-    response_key="daily_quotes",
+    path="/equities/bars/daily",
+    response_key="data",
     model="PriceBar",  # type: ignore[arg-type]
     paginated=True,
 )
 
 PRICES_AM: Endpoint[PriceBar] = Endpoint(
-    path="/prices/prices_am",
-    response_key="prices_am",
+    path="/equities/bars/daily/am",
+    response_key="data",
     model="PriceBar",  # type: ignore[arg-type]
 )
 
-
-# === COMPANY INFO ===
-
 LISTED_INFO: Endpoint[StockInfo] = Endpoint(
-    path="/listed/info",
-    response_key="info",
+    path="/equities/master",
+    response_key="data",
     model="StockInfo",  # type: ignore[arg-type]
+    paginated=True,
+)
+
+EARNINGS_CALENDAR: Endpoint[EarningsAnnouncement] = Endpoint(
+    path="/equities/earnings-calendar",
+    response_key="data",
+    model="EarningsAnnouncement",  # type: ignore[arg-type]
     paginated=True,
 )
 
@@ -71,23 +76,16 @@ LISTED_INFO: Endpoint[StockInfo] = Endpoint(
 # === FINANCIALS ===
 
 STATEMENTS: Endpoint[FinancialStatement] = Endpoint(
-    path="/fins/statements",
-    response_key="statements",
+    path="/fins/summary",
+    response_key="data",
     model="FinancialStatement",  # type: ignore[arg-type]
     paginated=True,
 )
 
 DIVIDENDS: Endpoint[Dividend] = Endpoint(
     path="/fins/dividend",
-    response_key="dividend",
+    response_key="data",
     model="Dividend",  # type: ignore[arg-type]
-    paginated=True,
-)
-
-EARNINGS_CALENDAR: Endpoint[EarningsAnnouncement] = Endpoint(
-    path="/fins/announcement",
-    response_key="announcement",
-    model="EarningsAnnouncement",  # type: ignore[arg-type]
     paginated=True,
 )
 
@@ -95,50 +93,51 @@ EARNINGS_CALENDAR: Endpoint[EarningsAnnouncement] = Endpoint(
 # === MARKET DATA ===
 
 TRADING_CALENDAR: Endpoint[TradingCalendarDay] = Endpoint(
-    path="/markets/trading_calendar",
-    response_key="trading_calendar",
+    path="/markets/calendar",
+    response_key="data",
     model="TradingCalendarDay",  # type: ignore[arg-type]
 )
 
+# Note: Sector endpoints may not exist in V2 - verify with API docs
 SECTORS_17: Endpoint[Sector] = Endpoint(
     path="/markets/sectors/topix17",
-    response_key="sectors_topix17",
+    response_key="data",
     model="Sector",  # type: ignore[arg-type]
 )
 
 SECTORS_33: Endpoint[Sector] = Endpoint(
     path="/markets/sectors/topix33",
-    response_key="sectors_topix33",
+    response_key="data",
     model="Sector",  # type: ignore[arg-type]
 )
 
 SHORT_SELLING: Endpoint[ShortSelling] = Endpoint(
-    path="/markets/short_selling",
-    response_key="short_selling",
+    path="/markets/short-ratio",
+    response_key="data",
     model="ShortSelling",  # type: ignore[arg-type]
     paginated=True,
 )
 
 MARGIN_INTEREST: Endpoint[MarginInterest] = Endpoint(
-    path="/markets/weekly_margin_interest",
-    response_key="weekly_margin_interest",
+    path="/markets/margin-interest",
+    response_key="data",
     model="MarginInterest",  # type: ignore[arg-type]
     paginated=True,
 )
 
 
-# === INDEX ===
+# === INDICES ===
 
 INDEX_PRICES: Endpoint[IndexPrice] = Endpoint(
-    path="/indices",
-    response_key="indices",
+    path="/indices/bars/daily",
+    response_key="data",
     model="IndexPrice",  # type: ignore[arg-type]
     paginated=True,
 )
 
 TOPIX: Endpoint[IndexPrice] = Endpoint(
-    path="/indices/topix",
-    response_key="topix",
+    path="/indices/bars/daily/topix",
+    response_key="data",
     model="IndexPrice",  # type: ignore[arg-type]
     paginated=True,
 )
