@@ -5,20 +5,33 @@ from __future__ import annotations
 import datetime
 from decimal import Decimal
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock
 
 import pytest
 
 from pyjquants.domain.models import PriceBar, StockInfo
+from pyjquants.infra.config import Tier
 from pyjquants.infra.session import Session
 
 
 @pytest.fixture
 def mock_session() -> MagicMock:
-    """Create a mock session for testing."""
+    """Create a mock session for testing (Standard tier)."""
     session = MagicMock(spec=Session)
     session.get.return_value = {}
     session.get_paginated.return_value = iter([])
+    # Set tier to STANDARD to allow all endpoints
+    type(session).tier = PropertyMock(return_value=Tier.STANDARD)
+    return session
+
+
+@pytest.fixture
+def mock_session_light() -> MagicMock:
+    """Create a mock session with Light tier for testing tier restrictions."""
+    session = MagicMock(spec=Session)
+    session.get.return_value = {}
+    session.get_paginated.return_value = iter([])
+    type(session).tier = PropertyMock(return_value=Tier.LIGHT)
     return session
 
 

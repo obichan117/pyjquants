@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pandas as pd
 import pytest
 
 from pyjquants.domain.index import NIKKEI225_CODE, TOPIX_CODE, Index
+from pyjquants.infra.config import Tier
 
 
 class TestIndex:
@@ -16,10 +17,11 @@ class TestIndex:
 
     @pytest.fixture
     def mock_session(self) -> MagicMock:
-        """Create a mock session."""
+        """Create a mock session with Standard tier."""
         session = MagicMock()
         session.get.return_value = {}
         session.get_paginated.return_value = iter([])
+        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
         return session
 
     @pytest.fixture
@@ -127,8 +129,9 @@ class TestIndexFactoryMethods:
 
     @pytest.fixture
     def mock_session(self) -> MagicMock:
-        """Create a mock session."""
+        """Create a mock session with Standard tier."""
         session = MagicMock()
+        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
         return session
 
     def test_topix_factory(self, mock_session: MagicMock) -> None:

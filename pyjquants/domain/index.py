@@ -10,6 +10,8 @@ import pandas as pd
 from pyjquants.adapters.endpoints import INDEX_PRICES, TOPIX
 from pyjquants.domain.utils import parse_date, parse_period
 from pyjquants.infra.client import JQuantsClient
+from pyjquants.infra.config import Tier
+from pyjquants.infra.exceptions import TierError
 from pyjquants.infra.session import _get_global_session
 
 if TYPE_CHECKING:
@@ -79,6 +81,8 @@ class Index:
     ) -> pd.DataFrame:
         """Get price history (yfinance-style).
 
+        Note: Non-TOPIX indices (e.g., Nikkei 225) require Standard tier or higher.
+
         Args:
             period: Time period (e.g., "30d", "1y"). Ignored if start/end provided.
             start: Start date (YYYY-MM-DD string or date object)
@@ -105,6 +109,13 @@ class Index:
             # TOPIX endpoint doesn't need code param
             params.pop("code", None)
         else:
+            # Non-TOPIX indices require Standard+ tier
+            if self._session.tier < Tier.STANDARD:
+                raise TierError(
+                    method="history",
+                    required_tier=Tier.STANDARD.value,
+                    current_tier=self._session.tier.value,
+                )
             endpoint = INDEX_PRICES
 
         df = self._client.fetch_dataframe(endpoint, params)

@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pandas as pd
 import pytest
 
 from pyjquants.domain.ticker import Ticker, download, search
+from pyjquants.infra.config import Tier
 from pyjquants.infra.exceptions import TickerNotFoundError
 
 
@@ -17,10 +18,11 @@ class TestTicker:
 
     @pytest.fixture
     def mock_session(self) -> MagicMock:
-        """Create a mock session."""
+        """Create a mock session with Standard tier."""
         session = MagicMock()
         session.get.return_value = {}
         session.get_paginated.return_value = iter([])
+        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
         return session
 
     @pytest.fixture
@@ -170,8 +172,9 @@ class TestDownload:
 
     @pytest.fixture
     def mock_session(self) -> MagicMock:
-        """Create a mock session."""
+        """Create a mock session with Standard tier."""
         session = MagicMock()
+        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
         return session
 
     def test_download_empty_codes(self, mock_session: MagicMock) -> None:
@@ -244,8 +247,9 @@ class TestSearch:
 
     @pytest.fixture
     def mock_session(self) -> MagicMock:
-        """Create a mock session."""
+        """Create a mock session with Standard tier."""
         session = MagicMock()
+        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
         return session
 
     @pytest.fixture
@@ -352,24 +356,26 @@ class TestTickerNewMethods:
 
     @pytest.fixture
     def mock_session(self) -> MagicMock:
-        """Create a mock session."""
+        """Create a mock session with Standard tier."""
         session = MagicMock()
         session.get.return_value = {}
         session.get_paginated.return_value = iter([])
+        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
         return session
 
     @pytest.fixture
-    def sample_price_response(self) -> list[dict[str, Any]]:
-        """Sample AM price data (same structure as daily)."""
+    def sample_am_price_response(self) -> list[dict[str, Any]]:
+        """Sample AM price data (uses MO, MH, ML, MC for morning session)."""
         return [
             {
                 "Date": "2024-01-15",
-                "O": "2500.0",
-                "H": "2530.0",
-                "L": "2495.0",
-                "C": "2520.0",
-                "Vo": 500000,
-                "AdjFactor": "1.0",
+                "Code": "72030",
+                "MO": "2500.0",
+                "MH": "2530.0",
+                "ML": "2495.0",
+                "MC": "2520.0",
+                "MVo": 500000,
+                "MVa": "1250000000",
             },
         ]
 
@@ -390,11 +396,11 @@ class TestTickerNewMethods:
         ]
 
     def test_history_am(
-        self, mock_session: MagicMock, sample_price_response: list[dict[str, Any]]
+        self, mock_session: MagicMock, sample_am_price_response: list[dict[str, Any]]
     ) -> None:
         """Test Ticker.history_am returns AM session prices."""
         # AM endpoint is not paginated, so mock get() instead of get_paginated()
-        mock_session.get.return_value = {"data": sample_price_response}
+        mock_session.get.return_value = {"data": sample_am_price_response}
 
         ticker = Ticker("7203", session=mock_session)
         df = ticker.history_am(period="30d")
@@ -437,3 +443,53 @@ class TestTickerNewMethods:
 
         assert isinstance(df, pd.DataFrame)
         assert df.empty
+
+
+class TestTierRestrictions:
+    """Tests for tier-restricted methods."""
+
+    @pytest.fixture
+    def mock_session_light(self) -> MagicMock:
+        """Create a mock session with Light tier."""
+        session = MagicMock()
+        session.get.return_value = {}
+        session.get_paginated.return_value = iter([])
+        type(session).tier = PropertyMock(return_value=Tier.LIGHT)
+        return session
+
+    def test_history_am_requires_standard(self, mock_session_light: MagicMock) -> None:
+        """Test Ticker.history_am raises TierError for Light tier."""
+        from pyjquants.infra.exceptions import TierError
+
+        ticker = Ticker("7203", session=mock_session_light)
+
+        with pytest.raises(TierError) as exc_info:
+            ticker.history_am(period="30d")
+
+        assert "history_am" in str(exc_info.value)
+        assert "standard" in str(exc_info.value).lower()
+        assert "light" in str(exc_info.value).lower()
+
+    def test_dividends_requires_standard(self, mock_session_light: MagicMock) -> None:
+        """Test Ticker.dividends raises TierError for Light tier."""
+        from pyjquants.infra.exceptions import TierError
+
+        ticker = Ticker("7203", session=mock_session_light)
+
+        with pytest.raises(TierError) as exc_info:
+            _ = ticker.dividends
+
+        assert "dividends" in str(exc_info.value)
+        assert "standard" in str(exc_info.value).lower()
+
+    def test_financial_details_requires_standard(self, mock_session_light: MagicMock) -> None:
+        """Test Ticker.financial_details raises TierError for Light tier."""
+        from pyjquants.infra.exceptions import TierError
+
+        ticker = Ticker("7203", session=mock_session_light)
+
+        with pytest.raises(TierError) as exc_info:
+            _ = ticker.financial_details
+
+        assert "financial_details" in str(exc_info.value)
+        assert "standard" in str(exc_info.value).lower()

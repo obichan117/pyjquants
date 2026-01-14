@@ -59,11 +59,17 @@ class MarginInterest(BaseModel):
 
 
 class ShortSelling(BaseModel):
-    """Short selling data."""
+    """Short sale value and ratio by sector.
+
+    Data from J-Quants /markets/short-ratio endpoint.
+    Contains long selling and short selling (with/without price restrictions) by 33-sector.
+    """
 
     date: datetime.date = Field(alias="Date")
-    sector_33_code: str = Field(alias="Sector33Code")
-    selling_value: float | None = Field(alias="SellingValue", default=None)
+    sector_33_code: str = Field(alias="S33")
+    long_selling_value: Decimal | None = Field(alias="SellExShortVa", default=None)
+    short_with_restriction_value: Decimal | None = Field(alias="ShrtWithResVa", default=None)
+    short_no_restriction_value: Decimal | None = Field(alias="ShrtNoResVa", default=None)
 
     @field_validator("date", mode="before")
     @classmethod
@@ -75,6 +81,18 @@ class ShortSelling(BaseModel):
                 return datetime.date.fromisoformat(v)
             return datetime.date(int(v[:4]), int(v[4:6]), int(v[6:8]))
         raise ValueError(f"Cannot parse date: {v}")
+
+    @field_validator(
+        "long_selling_value",
+        "short_with_restriction_value",
+        "short_no_restriction_value",
+        mode="before",
+    )
+    @classmethod
+    def parse_decimal(cls, v: Any) -> Decimal | None:
+        if v is None or v == "":
+            return None
+        return Decimal(str(v))
 
 
 class InvestorTrades(BaseModel):
@@ -304,30 +322,47 @@ class MarginAlert(BaseModel):
     """Margin trading daily publication (alert) data.
 
     Contains margin trading outstanding for issues subject to daily publication.
+    Includes both negotiable and standardized margin positions.
     """
 
     pub_date: datetime.date = Field(alias="PubDate")
     code: str = Field(alias="Code")
     apply_date: datetime.date | None = Field(alias="AppDate", default=None)
 
-    # Short positions
+    # Publication reason (map of flags)
+    pub_reason: dict[str, Any] | None = Field(alias="PubReason", default=None)
+
+    # Total short positions
     short_outstanding: int | None = Field(alias="ShrtOut", default=None)
-    short_outstanding_change: int | None = Field(alias="ShrtOutChg", default=None)
+    short_outstanding_change: int | str | None = Field(alias="ShrtOutChg", default=None)
     short_outstanding_ratio: Decimal | None = Field(alias="ShrtOutRatio", default=None)
 
-    # Long positions
+    # Total long positions
     long_outstanding: int | None = Field(alias="LongOut", default=None)
-    long_outstanding_change: int | None = Field(alias="LongOutChg", default=None)
+    long_outstanding_change: int | str | None = Field(alias="LongOutChg", default=None)
     long_outstanding_ratio: Decimal | None = Field(alias="LongOutRatio", default=None)
 
     # Short/Long ratio
     sl_ratio: Decimal | None = Field(alias="SLRatio", default=None)
 
-    # Negotiable/Standard breakdown
+    # Negotiable short breakdown
     short_neg_outstanding: int | None = Field(alias="ShrtNegOut", default=None)
+    short_neg_outstanding_change: int | str | None = Field(alias="ShrtNegOutChg", default=None)
+
+    # Standardized short breakdown
     short_std_outstanding: int | None = Field(alias="ShrtStdOut", default=None)
+    short_std_outstanding_change: int | str | None = Field(alias="ShrtStdOutChg", default=None)
+
+    # Negotiable long breakdown
     long_neg_outstanding: int | None = Field(alias="LongNegOut", default=None)
+    long_neg_outstanding_change: int | str | None = Field(alias="LongNegOutChg", default=None)
+
+    # Standardized long breakdown
     long_std_outstanding: int | None = Field(alias="LongStdOut", default=None)
+    long_std_outstanding_change: int | str | None = Field(alias="LongStdOutChg", default=None)
+
+    # TSE margin regulation classification
+    tse_margin_reg_class: str | None = Field(alias="TSEMrgnRegCls", default=None)
 
     @field_validator("pub_date", "apply_date", mode="before")
     @classmethod
@@ -342,14 +377,9 @@ class MarginAlert(BaseModel):
             return datetime.date(int(v[:4]), int(v[4:6]), int(v[6:8]))
         return None
 
-    @field_validator(
-        "short_outstanding_ratio",
-        "long_outstanding_ratio",
-        "sl_ratio",
-        mode="before",
-    )
+    @field_validator("sl_ratio", "short_outstanding_ratio", "long_outstanding_ratio", mode="before")
     @classmethod
     def parse_decimal(cls, v: Any) -> Decimal | None:
-        if v is None or v == "":
+        if v is None or v == "" or v == "*":
             return None
         return Decimal(str(v))

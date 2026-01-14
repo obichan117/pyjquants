@@ -18,6 +18,8 @@ from pyjquants.adapters.endpoints import (
 from pyjquants.domain.info import TickerInfo
 from pyjquants.domain.utils import parse_date, parse_period
 from pyjquants.infra.client import JQuantsClient
+from pyjquants.infra.config import Tier
+from pyjquants.infra.decorators import requires_tier
 from pyjquants.infra.exceptions import TickerNotFoundError
 from pyjquants.infra.session import _get_global_session
 
@@ -114,6 +116,7 @@ class Ticker:
 
         return df.reset_index(drop=True)
 
+    @requires_tier(Tier.STANDARD)
     def history_am(
         self,
         period: str | None = "30d",
@@ -161,13 +164,15 @@ class Ticker:
         return self._client.fetch_dataframe(STATEMENTS, {"code": self.code})
 
     @property
+    @requires_tier(Tier.STANDARD)
     def dividends(self) -> pd.DataFrame:
-        """Dividend history."""
+        """Dividend history (Standard+ tier)."""
         return self._client.fetch_dataframe(DIVIDENDS, {"code": self.code})
 
     @property
+    @requires_tier(Tier.STANDARD)
     def financial_details(self) -> pd.DataFrame:
-        """Full financial statement data (BS/PL/CF).
+        """Full financial statement data (BS/PL/CF) (Standard+ tier).
 
         Provides detailed balance sheet, income statement, and cash flow data.
         More comprehensive than the `financials` property.

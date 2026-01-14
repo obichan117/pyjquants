@@ -10,6 +10,8 @@ import pandas as pd
 from pyjquants.adapters.endpoints import INDEX_OPTIONS, OPTIONS
 from pyjquants.domain.utils import parse_date, parse_period
 from pyjquants.infra.client import JQuantsClient
+from pyjquants.infra.config import Tier
+from pyjquants.infra.decorators import requires_tier
 from pyjquants.infra.session import _get_global_session
 
 if TYPE_CHECKING:
@@ -52,6 +54,7 @@ class Options:
     def __hash__(self) -> int:
         return hash(self.code)
 
+    @requires_tier(Tier.STANDARD)
     def history(
         self,
         period: str | None = "30d",
@@ -59,6 +62,8 @@ class Options:
         end: str | date | None = None,
     ) -> pd.DataFrame:
         """Get options price history (yfinance-style).
+
+        Requires Standard tier or higher.
 
         Args:
             period: Time period (e.g., "30d", "1y"). Ignored if start/end provided.
@@ -118,6 +123,7 @@ class IndexOptions:
     def __str__(self) -> str:
         return "Nikkei 225 Index Options"
 
+    @requires_tier(Tier.STANDARD)
     def history(
         self,
         period: str | None = "30d",
@@ -125,6 +131,8 @@ class IndexOptions:
         end: str | date | None = None,
     ) -> pd.DataFrame:
         """Get Nikkei 225 index options price history.
+
+        Requires Standard tier or higher.
 
         Args:
             period: Time period (e.g., "30d", "1y"). Ignored if start/end provided.

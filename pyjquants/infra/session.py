@@ -11,7 +11,7 @@ from typing import Any
 import requests
 
 from pyjquants.infra.cache import Cache, NullCache, TTLCache
-from pyjquants.infra.config import JQuantsConfig
+from pyjquants.infra.config import JQuantsConfig, Tier
 from pyjquants.infra.exceptions import (
     APIError,
     AuthenticationError,
@@ -125,6 +125,11 @@ class Session:
     def is_authenticated(self) -> bool:
         """Check if session has API key."""
         return bool(self._api_key)
+
+    @property
+    def tier(self) -> Tier:
+        """Get subscription tier."""
+        return self._config.tier
 
     def get(
         self, endpoint: str, params: dict[str, Any] | None = None, use_cache: bool = True

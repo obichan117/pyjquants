@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import datetime
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock
 
 import pytest
 
 from pyjquants.domain.market import Market
+from pyjquants.infra.config import Tier
 
 
 class TestMarket:
@@ -16,10 +17,11 @@ class TestMarket:
 
     @pytest.fixture
     def mock_session(self) -> MagicMock:
-        """Create a mock session."""
+        """Create a mock session with Standard tier."""
         session = MagicMock()
         session.get.return_value = {}
         session.get_paginated.return_value = iter([])
+        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
         return session
 
     @pytest.fixture
@@ -415,17 +417,21 @@ class TestMarket:
 
     @pytest.fixture
     def sample_short_ratio_response(self) -> list[dict[str, Any]]:
-        """Sample short selling ratio data."""
+        """Sample short selling ratio data (V2 API field names)."""
         return [
             {
                 "Date": "2024-01-15",
-                "Sector33Code": "3050",
-                "SellingValue": 1500000000.0,
+                "S33": "3050",
+                "SellExShortVa": 1000000000.0,
+                "ShrtWithResVa": 300000000.0,
+                "ShrtNoResVa": 200000000.0,
             },
             {
                 "Date": "2024-01-15",
-                "Sector33Code": "3650",
-                "SellingValue": 2000000000.0,
+                "S33": "3650",
+                "SellExShortVa": 1500000000.0,
+                "ShrtWithResVa": 400000000.0,
+                "ShrtNoResVa": 100000000.0,
             },
         ]
 
@@ -444,7 +450,7 @@ class TestMarket:
         assert len(df) == 2
         assert "date" in df.columns
         assert "sector_33_code" in df.columns
-        assert "selling_value" in df.columns
+        assert "long_selling_value" in df.columns
 
     def test_short_ratio_empty(self, mock_session: MagicMock) -> None:
         """Test Market.short_ratio returns empty DataFrame when no data."""

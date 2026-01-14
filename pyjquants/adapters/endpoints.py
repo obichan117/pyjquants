@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 
 if TYPE_CHECKING:
     from pyjquants.domain.models import (
+        AMPriceBar,
         BreakdownTrade,
         Dividend,
         EarningsAnnouncement,
@@ -73,10 +74,10 @@ EARNINGS_CALENDAR: Endpoint[EarningsAnnouncement] = Endpoint(
     paginated=True,
 )
 
-DAILY_QUOTES_AM: Endpoint[PriceBar] = Endpoint(
+DAILY_QUOTES_AM: Endpoint[AMPriceBar] = Endpoint(
     path="/equities/bars/daily/am",
     response_key="data",
-    model="PriceBar",  # type: ignore[arg-type]
+    model="AMPriceBar",  # type: ignore[arg-type]
 )
 
 INVESTOR_TYPES: Endpoint[InvestorTrades] = Endpoint(

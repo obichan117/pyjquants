@@ -50,6 +50,18 @@ class ConfigurationError(PyJQuantsError):
     pass
 
 
+class TierError(PyJQuantsError):
+    """Operation requires a higher subscription tier."""
+
+    def __init__(self, method: str, required_tier: str, current_tier: str) -> None:
+        self.method = method
+        self.required_tier = required_tier
+        self.current_tier = current_tier
+        super().__init__(
+            f"{method}() requires {required_tier}+ tier, but you have {current_tier}"
+        )
+
+
 class TickerNotFoundError(NotFoundError):
     """Ticker not found in J-Quants API."""
 

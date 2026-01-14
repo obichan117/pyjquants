@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import datetime
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock
 
 import pandas as pd
 import pytest
 
 from pyjquants.domain.futures import Futures
 from pyjquants.domain.options import IndexOptions, Options
+from pyjquants.infra.config import Tier
 
 
 class TestFutures:
@@ -18,10 +19,11 @@ class TestFutures:
 
     @pytest.fixture
     def mock_session(self) -> MagicMock:
-        """Create a mock session."""
+        """Create a mock session with Standard tier."""
         session = MagicMock()
         session.get.return_value = {}
         session.get_paginated.return_value = iter([])
+        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
         return session
 
     @pytest.fixture
@@ -114,10 +116,11 @@ class TestOptions:
 
     @pytest.fixture
     def mock_session(self) -> MagicMock:
-        """Create a mock session."""
+        """Create a mock session with Standard tier."""
         session = MagicMock()
         session.get.return_value = {}
         session.get_paginated.return_value = iter([])
+        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
         return session
 
     @pytest.fixture
@@ -200,10 +203,11 @@ class TestIndexOptions:
 
     @pytest.fixture
     def mock_session(self) -> MagicMock:
-        """Create a mock session."""
+        """Create a mock session with Standard tier."""
         session = MagicMock()
         session.get.return_value = {}
         session.get_paginated.return_value = iter([])
+        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
         return session
 
     @pytest.fixture

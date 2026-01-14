@@ -43,7 +43,7 @@ pyjquants/
 │   └── models/           # Pydantic models (split by domain)
 │       ├── __init__.py       # Re-exports all models
 │       ├── base.py           # BaseModel, MarketSegment enum
-│       ├── price.py          # PriceBar, IndexPrice
+│       ├── price.py          # PriceBar, AMPriceBar, IndexPrice
 │       ├── company.py        # StockInfo, Sector
 │       ├── financial.py      # FinancialStatement, FinancialDetails, Dividend, EarningsAnnouncement
 │       ├── market.py         # TradingCalendarDay, MarginInterest, ShortSelling, InvestorTrades, BreakdownTrade, ShortSaleReport, MarginAlert
@@ -51,9 +51,10 @@ pyjquants/
 ├── infra/            # Infrastructure layer
 │   ├── session.py        # HTTP session with API key auth (V2)
 │   ├── client.py         # Generic fetch/parse client
-│   ├── config.py         # Configuration
+│   ├── config.py         # Configuration + Tier enum
+│   ├── decorators.py     # @requires_tier decorator
 │   ├── cache.py          # Caching utilities
-│   └── exceptions.py     # Exception hierarchy
+│   └── exceptions.py     # Exception hierarchy + TierError
 └── adapters/         # API layer
     └── endpoints.py      # Declarative endpoint definitions (21 V2 endpoints)
 ```
@@ -86,8 +87,8 @@ df = topix.history('1y')
 # Market utilities
 market = pjq.Market()
 market.is_trading_day(date(2024, 12, 25))
-market.sectors_17             # TOPIX-17 sectors (Standard+, returns [] on lower tiers)
-market.sectors_33             # TOPIX-33 sectors (Standard+, returns [] on lower tiers)
+market.sectors_17             # TOPIX-17 sectors (Standard+, raises TierError)
+market.sectors_33             # TOPIX-33 sectors (Standard+, raises TierError)
 df = market.investor_trades() # Market-wide trading by investor type
 df = market.breakdown('7203') # Trade breakdown by type (Standard+)
 df = market.short_positions() # Outstanding short positions (Standard+)
@@ -144,7 +145,7 @@ All J-Quants V2 endpoints are supported. Endpoints marked with *(Standard+)* req
 - `/markets/sectors/topix17` - 17-sector classification *(Standard+)*
 - `/markets/sectors/topix33` - 33-sector classification *(Standard+)*
 - `/markets/short-ratio` - Short selling ratio *(Standard+)*
-- `/markets/margin-interest` - Margin trading interest
+- `/markets/margin-interest` - Margin trading interest *(Standard+)*
 - `/markets/breakdown` - Trade breakdown by type *(Standard+)*
 - `/markets/short-sale-report` - Outstanding short positions *(Standard+)*
 - `/markets/margin-alert` - Margin trading alerts *(Standard+)*
@@ -163,16 +164,17 @@ All J-Quants V2 endpoints are supported. Endpoints marked with *(Standard+)* req
 ```bash
 JQUANTS_API_KEY=your_api_key  # Get from J-Quants dashboard
 # Optional:
+JQUANTS_TIER=light            # free, light, standard, premium (default: light)
 JQUANTS_CACHE_ENABLED=true
 JQUANTS_CACHE_TTL=3600
-JQUANTS_RATE_LIMIT=60  # V2 tiers: Free=5, Light=60, Standard=120, Premium=500
+# Legacy (backwards compat): JQUANTS_RATE_LIMIT=60 → infers tier from rate limit
 ```
 
 ## Testing
 
 ### Unit Tests (mocked, no API key needed)
 ```bash
-uv run pytest                    # Run all unit tests (106 tests)
+uv run pytest                    # Run all unit tests (109 tests)
 uv run pytest --cov=pyjquants    # With coverage
 ```
 
@@ -187,7 +189,7 @@ uv run pytest tests/integration/ -v                    # All integration tests
 uv run pytest tests/integration/ -v -m "not standard_tier"  # Free/Light tier only
 
 # 3. Set tier for Standard+ tests
-# Edit .env: JQUANTS_RATE_LIMIT=120  (or 500 for Premium)
+# Edit .env: JQUANTS_TIER=standard  (or premium)
 uv run pytest tests/integration/ -v                    # Includes Standard+ tests
 ```
 
@@ -206,6 +208,38 @@ uv run twine upload dist/* -u __token__ -p $PYPI_TOKEN
 ## Examples
 
 - **English quickstart:** `docs/examples/quickstart.ipynb` (Colab-ready with credential helper)
+
+## Tier-Aware Client
+
+The library validates subscription tier **before** making API calls and fails fast with `TierError`:
+
+```python
+from pyjquants.infra.exceptions import TierError
+
+# If your tier is Light and you try to use a Standard+ method:
+try:
+    df = ticker.history_am()  # Requires Standard+
+except TierError as e:
+    print(e)  # "history_am() requires standard+ tier, but you have light"
+```
+
+**Tier Hierarchy:** `FREE < LIGHT < STANDARD < PREMIUM`
+
+**Methods with tier restrictions (Standard+):**
+- `Ticker.history_am()` - Morning session prices
+- `Ticker.dividends` - Dividend history
+- `Ticker.financial_details` - Detailed BS/PL/CF
+- `Market.sectors`, `sectors_17`, `sectors_33` - Sector classifications
+- `Market.breakdown()`, `short_positions()`, `margin_alerts()` - Market data
+- `Market.short_ratio()`, `margin_interest()` - Short/margin data
+- `Index.history()` for Nikkei 225 (TOPIX is free)
+- `Futures.history()`, `Options.history()`, `IndexOptions.history()` - Derivatives
+
+**Implementation:**
+- `Tier` enum in `pyjquants/infra/config.py` with comparison operators
+- `TierError` exception in `pyjquants/infra/exceptions.py`
+- `@requires_tier(Tier.STANDARD)` decorator in `pyjquants/infra/decorators.py`
+- `Session.tier` property exposes the configured tier
 
 ## V2 Migration Notes
 
@@ -274,4 +308,61 @@ Bugs found and fixed via integration tests:
 2. **Stock codes are 5-digit**: API returns "72030" for Toyota, not "7203"
 3. **`margin_interest` requires Standard+ tier**: Was incorrectly documented as Free/Light
 
-**Codebase Status**: Clean. All 106 unit tests + 10 integration tests pass, docs build with `--strict`.
+**Codebase Status**: Clean. All 109 unit tests + 10 integration tests pass, docs build with `--strict`.
+
+**Comprehensive API Field Audit (Jan 14, 2026):**
+
+Compared official J-Quants V2 API documentation (https://jpx-jquants.com/en/spec/) against actual API responses and Pydantic models. All inconsistencies found and fixed:
+
+1. **PriceBar model** - Added missing `UL` (upper limit) and `LL` (lower limit) fields
+
+2. **AMPriceBar model** - **CRITICAL BUG FIXED**: Created new model for `/equities/bars/daily/am` endpoint. The AM session API uses different field names (MO, MH, ML, MC, MVo, MVa) than regular daily quotes (O, H, L, C, Vo, Va). Previous code incorrectly used PriceBar model which would fail to parse AM session data.
+
+3. **FinancialStatement model** - Added 79 missing fields to match actual API response (107 total fields):
+   - Metadata: DiscNo, NxtFYSt, NxtFYEn
+   - Dividends: DivUnit, DivTotalAnn, PayoutRatioAnn, FDiv*, NxFDiv*
+   - Forecasts: FSales*, FOP*, FOdP*, FNP*, FEPS*, NxF* (2Q and full year)
+   - Non-consolidated: NC* actuals and forecasts
+   - Change flags: MatChgSub, SigChgInC, ChgByASRev, ChgNoASRev, ChgAcEst, RetroRst
+   - Share data: ShOutFY, TrShFY, AvgSh
+
+4. **ShortSelling model** - Fixed field names to match actual API:
+   - `Sector33Code` → `S33`
+   - `SellingValue` → `SellExShortVa` (long selling value)
+   - Added: `ShrtWithResVa` (short with price restrictions), `ShrtNoResVa` (short without restrictions)
+
+5. **MarginAlert model** - Added missing fields:
+   - `PubReason` (publication reason flags)
+   - `ShrtNegOutChg`, `ShrtStdOutChg` (short breakdown changes)
+   - `LongNegOutChg`, `LongStdOutChg` (long breakdown changes)
+   - `TSEMrgnRegCls` (TSE margin regulation classification)
+
+**Tier Corrections:**
+- `/markets/margin-interest` - Actually requires Standard+ tier (was incorrectly documented as Free/Light)
+- `/markets/short-ratio` - Requires Standard+ tier
+
+**Model Field Validation Status (against actual API):**
+- `equities/bars/daily` (PriceBar): ✅ All 16 fields match
+- `equities/master` (StockInfo): ✅ All 13 fields match
+- `equities/earnings-calendar` (EarningsAnnouncement): ✅ All 7 fields match
+- `equities/investor-types` (InvestorTrades): ✅ All 56 fields match
+- `fins/summary` (FinancialStatement): ✅ All 107 fields match
+- `markets/calendar` (TradingCalendarDay): ✅ All 2 fields match
+- `indices/bars/daily/topix` (IndexPrice): ✅ All 5 fields match
+
+**Sources:**
+- Official V2 API docs: https://jpx-jquants.com/en/spec/
+- Stock Prices: https://jpx-jquants.com/en/spec/eq-bars-daily
+- AM Session: https://jpx-jquants.com/en/spec/eq-bars-daily-am
+- Indices: https://jpx-jquants.com/en/spec/idx-bars-daily
+
+**Tier-Aware Client Added (Jan 14, 2026):**
+
+Implemented fail-fast tier validation:
+- Added `Tier` enum (FREE, LIGHT, STANDARD, PREMIUM) with comparison operators
+- Added `TierError` exception for clear error messages
+- Added `@requires_tier(Tier.STANDARD)` decorator for tier-restricted methods
+- Session exposes `tier` property from config
+- Config supports both `JQUANTS_TIER` (explicit) and `JQUANTS_RATE_LIMIT` (backwards compat)
+- All tier-restricted methods now raise `TierError` before making API calls if tier is insufficient
+- Added 3 new tier restriction tests (109 total tests)

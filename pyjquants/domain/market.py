@@ -21,7 +21,9 @@ from pyjquants.adapters.endpoints import (
     TRADING_CALENDAR,
 )
 from pyjquants.infra.client import JQuantsClient
-from pyjquants.infra.exceptions import AuthenticationError
+from pyjquants.infra.config import Tier
+from pyjquants.infra.decorators import requires_tier
+from pyjquants.infra.exceptions import TierError
 from pyjquants.infra.session import _get_global_session
 
 if TYPE_CHECKING:
@@ -91,34 +93,31 @@ class Market:
     # === SECTORS ===
 
     @cached_property
+    @requires_tier(Tier.STANDARD)
     def sectors(self) -> list[Sector]:
         """Get 33-sector classification list (alias for sectors_33).
 
-        Note: Requires Standard tier or higher.
+        Requires Standard tier or higher.
         """
-        return self.sectors_33
+        return self._client.fetch_list(SECTORS_33)
 
     @cached_property
+    @requires_tier(Tier.STANDARD)
     def sectors_33(self) -> list[Sector]:
         """Get 33-sector classification list.
 
-        Note: Requires Standard tier or higher.
+        Requires Standard tier or higher.
         """
-        try:
-            return self._client.fetch_list(SECTORS_33)
-        except AuthenticationError:
-            return []
+        return self._client.fetch_list(SECTORS_33)
 
     @cached_property
+    @requires_tier(Tier.STANDARD)
     def sectors_17(self) -> list[Sector]:
         """Get 17-sector classification list.
 
-        Note: Requires Standard tier or higher.
+        Requires Standard tier or higher.
         """
-        try:
-            return self._client.fetch_list(SECTORS_17)
-        except AuthenticationError:
-            return []
+        return self._client.fetch_list(SECTORS_17)
 
     # === INVESTOR TRADING ===
 
@@ -159,6 +158,7 @@ class Market:
 
     # === MARKET DATA ===
 
+    @requires_tier(Tier.STANDARD)
     def breakdown(
         self,
         code: str,
@@ -166,6 +166,8 @@ class Market:
         end: date | None = None,
     ) -> pd.DataFrame:
         """Get breakdown trading data by trade type.
+
+        Requires Standard tier or higher.
 
         Contains trading values and volumes categorized by:
         - Long selling/buying
@@ -183,6 +185,7 @@ class Market:
         params = self._client.date_params(code=code, start=start, end=end)
         return self._client.fetch_dataframe(BREAKDOWN, params)
 
+    @requires_tier(Tier.STANDARD)
     def short_positions(
         self,
         code: str | None = None,
@@ -190,6 +193,8 @@ class Market:
         end: date | None = None,
     ) -> pd.DataFrame:
         """Get outstanding short selling positions reported.
+
+        Requires Standard tier or higher.
 
         Contains reported short positions where ratio >= 0.5%.
 
@@ -204,6 +209,7 @@ class Market:
         params = self._client.date_params(code=code, start=start, end=end)
         return self._client.fetch_dataframe(SHORT_SALE_REPORT, params)
 
+    @requires_tier(Tier.STANDARD)
     def margin_alerts(
         self,
         code: str | None = None,
@@ -211,6 +217,8 @@ class Market:
         end: date | None = None,
     ) -> pd.DataFrame:
         """Get margin trading daily publication (alert) data.
+
+        Requires Standard tier or higher.
 
         Contains margin trading outstanding for issues subject to daily publication.
 
@@ -249,6 +257,7 @@ class Market:
         params = self._client.date_params(start=start, end=end)
         return self._client.fetch_dataframe(EARNINGS_CALENDAR, params)
 
+    @requires_tier(Tier.STANDARD)
     def short_ratio(
         self,
         sector: str | None = None,
@@ -257,9 +266,9 @@ class Market:
     ) -> pd.DataFrame:
         """Get short selling ratio data by sector.
 
-        Returns short selling statistics aggregated by TOPIX-33 sector.
+        Requires Standard tier or higher.
 
-        Note: Requires Standard tier or higher.
+        Returns short selling statistics aggregated by TOPIX-33 sector.
 
         Args:
             sector: Sector code (optional, returns all sectors if not specified)
@@ -277,6 +286,7 @@ class Market:
             params["sector33code"] = sector
         return self._client.fetch_dataframe(SHORT_SELLING, params)
 
+    @requires_tier(Tier.STANDARD)
     def margin_interest(
         self,
         code: str | None = None,
@@ -284,6 +294,8 @@ class Market:
         end: date | None = None,
     ) -> pd.DataFrame:
         """Get margin trading interest (balance) data.
+
+        Requires Standard tier or higher.
 
         Returns margin buying and selling balances for stocks.
 

@@ -21,7 +21,7 @@ from pyjquants.domain.models.market import (
     ShortSelling,
     TradingCalendarDay,
 )
-from pyjquants.domain.models.price import IndexPrice, PriceBar
+from pyjquants.domain.models.price import AMPriceBar, IndexPrice, PriceBar
 
 __all__ = [
     # Base
@@ -29,6 +29,7 @@ __all__ = [
     "MarketSegment",
     # Price
     "PriceBar",
+    "AMPriceBar",
     "IndexPrice",
     # Company
     "Sector",
