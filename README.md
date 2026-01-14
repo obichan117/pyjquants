@@ -18,6 +18,29 @@ yfinance-style Python library for [J-Quants API](https://jpx.gitbook.io/j-quants
 - **Type hints**: Full type annotations with Pydantic models
 - **DataFrame integration**: Price data returned as pandas DataFrames
 
+## Feature Availability by Tier
+
+| Feature | Free/Light | Standard+ |
+|---------|:----------:|:---------:|
+| Daily prices | ✓ | ✓ |
+| Stock info & search | ✓ | ✓ |
+| Financial statements | ✓ | ✓ |
+| TOPIX index | ✓ | ✓ |
+| Trading calendar | ✓ | ✓ |
+| Earnings calendar | ✓ | ✓ |
+| Investor trades (market-wide) | ✓ | ✓ |
+| Margin interest | ✓ | ✓ |
+| Morning session (AM) prices | - | ✓ |
+| Dividends | - | ✓ |
+| Detailed financials (BS/PL/CF) | - | ✓ |
+| Nikkei 225 index | - | ✓ |
+| Sector classifications | - | ✓ |
+| Trade breakdown | - | ✓ |
+| Short selling data | - | ✓ |
+| Margin alerts | - | ✓ |
+| Futures | - | ✓ |
+| Options | - | ✓ |
+
 ## Installation
 
 ```bash
@@ -182,7 +205,9 @@ bar.volume          # int
 
 ## API Endpoint Mapping
 
-PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints:
+PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints.
+
+**Tier legend:** No marker = Free/Light tier, *(Standard+)* = requires Standard tier or higher
 
 ### Equities
 
@@ -191,7 +216,8 @@ PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints:
 | `/equities/bars/daily` | `Ticker("7203").history("30d")` |
 | `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` *(Standard+)* |
 | `/equities/master` | `Ticker("7203").info` / `search("トヨタ")` |
-| `/equities/earnings-calendar` | *(via endpoints)* |
+| `/equities/earnings-calendar` | `Market().earnings_calendar()` |
+| `/equities/investor-types` | `Market().investor_trades()` |
 
 ### Financials
 
@@ -206,11 +232,10 @@ PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints:
 | J-Quants API | PyJQuants |
 |--------------|-----------|
 | `/markets/calendar` | `Market().is_trading_day(date)` / `trading_days(start, end)` |
+| `/markets/margin-interest` | `Market().margin_interest()` |
 | `/markets/sectors/topix17` | `Market().sectors_17` *(Standard+)* |
 | `/markets/sectors/topix33` | `Market().sectors_33` *(Standard+)* |
-| `/equities/investor-types` | `Market().investor_trades()` |
-| `/markets/short-ratio` | *(via endpoints)* *(Standard+)* |
-| `/markets/margin-interest` | *(via endpoints)* |
+| `/markets/short-ratio` | `Market().short_ratio()` *(Standard+)* |
 | `/markets/breakdown` | `Market().breakdown("7203")` *(Standard+)* |
 | `/markets/short-sale-report` | `Market().short_positions()` *(Standard+)* |
 | `/markets/margin-alert` | `Market().margin_alerts()` *(Standard+)* |
@@ -219,10 +244,10 @@ PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints:
 
 | J-Quants API | PyJQuants |
 |--------------|-----------|
-| `/indices/bars/daily` | `Index("0001").history("30d")` |
 | `/indices/bars/daily/topix` | `Index.topix().history("30d")` |
+| `/indices/bars/daily` | `Index.nikkei225().history("30d")` *(Standard+)* |
 
-### Derivatives
+### Derivatives *(Standard+)*
 
 | J-Quants API | PyJQuants |
 |--------------|-----------|

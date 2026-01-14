@@ -226,4 +226,18 @@ Documentation inconsistencies fixed:
 - Outdated sector endpoint comment ("may not exist") → updated to clarify tier requirement
 - Quickstart notebook "Next Steps" section incomplete → expanded with derivatives and more features
 
-**Codebase Status**: Clean. All 100 tests pass, docs build with `--strict`.
+**Notebook/README Tier Organization (Jan 14, 2026):**
+
+Reorganized `docs/examples/quickstart.ipynb` and documentation for clear tier separation:
+- **Part 1 (Sections 1-6)**: All tiers (Free/Light/Standard/Premium)
+  - Setup, Single Ticker, Price History, Multi-Ticker Download
+  - Financial Statements, Market Information (TOPIX, calendar, earnings, investor trades, margin interest)
+- **Part 2 (Sections 7-12)**: Standard+ tier only
+  - Morning Session Prices, Dividends & Detailed Financials
+  - Nikkei 225 Index, Sector Classifications
+  - Short Selling & Margin Data, Derivatives
+- All Standard+ cells wrapped in try/except with tier restriction messages
+- README.md updated with "Feature Availability by Tier" matrix
+- API endpoint mapping tables updated with tier markers in README and getting-started.md
+
+**Codebase Status**: Clean. All 106 tests pass, docs build with `--strict`.

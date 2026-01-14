@@ -135,17 +135,17 @@ import pyjquants as pjq
 
 ticker = pjq.Ticker("7203")
 
-# Financial statements
+# Financial statements (Free/Light)
 financials = ticker.financials
 
-# Dividend history
+# Dividend history (Standard+ only)
 dividends = ticker.dividends
 
-# Detailed financials (BS/PL/CF)
+# Detailed financials BS/PL/CF (Standard+ only)
 details = ticker.financial_details
 ```
 
-### Derivatives
+### Derivatives (Standard+ only)
 
 ```python
 import pyjquants as pjq
@@ -163,7 +163,7 @@ idx_opts = pjq.IndexOptions.nikkei225()
 df = idx_opts.history("30d")
 ```
 
-### Market Data
+### Market Data (Standard+ only)
 
 ```python
 import pyjquants as pjq
@@ -178,18 +178,23 @@ df = market.short_positions()
 
 # Margin trading alerts
 df = market.margin_alerts()
+
+# Sector classifications
+sectors = market.sectors_33
 ```
 
 ## API Endpoint Mapping
 
-PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints:
+PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints.
+
+**Tier legend:** No marker = Free/Light tier, *(Standard+)* = requires Standard tier or higher
 
 ### Equities
 
 | J-Quants API | PyJQuants | Description |
 |--------------|-----------|-------------|
 | `/equities/bars/daily` | `Ticker("7203").history("30d")` | Daily OHLCV prices |
-| `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` | Morning session prices |
+| `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` | Morning session prices *(Standard+)* |
 | `/equities/master` | `Ticker("7203").info` / `search("トヨタ")` | Company info |
 | `/equities/earnings-calendar` | `Market().earnings_calendar()` | Earnings announcements |
 | `/equities/investor-types` | `Market().investor_trades()` | Market-wide trading by investor type |
@@ -199,30 +204,30 @@ PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints:
 | J-Quants API | PyJQuants | Description |
 |--------------|-----------|-------------|
 | `/fins/summary` | `Ticker("7203").financials` | Financial statements |
-| `/fins/dividend` | `Ticker("7203").dividends` | Dividend history |
-| `/fins/details` | `Ticker("7203").financial_details` | Detailed BS/PL/CF |
+| `/fins/dividend` | `Ticker("7203").dividends` | Dividend history *(Standard+)* |
+| `/fins/details` | `Ticker("7203").financial_details` | Detailed BS/PL/CF *(Standard+)* |
 
 ### Markets
 
 | J-Quants API | PyJQuants | Description |
 |--------------|-----------|-------------|
 | `/markets/calendar` | `Market().is_trading_day(date)` | Trading calendar |
-| `/markets/sectors/topix17` | `Market().sectors_17` | 17-sector classification |
-| `/markets/sectors/topix33` | `Market().sectors_33` | 33-sector classification |
-| `/markets/short-ratio` | `Market().short_ratio()` | Short selling ratio |
 | `/markets/margin-interest` | `Market().margin_interest()` | Margin interest |
-| `/markets/breakdown` | `Market().breakdown("7203")` | Trade breakdown by type |
-| `/markets/short-sale-report` | `Market().short_positions()` | Short positions |
-| `/markets/margin-alert` | `Market().margin_alerts()` | Margin alerts |
+| `/markets/sectors/topix17` | `Market().sectors_17` | 17-sector classification *(Standard+)* |
+| `/markets/sectors/topix33` | `Market().sectors_33` | 33-sector classification *(Standard+)* |
+| `/markets/short-ratio` | `Market().short_ratio()` | Short selling ratio *(Standard+)* |
+| `/markets/breakdown` | `Market().breakdown("7203")` | Trade breakdown by type *(Standard+)* |
+| `/markets/short-sale-report` | `Market().short_positions()` | Short positions *(Standard+)* |
+| `/markets/margin-alert` | `Market().margin_alerts()` | Margin alerts *(Standard+)* |
 
 ### Indices
 
 | J-Quants API | PyJQuants | Description |
 |--------------|-----------|-------------|
-| `/indices/bars/daily` | `Index("0001").history("30d")` | Index prices |
 | `/indices/bars/daily/topix` | `Index.topix().history("30d")` | TOPIX prices |
+| `/indices/bars/daily` | `Index.nikkei225().history("30d")` | Index prices (incl. Nikkei 225) *(Standard+)* |
 
-### Derivatives
+### Derivatives *(Standard+)*
 
 | J-Quants API | PyJQuants | Description |
 |--------------|-----------|-------------|
