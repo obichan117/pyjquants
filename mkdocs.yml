@@ -20,7 +20,6 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
   features:
-    - navigation.instant
     - navigation.tracking
     - navigation.sections
     - navigation.expand
@@ -29,6 +28,24 @@ theme:
 
 plugins:
   - search
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: false
+      reconfigure_material: false
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: ja
+          name: 日本語
+          build: true
+          nav:
+            - ホーム: index.md
+            - セットアップ: setup.md
+            - 基本的な使い方: basic-usage.md
+            - プラン別ガイド: tier-guide.md
+            - クイックスタート: examples/quickstart_ja.ipynb
   - mkdocstrings:
       handlers:
         python:
