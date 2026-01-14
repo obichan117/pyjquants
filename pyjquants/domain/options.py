@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date
 from typing import TYPE_CHECKING
 
 import pandas as pd
 
 from pyjquants.adapters.endpoints import INDEX_OPTIONS, OPTIONS
-from pyjquants.domain.utils import parse_date, parse_period
+from pyjquants.domain.utils import fetch_history
 from pyjquants.infra.client import JQuantsClient
 from pyjquants.infra.config import Tier
 from pyjquants.infra.decorators import requires_tier
@@ -74,29 +74,14 @@ class Options:
             DataFrame with columns: date, code, contract_month, strike_price, put_call,
             open, high, low, close, volume, open_interest, implied_volatility, etc.
         """
-        # Parse dates
-        start_date = parse_date(start) if start is not None else None
-        end_date = parse_date(end) if end is not None else None
-
-        # If no explicit dates, use period
-        if start_date is None and end_date is None:
-            days = parse_period(period or "30d")
-            end_date = date.today()
-            start_date = end_date - timedelta(days=days + 15)  # Buffer for non-trading days
-
-        params = self._client.date_params(code=self.code, start=start_date, end=end_date)
-
-        df = self._client.fetch_dataframe(OPTIONS, params)
-
-        if df.empty:
-            return df
-
-        # Trim to requested period if using period parameter
-        if period and start is None and end is None:
-            days = parse_period(period)
-            df = df.tail(days)
-
-        return df.reset_index(drop=True)
+        return fetch_history(
+            client=self._client,
+            endpoint=OPTIONS,
+            period=period,
+            start=start,
+            end=end,
+            code=self.code,
+        )
 
 
 class IndexOptions:
@@ -143,29 +128,13 @@ class IndexOptions:
             DataFrame with columns: date, code, contract_month, strike_price, put_call,
             open, high, low, close, volume, open_interest, implied_volatility, etc.
         """
-        # Parse dates
-        start_date = parse_date(start) if start is not None else None
-        end_date = parse_date(end) if end is not None else None
-
-        # If no explicit dates, use period
-        if start_date is None and end_date is None:
-            days = parse_period(period or "30d")
-            end_date = date.today()
-            start_date = end_date - timedelta(days=days + 15)  # Buffer for non-trading days
-
-        params = self._client.date_params(start=start_date, end=end_date)
-
-        df = self._client.fetch_dataframe(INDEX_OPTIONS, params)
-
-        if df.empty:
-            return df
-
-        # Trim to requested period if using period parameter
-        if period and start is None and end is None:
-            days = parse_period(period)
-            df = df.tail(days)
-
-        return df.reset_index(drop=True)
+        return fetch_history(
+            client=self._client,
+            endpoint=INDEX_OPTIONS,
+            period=period,
+            start=start,
+            end=end,
+        )
 
     @classmethod
     def nikkei225(cls, session: Session | None = None) -> IndexOptions:
