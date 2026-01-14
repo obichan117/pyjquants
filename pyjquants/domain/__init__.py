@@ -1,5 +1,6 @@
 """Domain layer - entities, models, and business logic."""
 
+from pyjquants.domain.futures import Futures
 from pyjquants.domain.index import Index
 from pyjquants.domain.market import Market
 from pyjquants.domain.models import (
@@ -8,11 +9,13 @@ from pyjquants.domain.models import (
     EarningsAnnouncement,
     FinancialDetails,
     FinancialStatement,
+    FuturesPrice,
     IndexPrice,
     InvestorTrades,
     MarginAlert,
     MarginInterest,
     MarketSegment,
+    OptionsPrice,
     PriceBar,
     Sector,
     ShortSaleReport,
@@ -20,6 +23,7 @@ from pyjquants.domain.models import (
     StockInfo,
     TradingCalendarDay,
 )
+from pyjquants.domain.options import IndexOptions, Options
 from pyjquants.domain.ticker import Ticker, download, search
 
 __all__ = [
@@ -27,6 +31,9 @@ __all__ = [
     "Ticker",
     "Index",
     "Market",
+    "Futures",
+    "Options",
+    "IndexOptions",
     # Functions
     "download",
     "search",
@@ -46,6 +53,8 @@ __all__ = [
     "BreakdownTrade",
     "ShortSaleReport",
     "MarginAlert",
+    "FuturesPrice",
+    "OptionsPrice",
     # Enums
     "MarketSegment",
 ]

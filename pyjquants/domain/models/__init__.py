@@ -5,6 +5,7 @@ Re-exports all models for backward compatibility.
 
 from pyjquants.domain.models.base import BaseModel, MarketSegment
 from pyjquants.domain.models.company import Sector, StockInfo
+from pyjquants.domain.models.derivatives import FuturesPrice, OptionsPrice
 from pyjquants.domain.models.financial import (
     Dividend,
     EarningsAnnouncement,
@@ -45,4 +46,7 @@ __all__ = [
     "BreakdownTrade",
     "ShortSaleReport",
     "MarginAlert",
+    # Derivatives
+    "FuturesPrice",
+    "OptionsPrice",
 ]

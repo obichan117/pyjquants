@@ -16,10 +16,12 @@ if TYPE_CHECKING:
         EarningsAnnouncement,
         FinancialDetails,
         FinancialStatement,
+        FuturesPrice,
         IndexPrice,
         InvestorTrades,
         MarginAlert,
         MarginInterest,
+        OptionsPrice,
         PriceBar,
         Sector,
         ShortSaleReport,
@@ -179,5 +181,29 @@ TOPIX: Endpoint[IndexPrice] = Endpoint(
     path="/indices/bars/daily/topix",
     response_key="data",
     model="IndexPrice",  # type: ignore[arg-type]
+    paginated=True,
+)
+
+
+# === DERIVATIVES ===
+
+FUTURES: Endpoint[FuturesPrice] = Endpoint(
+    path="/derivatives/bars/daily/futures",
+    response_key="data",
+    model="FuturesPrice",  # type: ignore[arg-type]
+    paginated=True,
+)
+
+OPTIONS: Endpoint[OptionsPrice] = Endpoint(
+    path="/derivatives/bars/daily/options",
+    response_key="data",
+    model="OptionsPrice",  # type: ignore[arg-type]
+    paginated=True,
+)
+
+INDEX_OPTIONS: Endpoint[OptionsPrice] = Endpoint(
+    path="/derivatives/bars/daily/options/225",
+    response_key="data",
+    model="OptionsPrice",  # type: ignore[arg-type]
     paginated=True,
 )

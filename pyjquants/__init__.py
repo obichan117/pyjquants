@@ -31,13 +31,18 @@ from pyjquants.domain import (
     EarningsAnnouncement,
     FinancialDetails,
     FinancialStatement,
+    Futures,
+    FuturesPrice,
     Index,
+    IndexOptions,
     IndexPrice,
     InvestorTrades,
     MarginAlert,
     MarginInterest,
     Market,
     MarketSegment,
+    Options,
+    OptionsPrice,
     PriceBar,
     Sector,
     ShortSaleReport,
@@ -73,6 +78,9 @@ __all__ = [
     # Entities
     "Index",
     "Market",
+    "Futures",
+    "Options",
+    "IndexOptions",
     # Session
     "Session",
     # Exceptions
@@ -99,6 +107,8 @@ __all__ = [
     "BreakdownTrade",
     "ShortSaleReport",
     "MarginAlert",
+    "FuturesPrice",
+    "OptionsPrice",
     # Enums
     "MarketSegment",
 ]

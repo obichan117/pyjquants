@@ -8,9 +8,11 @@ from decimal import Decimal
 from pyjquants.domain.models import (
     BreakdownTrade,
     FinancialDetails,
+    FuturesPrice,
     InvestorTrades,
     MarginAlert,
     MarketSegment,
+    OptionsPrice,
     PriceBar,
     Sector,
     ShortSaleReport,
@@ -403,3 +405,141 @@ class TestMarginAlert:
         assert alert.apply_date is None
         assert alert.short_outstanding is None
         assert alert.sl_ratio is None
+
+
+class TestFuturesPrice:
+    """Tests for FuturesPrice model."""
+
+    def test_create_from_api_data(self) -> None:
+        """Test creating FuturesPrice from API response."""
+        data = {
+            "Date": "2024-01-15",
+            "Code": "NK225M",
+            "ProdCat": "NK225M",
+            "CM": "2024-03",
+            "O": "35000.0",
+            "H": "35500.0",
+            "L": "34800.0",
+            "C": "35200.0",
+            "Vo": 100000,
+            "OI": 50000,
+            "Va": "3500000000.0",
+            "Settle": "35200.0",
+            "LTD": "2024-03-08",
+            "SQD": "2024-03-08",
+            "MO": "35100.0",
+            "MC": "35150.0",
+            "CCMFlag": "1",
+        }
+        price = FuturesPrice.model_validate(data)
+
+        assert price.date == datetime.date(2024, 1, 15)
+        assert price.code == "NK225M"
+        assert price.product_category == "NK225M"
+        assert price.contract_month == "2024-03"
+        assert price.open == Decimal("35000.0")
+        assert price.high == Decimal("35500.0")
+        assert price.low == Decimal("34800.0")
+        assert price.close == Decimal("35200.0")
+        assert price.volume == 100000
+        assert price.open_interest == 50000
+        assert price.settlement_price == Decimal("35200.0")
+        assert price.last_trading_day == datetime.date(2024, 3, 8)
+        assert price.morning_open == Decimal("35100.0")
+        assert price.central_contract_month_flag == "1"
+
+    def test_optional_fields(self) -> None:
+        """Test that optional fields default to None."""
+        data = {
+            "Date": "20240115",
+            "Code": "NK225M",
+            "ProdCat": "NK225M",
+            "CM": "2024-03",
+        }
+        price = FuturesPrice.model_validate(data)
+
+        assert price.date == datetime.date(2024, 1, 15)
+        assert price.code == "NK225M"
+        assert price.open is None
+        assert price.volume is None
+        assert price.settlement_price is None
+        assert price.morning_open is None
+
+
+class TestOptionsPrice:
+    """Tests for OptionsPrice model."""
+
+    def test_create_from_api_data(self) -> None:
+        """Test creating OptionsPrice from API response."""
+        data = {
+            "Date": "2024-01-15",
+            "Code": "NK225C35000",
+            "ProdCat": "NK225",
+            "CM": "2024-03",
+            "Strike": "35000.0",
+            "PCDiv": "2",  # Call
+            "UndSSO": "-",
+            "O": "500.0",
+            "H": "550.0",
+            "L": "480.0",
+            "C": "520.0",
+            "Vo": 5000,
+            "OI": 10000,
+            "Settle": "520.0",
+            "Theo": "515.0",
+            "IV": "0.22",
+            "BaseVol": "0.20",
+            "UnderPx": "35200.0",
+            "IR": "0.001",
+            "LTD": "2024-03-08",
+            "SQD": "2024-03-08",
+        }
+        price = OptionsPrice.model_validate(data)
+
+        assert price.date == datetime.date(2024, 1, 15)
+        assert price.code == "NK225C35000"
+        assert price.product_category == "NK225"
+        assert price.contract_month == "2024-03"
+        assert price.strike_price == Decimal("35000.0")
+        assert price.put_call_division == "2"
+        assert price.is_call is True
+        assert price.is_put is False
+        assert price.open == Decimal("500.0")
+        assert price.close == Decimal("520.0")
+        assert price.volume == 5000
+        assert price.open_interest == 10000
+        assert price.implied_volatility == Decimal("0.22")
+        assert price.theoretical_price == Decimal("515.0")
+        assert price.underlying_price == Decimal("35200.0")
+
+    def test_put_option(self) -> None:
+        """Test is_put property for put options."""
+        data = {
+            "Date": "2024-01-15",
+            "Code": "NK225P35000",
+            "ProdCat": "NK225",
+            "CM": "2024-03",
+            "PCDiv": "1",  # Put
+        }
+        price = OptionsPrice.model_validate(data)
+
+        assert price.is_put is True
+        assert price.is_call is False
+
+    def test_optional_fields(self) -> None:
+        """Test that optional fields default to None."""
+        data = {
+            "Date": "20240115",
+            "Code": "NK225C35000",
+            "ProdCat": "NK225",
+            "CM": "2024-03",
+        }
+        price = OptionsPrice.model_validate(data)
+
+        assert price.date == datetime.date(2024, 1, 15)
+        assert price.code == "NK225C35000"
+        assert price.strike_price is None
+        assert price.implied_volatility is None
+        assert price.put_call_division is None
+        assert price.is_put is False
+        assert price.is_call is False
