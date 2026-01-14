@@ -92,6 +92,13 @@ warn_unused_ignores = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+    "integration: mark test as integration test (requires JQUANTS_API_KEY)",
+    "standard_tier: mark test as requiring Standard+ tier",
+]
+# By default, exclude integration tests (CI runs without API key)
+# Run integration tests explicitly: uv run pytest tests/integration/ -v
+addopts = "--ignore=tests/integration/"
 
 [tool.coverage.run]
 source = ["pyjquants"]

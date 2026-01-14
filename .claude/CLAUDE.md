@@ -170,11 +170,31 @@ JQUANTS_RATE_LIMIT=60  # V2 tiers: Free=5, Light=60, Standard=120, Premium=500
 
 ## Testing
 
-Tests use mocking - no real API calls (100 tests):
+### Unit Tests (mocked, no API key needed)
 ```bash
-uv run pytest tests/ -v
-uv run pytest tests/ --cov=pyjquants --cov-report=term-missing
+uv run pytest                    # Run all unit tests (106 tests)
+uv run pytest --cov=pyjquants    # With coverage
 ```
+
+### Integration Tests (requires real API key)
+```bash
+# 1. Copy .env.example to .env and add your API key
+cp .env.example .env
+# Edit .env: JQUANTS_API_KEY=your_key_here
+
+# 2. Run integration tests
+uv run pytest tests/integration/ -v                    # All integration tests
+uv run pytest tests/integration/ -v -m "not standard_tier"  # Free/Light tier only
+
+# 3. Set tier for Standard+ tests
+# Edit .env: JQUANTS_RATE_LIMIT=120  (or 500 for Premium)
+uv run pytest tests/integration/ -v                    # Includes Standard+ tests
+```
+
+Integration tests validate:
+- Correct field names match API responses
+- All endpoints work with real data
+- Tier restrictions handled properly
 
 ## Publishing
 
