@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock
 
 import pandas as pd
 import pytest
@@ -136,24 +136,21 @@ class TestIndexFactoryMethods:
 
     def test_topix_factory(self, mock_session: MagicMock) -> None:
         """Test Index.topix() factory method."""
-        with patch("pyjquants.domain.index._get_global_session", return_value=mock_session):
-            index = Index.topix(session=mock_session)
+        index = Index.topix(session=mock_session)
 
         assert index.code == TOPIX_CODE
         assert index.name == "TOPIX"
 
     def test_nikkei225_factory(self, mock_session: MagicMock) -> None:
         """Test Index.nikkei225() factory method."""
-        with patch("pyjquants.domain.index._get_global_session", return_value=mock_session):
-            index = Index.nikkei225(session=mock_session)
+        index = Index.nikkei225(session=mock_session)
 
         assert index.code == NIKKEI225_CODE
         assert index.name == "Nikkei 225"
 
     def test_all_factory(self, mock_session: MagicMock) -> None:
         """Test Index.all() factory method."""
-        with patch("pyjquants.domain.index._get_global_session", return_value=mock_session):
-            indices = Index.all(session=mock_session)
+        indices = Index.all(session=mock_session)
 
         assert len(indices) == 2
         codes = [i.code for i in indices]

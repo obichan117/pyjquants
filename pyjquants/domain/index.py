@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 from pyjquants.adapters.endpoints import INDEX_PRICES, TOPIX
+from pyjquants.domain.base import CodeBasedEntity
 from pyjquants.domain.utils import fetch_history
-from pyjquants.infra.client import JQuantsClient
 from pyjquants.infra.config import Tier
 from pyjquants.infra.exceptions import TierError
 from pyjquants.infra.session import _get_global_session
@@ -23,7 +23,7 @@ TOPIX_CODE = "0000"
 NIKKEI225_CODE = "0001"
 
 
-class Index:
+class Index(CodeBasedEntity):
     """Market index with yfinance-style API.
 
     Example:
@@ -45,31 +45,16 @@ class Index:
             name: Index name (optional, auto-detected for known indices)
             session: Optional session (uses global session if not provided)
         """
-        self.code = code
+        super().__init__(code, session)
         self._name = name or self._KNOWN_INDICES.get(code)
-        self._session = session or _get_global_session()
-        self._client = JQuantsClient(self._session)
 
     @property
     def name(self) -> str:
         """Index name."""
         return self._name or self.code
 
-    def __repr__(self) -> str:
-        return f"Index('{self.code}')"
-
     def __str__(self) -> str:
         return f"{self.name} ({self.code})"
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, Index):
-            return self.code == other.code
-        if isinstance(other, str):
-            return self.code == other
-        return False
-
-    def __hash__(self) -> int:
-        return hash(self.code)
 
     # === HISTORY (yfinance-style) ===
 

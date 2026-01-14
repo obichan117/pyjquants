@@ -8,17 +8,16 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 from pyjquants.adapters.endpoints import FUTURES
+from pyjquants.domain.base import CodeBasedEntity
 from pyjquants.domain.utils import fetch_history
-from pyjquants.infra.client import JQuantsClient
 from pyjquants.infra.config import Tier
 from pyjquants.infra.decorators import requires_tier
-from pyjquants.infra.session import _get_global_session
 
 if TYPE_CHECKING:
     from pyjquants.infra.session import Session
 
 
-class Futures:
+class Futures(CodeBasedEntity):
     """Futures contract with yfinance-style API.
 
     Example:
@@ -34,25 +33,7 @@ class Futures:
             code: Futures contract code (e.g., product category code)
             session: Optional session (uses global session if not provided)
         """
-        self.code = code
-        self._session = session or _get_global_session()
-        self._client = JQuantsClient(self._session)
-
-    def __repr__(self) -> str:
-        return f"Futures('{self.code}')"
-
-    def __str__(self) -> str:
-        return f"Futures({self.code})"
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, Futures):
-            return self.code == other.code
-        if isinstance(other, str):
-            return self.code == other
-        return False
-
-    def __hash__(self) -> int:
-        return hash(self.code)
+        super().__init__(code, session)
 
     @requires_tier(Tier.PREMIUM)
     def history(

@@ -15,6 +15,7 @@ from pyjquants.adapters.endpoints import (
     LISTED_INFO,
     STATEMENTS,
 )
+from pyjquants.domain.base import DomainEntity
 from pyjquants.domain.info import TickerInfo
 from pyjquants.domain.utils import fetch_history
 from pyjquants.infra.client import JQuantsClient
@@ -28,7 +29,7 @@ if TYPE_CHECKING:
     from pyjquants.infra.session import Session
 
 
-class Ticker:
+class Ticker(DomainEntity):
     """Stock ticker for J-Quants API (yfinance-style API).
 
     Example:
@@ -43,9 +44,8 @@ class Ticker:
         Args:
             code: Stock code (e.g., "7203" for Toyota)
         """
+        super().__init__(session)
         self.code = str(code)
-        self._session = session or _get_global_session()
-        self._client = JQuantsClient(self._session)
         self._info_cache: StockInfo | None = None
         self._ticker_info_cache: TickerInfo | None = None
 

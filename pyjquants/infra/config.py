@@ -25,21 +25,20 @@ class Tier(Enum):
     STANDARD = "standard"
     PREMIUM = "premium"
 
+    def _order(self) -> int:
+        return [Tier.FREE, Tier.LIGHT, Tier.STANDARD, Tier.PREMIUM].index(self)
+
     def __ge__(self, other: Tier) -> bool:
-        order = [Tier.FREE, Tier.LIGHT, Tier.STANDARD, Tier.PREMIUM]
-        return order.index(self) >= order.index(other)
+        return self._order() >= other._order()
 
     def __gt__(self, other: Tier) -> bool:
-        order = [Tier.FREE, Tier.LIGHT, Tier.STANDARD, Tier.PREMIUM]
-        return order.index(self) > order.index(other)
+        return self._order() > other._order()
 
     def __le__(self, other: Tier) -> bool:
-        order = [Tier.FREE, Tier.LIGHT, Tier.STANDARD, Tier.PREMIUM]
-        return order.index(self) <= order.index(other)
+        return self._order() <= other._order()
 
     def __lt__(self, other: Tier) -> bool:
-        order = [Tier.FREE, Tier.LIGHT, Tier.STANDARD, Tier.PREMIUM]
-        return order.index(self) < order.index(other)
+        return self._order() < other._order()
 
 
 TIER_RATE_LIMITS: dict[Tier, int] = {

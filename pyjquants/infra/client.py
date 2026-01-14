@@ -59,14 +59,18 @@ class JQuantsClient:
             params: Query parameters
 
         Returns:
-            Parsed model instance or None if not found
+            Parsed model instance or None if not found/validation fails
         """
         data = self._session.get(endpoint.path, params)
         items = data.get(endpoint.response_key, [])
         if not items:
             return None
         model = self._get_model(endpoint)
-        return model.model_validate(items[0])  # type: ignore[attr-defined, no-any-return]
+        try:
+            return model.model_validate(items[0])  # type: ignore[attr-defined, no-any-return]
+        except Exception as e:
+            logger.warning("Failed to validate %s item: %s", model.__name__, e)
+            return None
 
     def fetch_list(self, endpoint: Endpoint[T], params: dict[str, Any] | None = None) -> list[T]:
         """Fetch list of items from endpoint.

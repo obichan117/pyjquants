@@ -20,17 +20,16 @@ from pyjquants.adapters.endpoints import (
     SHORT_SELLING,
     TRADING_CALENDAR,
 )
-from pyjquants.infra.client import JQuantsClient
+from pyjquants.domain.base import DomainEntity
 from pyjquants.infra.config import Tier
 from pyjquants.infra.decorators import requires_tier
-from pyjquants.infra.session import _get_global_session
 
 if TYPE_CHECKING:
     from pyjquants.domain.models import Sector, TradingCalendarDay
     from pyjquants.infra.session import Session
 
 
-class Market:
+class Market(DomainEntity):
     """Market utilities for trading calendar and sector information.
 
     Example:
@@ -39,14 +38,15 @@ class Market:
         >>> market.sectors  # List of sectors
     """
 
+    _MAX_TRADING_DAY_SEARCH = 20  # Cover extended holiday periods (e.g., Golden Week + weekends)
+
     def __init__(self, session: Session | None = None) -> None:
         """Initialize Market.
 
         Args:
             session: Optional session (uses global session if not provided)
         """
-        self._session = session or _get_global_session()
-        self._client = JQuantsClient(self._session)
+        super().__init__(session)
 
     def __repr__(self) -> str:
         return "Market()"
@@ -71,23 +71,35 @@ class Market:
         calendar = self.trading_calendar(start, end)
         return [day.date for day in calendar if day.is_trading_day]
 
-    def next_trading_day(self, from_date: date) -> date:
-        """Get the next trading day after a given date."""
-        check_date = from_date + timedelta(days=1)
-        for _ in range(10):
+    def _find_trading_day(self, from_date: date, direction: int) -> date:
+        """Find adjacent trading day in given direction.
+
+        Args:
+            from_date: Starting date
+            direction: 1 for next, -1 for previous
+
+        Returns:
+            The next/previous trading day
+
+        Raises:
+            ValueError: If no trading day found within search limit
+        """
+        check_date = from_date + timedelta(days=direction)
+        for _ in range(self._MAX_TRADING_DAY_SEARCH):
             if self.is_trading_day(check_date):
                 return check_date
-            check_date += timedelta(days=1)
-        return check_date
+            check_date += timedelta(days=direction)
+        raise ValueError(
+            f"No trading day found within {self._MAX_TRADING_DAY_SEARCH} days of {from_date}"
+        )
+
+    def next_trading_day(self, from_date: date) -> date:
+        """Get the next trading day after a given date."""
+        return self._find_trading_day(from_date, direction=1)
 
     def prev_trading_day(self, from_date: date) -> date:
         """Get the previous trading day before a given date."""
-        check_date = from_date - timedelta(days=1)
-        for _ in range(10):
-            if self.is_trading_day(check_date):
-                return check_date
-            check_date -= timedelta(days=1)
-        return check_date
+        return self._find_trading_day(from_date, direction=-1)
 
     # === SECTORS ===
 

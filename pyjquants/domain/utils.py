@@ -73,6 +73,9 @@ def parse_period(period: str) -> int:
     Returns:
         Number of days
 
+    Raises:
+        ValueError: If period format is invalid
+
     Examples:
         >>> parse_period("30d")
         30
@@ -84,18 +87,24 @@ def parse_period(period: str) -> int:
         365
     """
     period = period.lower()
-    if period.endswith("d"):
-        return int(period[:-1])
-    elif period.endswith("w"):
-        return int(period[:-1]) * 7
-    elif period.endswith("mo"):
-        return int(period[:-2]) * 30
-    elif period.endswith("m") and not period.endswith("mo"):
-        return int(period[:-1]) * 30
-    elif period.endswith("y"):
-        return int(period[:-1]) * 365
-    else:
-        return int(period)
+    try:
+        if period.endswith("d"):
+            return int(period[:-1])
+        elif period.endswith("w"):
+            return int(period[:-1]) * 7
+        elif period.endswith("mo"):
+            return int(period[:-2]) * 30
+        elif period.endswith("m"):
+            return int(period[:-1]) * 30
+        elif period.endswith("y"):
+            return int(period[:-1]) * 365
+        else:
+            return int(period)
+    except ValueError as e:
+        raise ValueError(
+            f"Invalid period format: {period!r}. "
+            f"Use format like '30d', '1w', '6mo', '1y', or a number of days."
+        ) from e
 
 
 def parse_date(d: str | date) -> date:
