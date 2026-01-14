@@ -54,7 +54,7 @@ class Futures:
     def __hash__(self) -> int:
         return hash(self.code)
 
-    @requires_tier(Tier.STANDARD)
+    @requires_tier(Tier.PREMIUM)
     def history(
         self,
         period: str | None = "30d",
@@ -63,7 +63,7 @@ class Futures:
     ) -> pd.DataFrame:
         """Get futures price history (yfinance-style).
 
-        Requires Standard tier or higher.
+        Requires Premium tier.
 
         Args:
             period: Time period (e.g., "30d", "1y"). Ignored if start/end provided.

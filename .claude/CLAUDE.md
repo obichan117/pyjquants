@@ -68,10 +68,10 @@ import pyjquants as pjq
 ticker = pjq.Ticker('7203')
 ticker.info.name          # "トヨタ自動車"
 df = ticker.history('30d')
-df = ticker.history_am('30d')  # Morning session prices (Standard+)
+df = ticker.history_am('30d')  # Morning session prices (Premium only)
 df = ticker.financials        # Financial statements
-df = ticker.financial_details # Detailed BS/PL/CF (Standard+)
-df = ticker.dividends         # Dividend history (Standard+)
+df = ticker.financial_details # Detailed BS/PL/CF (Premium only)
+df = ticker.dividends         # Dividend history (Premium only)
 
 # Multi-ticker download
 df = pjq.download(['7203', '6758'], period='1y')
@@ -89,13 +89,13 @@ market = pjq.Market()
 market.is_trading_day(date(2024, 12, 25))
 market.sectors_17             # TOPIX-17 sectors (Standard+, raises TierError)
 market.sectors_33             # TOPIX-33 sectors (Standard+, raises TierError)
-df = market.investor_trades() # Market-wide trading by investor type
-df = market.breakdown('7203') # Trade breakdown by type (Standard+)
+df = market.investor_trades() # Market-wide trading by investor type (Light+)
+df = market.breakdown('7203') # Trade breakdown by type (Premium only)
 df = market.short_positions() # Outstanding short positions (Standard+)
 df = market.margin_alerts()   # Margin trading alerts (Standard+)
 df = market.earnings_calendar()  # Earnings announcements
 df = market.short_ratio()     # Short selling ratio (Standard+)
-df = market.margin_interest() # Margin trading balances
+df = market.margin_interest() # Margin trading balances (Standard+)
 
 # Derivatives (V2 endpoints)
 futures = pjq.Futures('NK225M')    # Nikkei 225 mini futures
@@ -126,38 +126,40 @@ df = idx_opts.history('30d')
 
 ## V2 API Endpoints Coverage
 
-All J-Quants V2 endpoints are supported. Endpoints marked with *(Standard+)* require Standard tier or higher.
+All J-Quants V2 endpoints are supported.
+
+**Tier legend:** *(L)* = Light+, *(S)* = Standard+, *(P)* = Premium only
 
 **Equities:**
 - `/equities/bars/daily` - Daily OHLCV prices
-- `/equities/bars/daily/am` - Morning session prices *(Standard+)*
+- `/equities/bars/daily/am` - Morning session prices *(P)*
 - `/equities/master` - Listed company info
 - `/equities/earnings-calendar` - Earnings announcements
-- `/equities/investor-types` - Market-wide trading by investor type (not per-stock)
+- `/equities/investor-types` - Market-wide trading by investor type *(L)*
 
 **Financials:**
 - `/fins/summary` - Financial statements
-- `/fins/dividend` - Dividends *(Standard+)*
-- `/fins/details` - Detailed BS/PL/CF *(Standard+)*
+- `/fins/dividend` - Dividends *(P)*
+- `/fins/details` - Detailed BS/PL/CF *(P)*
 
 **Markets:**
 - `/markets/calendar` - Trading calendar
-- `/markets/sectors/topix17` - 17-sector classification *(Standard+)*
-- `/markets/sectors/topix33` - 33-sector classification *(Standard+)*
-- `/markets/short-ratio` - Short selling ratio *(Standard+)*
-- `/markets/margin-interest` - Margin trading interest *(Standard+)*
-- `/markets/breakdown` - Trade breakdown by type *(Standard+)*
-- `/markets/short-sale-report` - Outstanding short positions *(Standard+)*
-- `/markets/margin-alert` - Margin trading alerts *(Standard+)*
+- `/markets/sectors/topix17` - 17-sector classification *(S)*
+- `/markets/sectors/topix33` - 33-sector classification *(S)*
+- `/markets/short-ratio` - Short selling ratio *(S)*
+- `/markets/margin-interest` - Margin trading interest *(S)*
+- `/markets/breakdown` - Trade breakdown by type *(P)*
+- `/markets/short-sale-report` - Outstanding short positions *(S)*
+- `/markets/margin-alert` - Margin trading alerts *(S)*
 
 **Indices:**
-- `/indices/bars/daily` - Index prices *(Standard+)*
-- `/indices/bars/daily/topix` - TOPIX prices
+- `/indices/bars/daily` - Index prices (Nikkei 225) *(S)*
+- `/indices/bars/daily/topix` - TOPIX prices *(L)*
 
 **Derivatives:**
-- `/derivatives/bars/daily/futures` - Futures prices *(Standard+)*
-- `/derivatives/bars/daily/options` - Options prices *(Standard+)*
-- `/derivatives/bars/daily/options/225` - Nikkei 225 index options *(Standard+)*
+- `/derivatives/bars/daily/futures` - Futures prices *(P)*
+- `/derivatives/bars/daily/options` - Options prices *(P)*
+- `/derivatives/bars/daily/options/225` - Nikkei 225 index options *(S)*
 
 ## Environment Variables
 
@@ -225,15 +227,26 @@ except TierError as e:
 
 **Tier Hierarchy:** `FREE < LIGHT < STANDARD < PREMIUM`
 
-**Methods with tier restrictions (Standard+):**
+**Methods with tier restrictions:**
+
+*Light+ tier:*
+- `Market.investor_trades()` - Market-wide trading by investor type
+- `Index.topix().history()` - TOPIX index prices
+
+*Standard+ tier:*
+- `Market.sectors`, `sectors_17`, `sectors_33` - Sector classifications
+- `Market.short_positions()`, `margin_alerts()` - Short/margin alerts
+- `Market.short_ratio()`, `margin_interest()` - Short/margin data
+- `Index.nikkei225().history()` - Nikkei 225 index
+- `IndexOptions.nikkei225().history()` - Nikkei 225 index options
+
+*Premium tier only:*
 - `Ticker.history_am()` - Morning session prices
 - `Ticker.dividends` - Dividend history
 - `Ticker.financial_details` - Detailed BS/PL/CF
-- `Market.sectors`, `sectors_17`, `sectors_33` - Sector classifications
-- `Market.breakdown()`, `short_positions()`, `margin_alerts()` - Market data
-- `Market.short_ratio()`, `margin_interest()` - Short/margin data
-- `Index.history()` for Nikkei 225 (TOPIX is free)
-- `Futures.history()`, `Options.history()`, `IndexOptions.history()` - Derivatives
+- `Market.breakdown()` - Trade breakdown by type
+- `Futures.history()` - Futures prices
+- `Options.history()` - Options prices
 
 **Implementation:**
 - `Tier` enum in `pyjquants/infra/config.py` with comparison operators

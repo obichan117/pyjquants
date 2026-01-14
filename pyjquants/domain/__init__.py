@@ -4,6 +4,7 @@ from pyjquants.domain.futures import Futures
 from pyjquants.domain.index import Index
 from pyjquants.domain.market import Market
 from pyjquants.domain.models import (
+    AMPriceBar,
     BreakdownTrade,
     Dividend,
     EarningsAnnouncement,
@@ -39,6 +40,7 @@ __all__ = [
     "search",
     # Models
     "PriceBar",
+    "AMPriceBar",
     "StockInfo",
     "Sector",
     "FinancialStatement",

@@ -26,6 +26,7 @@ Usage:
 
 # Domain entities
 from pyjquants.domain import (
+    AMPriceBar,
     BreakdownTrade,
     Dividend,
     EarningsAnnouncement,
@@ -63,6 +64,7 @@ from pyjquants.infra import (
     PyJQuantsError,
     RateLimitError,
     Session,
+    TierError,
     ValidationError,
 )
 
@@ -91,8 +93,10 @@ __all__ = [
     "NotFoundError",
     "ValidationError",
     "ConfigurationError",
+    "TierError",
     # Models
     "PriceBar",
+    "AMPriceBar",
     "StockInfo",
     "Sector",
     "FinancialStatement",

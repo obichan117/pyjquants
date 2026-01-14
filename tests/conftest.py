@@ -16,12 +16,12 @@ from pyjquants.infra.session import Session
 
 @pytest.fixture
 def mock_session() -> MagicMock:
-    """Create a mock session for testing (Standard tier)."""
+    """Create a mock session for testing (Premium tier to allow all endpoints)."""
     session = MagicMock(spec=Session)
     session.get.return_value = {}
     session.get_paginated.return_value = iter([])
-    # Set tier to STANDARD to allow all endpoints
-    type(session).tier = PropertyMock(return_value=Tier.STANDARD)
+    # Set tier to PREMIUM to allow all endpoints
+    type(session).tier = PropertyMock(return_value=Tier.PREMIUM)
     return session
 
 

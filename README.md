@@ -20,26 +20,30 @@ yfinance-style Python library for [J-Quants API](https://jpx.gitbook.io/j-quants
 
 ## Feature Availability by Tier
 
-| Feature | Free/Light | Standard+ |
-|---------|:----------:|:---------:|
-| Daily prices | ✓ | ✓ |
-| Stock info & search | ✓ | ✓ |
-| Financial statements | ✓ | ✓ |
-| TOPIX index | ✓ | ✓ |
-| Trading calendar | ✓ | ✓ |
-| Earnings calendar | ✓ | ✓ |
-| Investor trades (market-wide) | ✓ | ✓ |
-| Margin interest | ✓ | ✓ |
-| Morning session (AM) prices | - | ✓ |
-| Dividends | - | ✓ |
-| Detailed financials (BS/PL/CF) | - | ✓ |
-| Nikkei 225 index | - | ✓ |
-| Sector classifications | - | ✓ |
-| Trade breakdown | - | ✓ |
-| Short selling data | - | ✓ |
-| Margin alerts | - | ✓ |
-| Futures | - | ✓ |
-| Options | - | ✓ |
+| Feature | Free | Light | Standard | Premium |
+|---------|:----:|:-----:|:--------:|:-------:|
+| Daily prices | ✓* | ✓ | ✓ | ✓ |
+| Stock info & search | ✓* | ✓ | ✓ | ✓ |
+| Financial statements | ✓* | ✓ | ✓ | ✓ |
+| Trading calendar | ✓* | ✓ | ✓ | ✓ |
+| Earnings calendar | ✓ | ✓ | ✓ | ✓ |
+| Investor trades (market-wide) | - | ✓ | ✓ | ✓ |
+| TOPIX index | - | ✓ | ✓ | ✓ |
+| Nikkei 225 index | - | - | ✓ | ✓ |
+| Index options (Nikkei 225) | - | - | ✓ | ✓ |
+| Margin interest | - | - | ✓ | ✓ |
+| Short selling ratio | - | - | ✓ | ✓ |
+| Short positions report | - | - | ✓ | ✓ |
+| Margin alerts | - | - | ✓ | ✓ |
+| Sector classifications | - | - | ✓ | ✓ |
+| Morning session (AM) prices | - | - | - | ✓ |
+| Dividends | - | - | - | ✓ |
+| Detailed financials (BS/PL/CF) | - | - | - | ✓ |
+| Trade breakdown | - | - | - | ✓ |
+| Futures | - | - | - | ✓ |
+| Options | - | - | - | ✓ |
+
+*Free tier has 12-week delayed data
 
 ## Installation
 
@@ -207,53 +211,53 @@ bar.volume          # int
 
 PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints.
 
-**Tier legend:** No marker = Free/Light tier, *(Standard+)* = requires Standard tier or higher
+**Tier legend:** *(L)* = Light+, *(S)* = Standard+, *(P)* = Premium only
 
 ### Equities
 
 | J-Quants API | PyJQuants |
 |--------------|-----------|
 | `/equities/bars/daily` | `Ticker("7203").history("30d")` |
-| `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` *(Standard+)* |
+| `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` *(P)* |
 | `/equities/master` | `Ticker("7203").info` / `search("トヨタ")` |
 | `/equities/earnings-calendar` | `Market().earnings_calendar()` |
-| `/equities/investor-types` | `Market().investor_trades()` |
+| `/equities/investor-types` | `Market().investor_trades()` *(L)* |
 
 ### Financials
 
 | J-Quants API | PyJQuants |
 |--------------|-----------|
 | `/fins/summary` | `Ticker("7203").financials` |
-| `/fins/dividend` | `Ticker("7203").dividends` *(Standard+)* |
-| `/fins/details` | `Ticker("7203").financial_details` *(Standard+)* |
+| `/fins/dividend` | `Ticker("7203").dividends` *(P)* |
+| `/fins/details` | `Ticker("7203").financial_details` *(P)* |
 
 ### Markets
 
 | J-Quants API | PyJQuants |
 |--------------|-----------|
 | `/markets/calendar` | `Market().is_trading_day(date)` / `trading_days(start, end)` |
-| `/markets/margin-interest` | `Market().margin_interest()` |
-| `/markets/sectors/topix17` | `Market().sectors_17` *(Standard+)* |
-| `/markets/sectors/topix33` | `Market().sectors_33` *(Standard+)* |
-| `/markets/short-ratio` | `Market().short_ratio()` *(Standard+)* |
-| `/markets/breakdown` | `Market().breakdown("7203")` *(Standard+)* |
-| `/markets/short-sale-report` | `Market().short_positions()` *(Standard+)* |
-| `/markets/margin-alert` | `Market().margin_alerts()` *(Standard+)* |
+| `/markets/margin-interest` | `Market().margin_interest()` *(S)* |
+| `/markets/sectors/topix17` | `Market().sectors_17` *(S)* |
+| `/markets/sectors/topix33` | `Market().sectors_33` *(S)* |
+| `/markets/short-ratio` | `Market().short_ratio()` *(S)* |
+| `/markets/breakdown` | `Market().breakdown("7203")` *(P)* |
+| `/markets/short-sale-report` | `Market().short_positions()` *(S)* |
+| `/markets/margin-alert` | `Market().margin_alerts()` *(S)* |
 
 ### Indices
 
 | J-Quants API | PyJQuants |
 |--------------|-----------|
-| `/indices/bars/daily/topix` | `Index.topix().history("30d")` |
-| `/indices/bars/daily` | `Index.nikkei225().history("30d")` *(Standard+)* |
+| `/indices/bars/daily/topix` | `Index.topix().history("30d")` *(L)* |
+| `/indices/bars/daily` | `Index.nikkei225().history("30d")` *(S)* |
 
-### Derivatives *(Standard+)*
+### Derivatives
 
 | J-Quants API | PyJQuants |
 |--------------|-----------|
-| `/derivatives/bars/daily/futures` | `Futures("NK225M").history("30d")` |
-| `/derivatives/bars/daily/options` | `Options("NK225C25000").history("30d")` |
-| `/derivatives/bars/daily/options/225` | `IndexOptions.nikkei225().history("30d")` |
+| `/derivatives/bars/daily/futures` | `Futures("NK225M").history("30d")` *(P)* |
+| `/derivatives/bars/daily/options` | `Options("NK225C25000").history("30d")` *(P)* |
+| `/derivatives/bars/daily/options/225` | `IndexOptions.nikkei225().history("30d")` *(S)* |
 
 ## Rate Limits by Tier
 

@@ -23,7 +23,6 @@ from pyjquants.adapters.endpoints import (
 from pyjquants.infra.client import JQuantsClient
 from pyjquants.infra.config import Tier
 from pyjquants.infra.decorators import requires_tier
-from pyjquants.infra.exceptions import TierError
 from pyjquants.infra.session import _get_global_session
 
 if TYPE_CHECKING:
@@ -158,7 +157,7 @@ class Market:
 
     # === MARKET DATA ===
 
-    @requires_tier(Tier.STANDARD)
+    @requires_tier(Tier.PREMIUM)
     def breakdown(
         self,
         code: str,
@@ -167,7 +166,7 @@ class Market:
     ) -> pd.DataFrame:
         """Get breakdown trading data by trade type.
 
-        Requires Standard tier or higher.
+        Requires Premium tier.
 
         Contains trading values and volumes categorized by:
         - Long selling/buying

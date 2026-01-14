@@ -116,7 +116,7 @@ class Ticker:
 
         return df.reset_index(drop=True)
 
-    @requires_tier(Tier.STANDARD)
+    @requires_tier(Tier.PREMIUM)
     def history_am(
         self,
         period: str | None = "30d",
@@ -164,15 +164,15 @@ class Ticker:
         return self._client.fetch_dataframe(STATEMENTS, {"code": self.code})
 
     @property
-    @requires_tier(Tier.STANDARD)
+    @requires_tier(Tier.PREMIUM)
     def dividends(self) -> pd.DataFrame:
-        """Dividend history (Standard+ tier)."""
+        """Dividend history (Premium tier)."""
         return self._client.fetch_dataframe(DIVIDENDS, {"code": self.code})
 
     @property
-    @requires_tier(Tier.STANDARD)
+    @requires_tier(Tier.PREMIUM)
     def financial_details(self) -> pd.DataFrame:
-        """Full financial statement data (BS/PL/CF) (Standard+ tier).
+        """Full financial statement data (BS/PL/CF) (Premium tier).
 
         Provides detailed balance sheet, income statement, and cash flow data.
         More comprehensive than the `financials` property.

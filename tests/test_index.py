@@ -21,7 +21,7 @@ class TestIndex:
         session = MagicMock()
         session.get.return_value = {}
         session.get_paginated.return_value = iter([])
-        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
+        type(session).tier = PropertyMock(return_value=Tier.PREMIUM)
         return session
 
     @pytest.fixture
@@ -131,7 +131,7 @@ class TestIndexFactoryMethods:
     def mock_session(self) -> MagicMock:
         """Create a mock session with Standard tier."""
         session = MagicMock()
-        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
+        type(session).tier = PropertyMock(return_value=Tier.PREMIUM)
         return session
 
     def test_topix_factory(self, mock_session: MagicMock) -> None:

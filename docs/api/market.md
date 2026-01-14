@@ -93,7 +93,7 @@ df = market.investor_trades(start=date(2024, 1, 1), end=date(2024, 12, 31))
 ```python
 market = pjq.Market()
 
-# Get trade breakdown by type for a specific stock (Standard+ tier)
+# Get trade breakdown by type for a specific stock (Premium tier only)
 df = market.breakdown("7203")
 # Returns DataFrame with trade counts by investor category
 ```
@@ -145,7 +145,7 @@ df = market.short_ratio()
 ```python
 market = pjq.Market()
 
-# Get margin trading balances
+# Get margin trading balances (Standard+ tier)
 df = market.margin_interest(code="7203")
 # Returns DataFrame with: code, date, margin_buying_balance, margin_selling_balance
 ```

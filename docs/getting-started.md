@@ -187,53 +187,53 @@ sectors = market.sectors_33
 
 PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints.
 
-**Tier legend:** No marker = Free/Light tier, *(Standard+)* = requires Standard tier or higher
+**Tier legend:** *(L)* = Light+, *(S)* = Standard+, *(P)* = Premium only
 
 ### Equities
 
 | J-Quants API | PyJQuants | Description |
 |--------------|-----------|-------------|
 | `/equities/bars/daily` | `Ticker("7203").history("30d")` | Daily OHLCV prices |
-| `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` | Morning session prices *(Standard+)* |
+| `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` | Morning session prices *(P)* |
 | `/equities/master` | `Ticker("7203").info` / `search("トヨタ")` | Company info |
 | `/equities/earnings-calendar` | `Market().earnings_calendar()` | Earnings announcements |
-| `/equities/investor-types` | `Market().investor_trades()` | Market-wide trading by investor type |
+| `/equities/investor-types` | `Market().investor_trades()` | Market-wide trading by investor type *(L)* |
 
 ### Financials
 
 | J-Quants API | PyJQuants | Description |
 |--------------|-----------|-------------|
 | `/fins/summary` | `Ticker("7203").financials` | Financial statements |
-| `/fins/dividend` | `Ticker("7203").dividends` | Dividend history *(Standard+)* |
-| `/fins/details` | `Ticker("7203").financial_details` | Detailed BS/PL/CF *(Standard+)* |
+| `/fins/dividend` | `Ticker("7203").dividends` | Dividend history *(P)* |
+| `/fins/details` | `Ticker("7203").financial_details` | Detailed BS/PL/CF *(P)* |
 
 ### Markets
 
 | J-Quants API | PyJQuants | Description |
 |--------------|-----------|-------------|
 | `/markets/calendar` | `Market().is_trading_day(date)` | Trading calendar |
-| `/markets/margin-interest` | `Market().margin_interest()` | Margin interest |
-| `/markets/sectors/topix17` | `Market().sectors_17` | 17-sector classification *(Standard+)* |
-| `/markets/sectors/topix33` | `Market().sectors_33` | 33-sector classification *(Standard+)* |
-| `/markets/short-ratio` | `Market().short_ratio()` | Short selling ratio *(Standard+)* |
-| `/markets/breakdown` | `Market().breakdown("7203")` | Trade breakdown by type *(Standard+)* |
-| `/markets/short-sale-report` | `Market().short_positions()` | Short positions *(Standard+)* |
-| `/markets/margin-alert` | `Market().margin_alerts()` | Margin alerts *(Standard+)* |
+| `/markets/margin-interest` | `Market().margin_interest()` | Margin interest *(S)* |
+| `/markets/sectors/topix17` | `Market().sectors_17` | 17-sector classification *(S)* |
+| `/markets/sectors/topix33` | `Market().sectors_33` | 33-sector classification *(S)* |
+| `/markets/short-ratio` | `Market().short_ratio()` | Short selling ratio *(S)* |
+| `/markets/breakdown` | `Market().breakdown("7203")` | Trade breakdown by type *(P)* |
+| `/markets/short-sale-report` | `Market().short_positions()` | Short positions *(S)* |
+| `/markets/margin-alert` | `Market().margin_alerts()` | Margin alerts *(S)* |
 
 ### Indices
 
 | J-Quants API | PyJQuants | Description |
 |--------------|-----------|-------------|
-| `/indices/bars/daily/topix` | `Index.topix().history("30d")` | TOPIX prices |
-| `/indices/bars/daily` | `Index.nikkei225().history("30d")` | Index prices (incl. Nikkei 225) *(Standard+)* |
+| `/indices/bars/daily/topix` | `Index.topix().history("30d")` | TOPIX prices *(L)* |
+| `/indices/bars/daily` | `Index.nikkei225().history("30d")` | Index prices (incl. Nikkei 225) *(S)* |
 
-### Derivatives *(Standard+)*
+### Derivatives
 
 | J-Quants API | PyJQuants | Description |
 |--------------|-----------|-------------|
-| `/derivatives/bars/daily/futures` | `Futures("NK225M").history("30d")` | Futures prices |
-| `/derivatives/bars/daily/options` | `Options("NK225C25000").history("30d")` | Options prices |
-| `/derivatives/bars/daily/options/225` | `IndexOptions.nikkei225().history("30d")` | Nikkei 225 options |
+| `/derivatives/bars/daily/futures` | `Futures("NK225M").history("30d")` | Futures prices *(P)* |
+| `/derivatives/bars/daily/options` | `Options("NK225C25000").history("30d")` | Options prices *(P)* |
+| `/derivatives/bars/daily/options/225` | `IndexOptions.nikkei225().history("30d")` | Nikkei 225 index options *(S)* |
 
 ## Rate Limits by Tier
 

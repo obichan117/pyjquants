@@ -23,7 +23,7 @@ class TestFutures:
         session = MagicMock()
         session.get.return_value = {}
         session.get_paginated.return_value = iter([])
-        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
+        type(session).tier = PropertyMock(return_value=Tier.PREMIUM)
         return session
 
     @pytest.fixture
@@ -120,7 +120,7 @@ class TestOptions:
         session = MagicMock()
         session.get.return_value = {}
         session.get_paginated.return_value = iter([])
-        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
+        type(session).tier = PropertyMock(return_value=Tier.PREMIUM)
         return session
 
     @pytest.fixture
@@ -207,7 +207,7 @@ class TestIndexOptions:
         session = MagicMock()
         session.get.return_value = {}
         session.get_paginated.return_value = iter([])
-        type(session).tier = PropertyMock(return_value=Tier.STANDARD)
+        type(session).tier = PropertyMock(return_value=Tier.PREMIUM)
         return session
 
     @pytest.fixture

@@ -25,19 +25,19 @@ class Tier(Enum):
     STANDARD = "standard"
     PREMIUM = "premium"
 
-    def __ge__(self, other: "Tier") -> bool:
+    def __ge__(self, other: Tier) -> bool:
         order = [Tier.FREE, Tier.LIGHT, Tier.STANDARD, Tier.PREMIUM]
         return order.index(self) >= order.index(other)
 
-    def __gt__(self, other: "Tier") -> bool:
+    def __gt__(self, other: Tier) -> bool:
         order = [Tier.FREE, Tier.LIGHT, Tier.STANDARD, Tier.PREMIUM]
         return order.index(self) > order.index(other)
 
-    def __le__(self, other: "Tier") -> bool:
+    def __le__(self, other: Tier) -> bool:
         order = [Tier.FREE, Tier.LIGHT, Tier.STANDARD, Tier.PREMIUM]
         return order.index(self) <= order.index(other)
 
-    def __lt__(self, other: "Tier") -> bool:
+    def __lt__(self, other: Tier) -> bool:
         order = [Tier.FREE, Tier.LIGHT, Tier.STANDARD, Tier.PREMIUM]
         return order.index(self) < order.index(other)
 
