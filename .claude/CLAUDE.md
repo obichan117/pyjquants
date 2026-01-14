@@ -30,7 +30,7 @@ Clean Domain-Driven Design with yfinance-style public API:
 
 ```
 pyjquants/
-├── __init__.py       # Public API exports (version 0.2.2)
+├── __init__.py       # Public API exports (version 0.3.0)
 ├── py.typed          # PEP 561 marker
 ├── domain/           # Business logic
 │   ├── ticker.py         # Ticker class + download() + search()

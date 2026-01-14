@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyjquants"
-version = "0.2.2"
+version = "0.3.0"
 description = "Investor-friendly OOP Python library for J-Quants API"
 readme = "README.md"
 license = "MIT"
