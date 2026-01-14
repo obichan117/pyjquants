@@ -1,7 +1,7 @@
 # PyJQuants
 
 [![PyPI](https://img.shields.io/pypi/v/pyjquants.svg)](https://pypi.org/project/pyjquants/)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/ja/examples/quickstart_ja.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart_ja.ipynb)
 
 **J-Quants APIを簡単に使えるPythonライブラリです。**
 
