@@ -33,19 +33,26 @@ plugins:
       fallback_to_default: false
       reconfigure_material: true
       languages:
-        - locale: en
-          default: true
-          name: English
-          build: true
         - locale: ja
+          default: true
           name: 日本語
           build: true
+        - locale: en
+          name: English
+          build: true
           nav:
-            - ホーム: index.md
-            - セットアップ: setup.md
-            - 基本的な使い方: basic-usage.md
-            - プラン別ガイド: tier-guide.md
-            - クイックスタート: examples/quickstart_ja.ipynb
+            - Home: index.md
+            - Getting Started: getting-started.md
+            - Architecture: architecture.md
+            - J-Quants API Spec: api-spec.md
+            - API Reference:
+                - Overview: api/index.md
+                - Ticker: api/stock.md
+                - Index: api/index-entity.md
+                - Market: api/market.md
+                - Models: api/models.md
+            - Examples:
+                - Quickstart: examples/quickstart.ipynb
   - mkdocstrings:
       handlers:
         python:
@@ -80,15 +87,8 @@ extra:
       link: https://github.com/obichan117/pyjquants
 
 nav:
-  - Home: index.md
-  - Getting Started: getting-started.md
-  - Architecture: architecture.md
-  - J-Quants API Spec: api-spec.md
-  - API Reference:
-      - Overview: api/index.md
-      - Ticker: api/stock.md
-      - Index: api/index-entity.md
-      - Market: api/market.md
-      - Models: api/models.md
-  - Examples:
-      - Quickstart: examples/quickstart.ipynb
+  - ホーム: index.md
+  - セットアップ: setup.md
+  - 基本的な使い方: basic-usage.md
+  - プラン別ガイド: tier-guide.md
+  - クイックスタート: examples/quickstart_ja.ipynb

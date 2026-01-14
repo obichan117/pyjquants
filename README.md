@@ -4,11 +4,16 @@
 [![CI](https://github.com/obichan117/pyjquants/actions/workflows/ci.yml/badge.svg)](https://github.com/obichan117/pyjquants/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/en/examples/quickstart.ipynb)
+
+> **日本語ドキュメント / Japanese Documentation**
+>
+> 日本語のドキュメントとチュートリアルは [こちら](https://obichan117.github.io/pyjquants/) をご覧ください。
+> Colabで試す: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart_ja.ipynb)
 
 yfinance-style Python library for [J-Quants API](https://jpx.gitbook.io/j-quants-en) (Japanese stock market data).
 
-**[Documentation](https://obichan117.github.io/pyjquants)** | **[API Spec](https://obichan117.github.io/pyjquants/openapi/)** | **[Quickstart Notebook](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart.ipynb)**
+**[Documentation (EN)](https://obichan117.github.io/pyjquants/en/)** | **[API Spec](https://obichan117.github.io/pyjquants/en/openapi/)** | **[Quickstart Notebook](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/en/examples/quickstart.ipynb)**
 
 ## Features
 
@@ -286,7 +291,7 @@ pyjquants/
 └── adapters/     # API layer (endpoint definitions)
 ```
 
-See the [Architecture documentation](https://obichan117.github.io/pyjquants/architecture/) for details.
+See the [Architecture documentation](https://obichan117.github.io/pyjquants/en/architecture/) for details.
 
 ## Development
 
@@ -320,8 +325,10 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Links
 
-- [Documentation](https://obichan117.github.io/pyjquants)
-- [J-Quants API Spec (OpenAPI)](https://obichan117.github.io/pyjquants/openapi/) - Unofficial OpenAPI 3.0 spec for J-Quants V2
-- [Quickstart Notebook](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart.ipynb)
+- [Documentation (日本語)](https://obichan117.github.io/pyjquants/) - Japanese documentation (default)
+- [Documentation (English)](https://obichan117.github.io/pyjquants/en/) - English documentation
+- [J-Quants API Spec (OpenAPI)](https://obichan117.github.io/pyjquants/en/openapi/) - Unofficial OpenAPI 3.0 spec for J-Quants V2
+- [Quickstart Notebook (日本語)](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/examples/quickstart_ja.ipynb)
+- [Quickstart Notebook (English)](https://colab.research.google.com/github/obichan117/pyjquants/blob/main/docs/en/examples/quickstart.ipynb)
 - [J-Quants Official](https://jpx-jquants.com/) - Official J-Quants site
 - [GitHub Repository](https://github.com/obichan117/pyjquants)
