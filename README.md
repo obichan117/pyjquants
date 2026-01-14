@@ -180,13 +180,79 @@ bar.volume          # int
 | `Sector` | Industry sector |
 | `MarketSegment` | `TSE_PRIME`, `TSE_STANDARD`, `TSE_GROWTH`, `OTHER` |
 
+## API Endpoint Mapping
+
+PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints:
+
+### Equities
+
+| J-Quants API | PyJQuants |
+|--------------|-----------|
+| `/equities/bars/daily` | `Ticker("7203").history("30d")` |
+| `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` |
+| `/equities/master` | `Ticker("7203").info` / `search("トヨタ")` |
+| `/equities/earnings-calendar` | *(via endpoints)* |
+| `/equities/investor-types` | `Ticker("7203").investor_trades` |
+
+### Financials
+
+| J-Quants API | PyJQuants |
+|--------------|-----------|
+| `/fins/summary` | `Ticker("7203").financials` |
+| `/fins/dividend` | `Ticker("7203").dividends` |
+| `/fins/details` | `Ticker("7203").financial_details` |
+
+### Markets
+
+| J-Quants API | PyJQuants |
+|--------------|-----------|
+| `/markets/calendar` | `Market().is_trading_day(date)` / `trading_days(start, end)` |
+| `/markets/sectors/topix17` | `Market().sectors_17` |
+| `/markets/sectors/topix33` | `Market().sectors_33` |
+| `/markets/short-ratio` | *(via endpoints)* |
+| `/markets/margin-interest` | *(via endpoints)* |
+| `/markets/breakdown` | `Market().breakdown("7203")` |
+| `/markets/short-sale-report` | `Market().short_positions()` |
+| `/markets/margin-alert` | `Market().margin_alerts()` |
+
+### Indices
+
+| J-Quants API | PyJQuants |
+|--------------|-----------|
+| `/indices/bars/daily` | `Index("0001").history("30d")` |
+| `/indices/bars/daily/topix` | `Index.topix().history("30d")` |
+
+### Derivatives
+
+| J-Quants API | PyJQuants |
+|--------------|-----------|
+| `/derivatives/bars/daily/futures` | `Futures("NK225M").history("30d")` |
+| `/derivatives/bars/daily/options` | `Options("NK225C25000").history("30d")` |
+| `/derivatives/bars/daily/options/225` | `IndexOptions.nikkei225().history("30d")` |
+
+## Rate Limits by Tier
+
+J-Quants V2 API has different rate limits based on subscription tier:
+
+| Tier | Requests/min | Monthly Fee | Best For |
+|------|-------------|-------------|----------|
+| **Free** | 5 | ¥0 | Testing, learning |
+| **Light** | 60 | ~¥1,650 | Personal projects |
+| **Standard** | 120 | ~¥3,300 | Active trading |
+| **Premium** | 500 | ~¥16,500 | Production systems |
+
+Configure your rate limit in environment:
+```bash
+export JQUANTS_RATE_LIMIT=60  # Match your tier
+```
+
 ## Architecture
 
 PyJQuants follows a Clean Domain-Driven Design:
 
 ```
 pyjquants/
-├── domain/       # Business logic (Ticker, Index, Market, models)
+├── domain/       # Business logic (Ticker, Index, Market, Futures, Options, models)
 ├── infra/        # Infrastructure (Session, Cache, Config)
 └── adapters/     # API layer (endpoint definitions)
 ```

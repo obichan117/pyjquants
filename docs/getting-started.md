@@ -140,7 +140,129 @@ financials = ticker.financials
 
 # Dividend history
 dividends = ticker.dividends
+
+# Detailed financials (BS/PL/CF)
+details = ticker.financial_details
+
+# Trading by investor type
+investor_trades = ticker.investor_trades
 ```
+
+### Derivatives
+
+```python
+import pyjquants as pjq
+
+# Futures
+futures = pjq.Futures("NK225M")  # Nikkei 225 mini
+df = futures.history("30d")
+
+# Options
+options = pjq.Options("NK225C25000")
+df = options.history("30d")
+
+# Nikkei 225 Index Options
+idx_opts = pjq.IndexOptions.nikkei225()
+df = idx_opts.history("30d")
+```
+
+### Market Data
+
+```python
+import pyjquants as pjq
+
+market = pjq.Market()
+
+# Trade breakdown by type
+df = market.breakdown("7203")
+
+# Outstanding short positions
+df = market.short_positions()
+
+# Margin trading alerts
+df = market.margin_alerts()
+```
+
+## API Endpoint Mapping
+
+PyJQuants provides a Pythonic interface to all J-Quants V2 API endpoints:
+
+### Equities
+
+| J-Quants API | PyJQuants | Description |
+|--------------|-----------|-------------|
+| `/equities/bars/daily` | `Ticker("7203").history("30d")` | Daily OHLCV prices |
+| `/equities/bars/daily/am` | `Ticker("7203").history_am("30d")` | Morning session prices |
+| `/equities/master` | `Ticker("7203").info` / `search("トヨタ")` | Company info |
+| `/equities/earnings-calendar` | *(via endpoints)* | Earnings announcements |
+| `/equities/investor-types` | `Ticker("7203").investor_trades` | Trading by investor type |
+
+### Financials
+
+| J-Quants API | PyJQuants | Description |
+|--------------|-----------|-------------|
+| `/fins/summary` | `Ticker("7203").financials` | Financial statements |
+| `/fins/dividend` | `Ticker("7203").dividends` | Dividend history |
+| `/fins/details` | `Ticker("7203").financial_details` | Detailed BS/PL/CF |
+
+### Markets
+
+| J-Quants API | PyJQuants | Description |
+|--------------|-----------|-------------|
+| `/markets/calendar` | `Market().is_trading_day(date)` | Trading calendar |
+| `/markets/sectors/topix17` | `Market().sectors_17` | 17-sector classification |
+| `/markets/sectors/topix33` | `Market().sectors_33` | 33-sector classification |
+| `/markets/short-ratio` | *(via endpoints)* | Short selling ratio |
+| `/markets/margin-interest` | *(via endpoints)* | Margin interest |
+| `/markets/breakdown` | `Market().breakdown("7203")` | Trade breakdown by type |
+| `/markets/short-sale-report` | `Market().short_positions()` | Short positions |
+| `/markets/margin-alert` | `Market().margin_alerts()` | Margin alerts |
+
+### Indices
+
+| J-Quants API | PyJQuants | Description |
+|--------------|-----------|-------------|
+| `/indices/bars/daily` | `Index("0001").history("30d")` | Index prices |
+| `/indices/bars/daily/topix` | `Index.topix().history("30d")` | TOPIX prices |
+
+### Derivatives
+
+| J-Quants API | PyJQuants | Description |
+|--------------|-----------|-------------|
+| `/derivatives/bars/daily/futures` | `Futures("NK225M").history("30d")` | Futures prices |
+| `/derivatives/bars/daily/options` | `Options("NK225C25000").history("30d")` | Options prices |
+| `/derivatives/bars/daily/options/225` | `IndexOptions.nikkei225().history("30d")` | Nikkei 225 options |
+
+## Rate Limits by Tier
+
+J-Quants V2 API has different rate limits based on subscription tier:
+
+| Tier | Requests/min | Monthly Fee | Best For |
+|------|-------------|-------------|----------|
+| **Free** | 5 | ¥0 | Testing, learning |
+| **Light** | 60 | ~¥1,650 | Personal projects |
+| **Standard** | 120 | ~¥3,300 | Active trading |
+| **Premium** | 500 | ~¥16,500 | Production systems |
+
+Configure your rate limit to match your tier:
+
+=== "Environment Variable"
+
+    ```bash
+    export JQUANTS_RATE_LIMIT=60
+    ```
+
+=== "TOML Config"
+
+    ```toml
+    [rate_limit]
+    requests_per_minute = 60
+    ```
+
+!!! tip "Rate Limit Tips"
+    - PyJQuants automatically throttles requests to stay within your limit
+    - Caching (enabled by default) reduces API calls for repeated queries
+    - Use `download()` for batch operations instead of looping through tickers
 
 ## Next Steps
 
