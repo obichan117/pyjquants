@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date
 from typing import TYPE_CHECKING
 
@@ -167,12 +169,26 @@ class Ticker(DomainEntity):
 # === MODULE-LEVEL FUNCTIONS ===
 
 
+def _fetch_ticker_history(
+    code: str,
+    period: str | None,
+    start: str | date | None,
+    end: str | date | None,
+    session: Session | None,
+) -> tuple[str, pd.DataFrame]:
+    """Fetch history for a single ticker. Returns (code, df) tuple."""
+    ticker = Ticker(code, session=session)
+    df = ticker.history(period=period, start=start, end=end)
+    return code, df
+
+
 def download(
     codes: list[str],
     period: str | None = "30d",
     start: str | date | None = None,
     end: str | date | None = None,
     session: Session | None = None,
+    threads: bool | int = True,
 ) -> pd.DataFrame:
     """Download price data for multiple tickers (yfinance-style).
 
@@ -182,27 +198,68 @@ def download(
         start: Start date
         end: End date
         session: Optional session
+        threads: Use threading for faster downloads.
+            - True: Use optimal thread count (min of cpu_count or len(codes))
+            - False: Sequential download (useful for debugging)
+            - int: Use specified number of threads
 
     Returns:
         Wide-format DataFrame with date index and columns for each ticker's close price
+
+    Example:
+        >>> df = pjq.download(["7203", "6758", "9984"], period="30d")
+        >>> df = pjq.download(["7203", "6758"], threads=False)  # Sequential
+        >>> df = pjq.download(["7203", "6758"], threads=4)  # 4 threads
     """
     if not codes:
         return pd.DataFrame()
 
-    dfs = []
-    for code in codes:
-        ticker = Ticker(code, session=session)
-        df = ticker.history(period=period, start=start, end=end)
-        if not df.empty:
-            df = df[["date", "close"]].copy()
-            df = df.rename(columns={"close": code})
-            dfs.append(df.set_index("date"))
+    # Determine thread count
+    if threads is False:
+        max_workers = 1
+    elif threads is True:
+        max_workers = min(os.cpu_count() or 4, len(codes), 10)
+    else:
+        max_workers = min(threads, len(codes))
+
+    dfs: dict[str, pd.DataFrame] = {}
+
+    if max_workers == 1:
+        # Sequential download
+        for code in codes:
+            code, df = _fetch_ticker_history(code, period, start, end, session)
+            if not df.empty:
+                dfs[code] = df
+    else:
+        # Threaded download
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {
+                executor.submit(
+                    _fetch_ticker_history, code, period, start, end, session
+                ): code
+                for code in codes
+            }
+            for future in as_completed(futures):
+                code, df = future.result()
+                if not df.empty:
+                    dfs[code] = df
 
     if not dfs:
         return pd.DataFrame()
 
-    result = dfs[0]
-    for df in dfs[1:]:
+    # Combine DataFrames preserving original order
+    result_dfs = []
+    for code in codes:
+        if code in dfs:
+            df = dfs[code][["date", "close"]].copy()
+            df = df.rename(columns={"close": code})
+            result_dfs.append(df.set_index("date"))
+
+    if not result_dfs:
+        return pd.DataFrame()
+
+    result = result_dfs[0]
+    for df in result_dfs[1:]:
         result = result.join(df, how="outer")
 
     return result.reset_index()

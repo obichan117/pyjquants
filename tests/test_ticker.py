@@ -241,6 +241,62 @@ class TestDownload:
         assert "7203" in df.columns
         assert "6758" in df.columns
 
+    def test_download_sequential(self, mock_session: MagicMock) -> None:
+        """Test download with threads=False (sequential mode)."""
+        price_data = [
+            {
+                "Date": "2024-01-15",
+                "O": "2500.0",
+                "H": "2550.0",
+                "L": "2480.0",
+                "C": "2530.0",
+                "Vo": 1000000,
+                "AdjFactor": "1.0",
+            }
+        ]
+        mock_session.get_paginated.return_value = iter(price_data)
+
+        df = download(["7203"], period="30d", session=mock_session, threads=False)
+
+        assert isinstance(df, pd.DataFrame)
+        assert "7203" in df.columns
+
+    def test_download_with_thread_count(self, mock_session: MagicMock) -> None:
+        """Test download with specific thread count."""
+        price_data_7203 = [
+            {
+                "Date": "2024-01-15",
+                "O": "2500.0",
+                "H": "2550.0",
+                "L": "2480.0",
+                "C": "2530.0",
+                "Vo": 1000000,
+                "AdjFactor": "1.0",
+            }
+        ]
+        price_data_6758 = [
+            {
+                "Date": "2024-01-15",
+                "O": "1200.0",
+                "H": "1220.0",
+                "L": "1190.0",
+                "C": "1210.0",
+                "Vo": 500000,
+                "AdjFactor": "1.0",
+            }
+        ]
+
+        mock_session.get_paginated.side_effect = [
+            iter(price_data_7203),
+            iter(price_data_6758),
+        ]
+
+        df = download(["7203", "6758"], period="30d", session=mock_session, threads=2)
+
+        assert isinstance(df, pd.DataFrame)
+        assert "7203" in df.columns
+        assert "6758" in df.columns
+
 
 class TestSearch:
     """Tests for search function."""
