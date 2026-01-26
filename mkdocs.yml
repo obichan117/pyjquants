@@ -52,7 +52,7 @@ plugins:
                 - Market: api/market.md
                 - Models: api/models.md
             - Examples:
-                - Quickstart: examples/quickstart.ipynb
+                - Quickstart: examples/quickstart.md
   - mkdocstrings:
       handlers:
         python:
@@ -62,9 +62,6 @@ plugins:
             heading_level: 2
             members_order: source
             docstring_style: google
-  - mkdocs-jupyter:
-      include_source: true
-
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
@@ -91,4 +88,4 @@ nav:
   - セットアップ: setup.md
   - 基本的な使い方: basic-usage.md
   - プラン別ガイド: tier-guide.md
-  - クイックスタート: examples/quickstart_ja.ipynb
+  - クイックスタート: examples/quickstart_ja.md

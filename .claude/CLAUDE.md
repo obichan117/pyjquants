@@ -219,7 +219,8 @@ docs/
 ├── basic-usage.md        # 基本的な使い方（コピペサンプル）
 ├── tier-guide.md         # プラン別ガイド（料金・機能比較）
 └── examples/
-    └── quickstart_ja.ipynb  # 日本語クイックスタート
+    ├── quickstart_ja.md      # 日本語クイックスタート (rendered in docs)
+    └── quickstart_ja.ipynb   # Jupyter notebook (for Colab)
 ```
 
 **English:** Technical documentation for developers
@@ -232,8 +233,11 @@ docs/en/
 ├── api/                  # API reference (mkdocstrings)
 ├── openapi/              # OpenAPI 3.0 spec
 └── examples/
-    └── quickstart.ipynb  # English Colab notebook
+    ├── quickstart.md         # English quickstart (rendered in docs)
+    └── quickstart.ipynb      # Jupyter notebook (for Colab)
 ```
+
+**Note:** Notebooks are pre-converted to markdown for docs because `mkdocs-static-i18n` and `mkdocs-jupyter` are incompatible. The `.ipynb` files remain for Colab badges.
 
 **Key differences in Japanese docs:**
 - Beginner-friendly explanations (「APIキーとは？」など)
